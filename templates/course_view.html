@@ -649,10 +649,11 @@
     <!-- Sidebar -->
     <div class="sidebar">
         <h2>Dashboard</h2>
+        <a href="http://127.0.0.1:5000">🏠 Home</a>
         <a href="{{ url_for('course_view') }}">📚 Courses</a>
-        <a href="#">📞 Contact Us</a>
-        <a href="#">ℹ️ About Admin</a>
-        <a href="#">⚙️ Settings</a>
+        <a href="{{ url_for('contact_us') }}">📞 Contact Us</a>
+        <a href="{{ url_for('about_admin') }}">👨‍💼 About Admin</a>
+        <a href="{{ url_for('settings') }}">⚙️ Settings</a>
         {% if not session['admin_mode'] %}
             <!-- Admin Login Form in Sidebar -->
             <form class="admin-login-form" action="{{ url_for('admin_login') }}" method="post">

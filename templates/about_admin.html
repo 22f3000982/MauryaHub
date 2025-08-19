@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Developer - IITM BS Portal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style2.css') }}">
+    <style>
+        .admin-container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            color: white;
+        }
+        .admin-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        .admin-profile {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            background: rgba(255,255,255,0.1);
+            padding: 2rem;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 2rem;
+        }
+        .profile-pic {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            flex-shrink: 0;
+        }
+        .profile-info h2 {
+            color: #ffd700;
+            margin-bottom: 0.5rem;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        .stat-card {
+            background: rgba(255,255,255,0.1);
+            padding: 1.5rem;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffd700;
+        }
+        .features-list {
+            background: rgba(255,255,255,0.1);
+            padding: 2rem;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+        }
+        .feature-icon {
+            font-size: 1.5rem;
+        }
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            backdrop-filter: blur(10px);
+        }
+        @media (max-width: 768px) {
+            .admin-profile {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body style="background: linear-gradient(135deg, #74b9ff 0%, #0984e3 50%, #6c5ce7 100%); min-height: 100vh; margin: 0;">
+    <a href="{{ url_for('course_view') }}" class="back-btn">← Back to Dashboard</a>
+    
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>👨‍� About Developer</h1>
+            <p>Meet the creator behind this personal IITM BS Portal</p>
+        </div>
+
+        <div class="admin-profile">
+            <div class="profile-pic">👨‍💻</div>
+            <div class="profile-info">
+                <h2>Ashraj - Portal Creator</h2>
+                <p><strong>Role:</strong> Full-Stack Developer & IITM BS Student</p>
+                <p><strong>Program:</strong> IITM BS in Data Science and Applications</p>
+                <p><strong>Tech Stack:</strong> Python, Flask, JavaScript, HTML/CSS, SQLite</p>
+                <p><strong>Contact:</strong> ashraj77777@gmail.com</p>
+                <p><strong>Passion:</strong> Creating useful tools for fellow students</p>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">{{ courses_count or '15+' }}</div>
+                <div>Courses Tracked</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ total_resources or '100+' }}</div>
+                <div>Resources Organized</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">1</div>
+                <div>Passionate Developer</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">24/7</div>
+                <div>Learning Mode</div>
+            </div>
+        </div>
+
+        <div class="features-list">
+            <h3>🚀 Portal Features Developed</h3>
+            <div class="feature-item">
+                <span class="feature-icon">📚</span>
+                <span>Personal Course Management System</span>
+            </div>
+            <div class="feature-item">
+                <span class="feature-icon">📝</span>
+                <span>Previous Year Questions (PYQ) Database</span>
+            </div>
+            <div class="feature-item">
+                <span class="feature-icon">📋</span>
+                <span>Notes & Study Materials Organization</span>
+            </div>
+            <div class="feature-item">
+                <span class="feature-icon">✅</span>
+                <span>Assignment Tracking & Management</span>
+            </div>
+            <div class="feature-item">
+                <span class="feature-icon">🎥</span>
+                <span>Video Resources & Tutorial Integration</span>
+            </div>
+            <div class="feature-item">
+                <span class="feature-icon">🧮</span>
+                <span>Grade Calculator Tool</span>
+            </div>
+            <div class="feature-item">
+                <span class="feature-icon">⚡</span>
+                <span>Dynamic Content Management</span>
+            </div>
+            <div class="feature-item">
+                <span class="feature-icon">🔒</span>
+                <span>Secure Personal Data Management</span>
+            </div>
+        </div>
+
+        <div class="features-list" style="margin-top: 2rem;">
+            <h3>💡 Personal Mission</h3>
+            <p>As an IITM BS student, I created this portal to help organize my academic resources and potentially assist fellow students. This is a personal project built with passion for learning and sharing knowledge within our community.</p>
+            
+            <h3 style="margin-top: 2rem;">🎯 Project Goals</h3>
+            <ul>
+                <li>Create a centralized hub for all my academic resources</li>
+                <li>Practice and showcase full-stack development skills</li>
+                <li>Build something useful for the IITM BS student community</li>
+                <li>Continuously learn new technologies and improve the portal</li>
+                <li>Share knowledge and help fellow students succeed</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

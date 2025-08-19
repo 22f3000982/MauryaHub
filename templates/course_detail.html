@@ -99,6 +99,20 @@
             display: flex;
             justify-content: center;
             gap: 20px;
+            flex-wrap: wrap;
+        }
+        .cards-row {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .cards-row.three-items {
+            justify-content: center;
+        }
+        .cards-row.one-item {
+            justify-content: center;
         }
         .card {
             background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
@@ -107,6 +121,12 @@
             padding: 15px;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(245, 246, 246, 0.204);
+            flex: 0 1 30%;
+            max-width: 400px;
+        }
+        .card.centered {
+            width: 40%;
+            max-width: 500px;
         }
         .card h2 {
             margin: 0 0 10px;
@@ -163,16 +183,67 @@
             color: #c0dbed;
             font-size: 0.9em;
         }
+        .reorder-buttons {
+            display: flex;
+            flex-direction: column;
+            margin-right: 8px;
+            gap: 2px;
+        }
+        .reorder-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            width: 20px;
+            height: 16px;
+            font-size: 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .reorder-btn:hover {
+            background: #2980b9;
+        }
+        .circular-add-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 50%;
+            font-size: 20px;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 10px auto;
+        }
+        .circular-add-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 16px rgba(52, 152, 219, 0.4);
+        }
+        .add-btn-container {
+            text-align: center;
+            padding: 10px 0;
+            border-top: 1px solid #444;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
 <div class="sidebar">
     <h2>Dashboard</h2>
-    <a href="{{ url_for('course_view') }}">Courses</a>
+    <a href="http://127.0.0.1:5000">🏠 Home</a>
+    <a href="{{ url_for('course_view') }}">📚 Courses</a>
+    <a href="{{ url_for('contact_us') }}">📞 Contact Us</a>
+    <a href="{{ url_for('about_admin') }}">👨‍💼 About Admin</a>
+    <a href="{{ url_for('settings') }}">⚙️ Settings</a>
     {% if admin_mode %}
         <a href="{{ url_for('admin_add_item', item_type='pyqs', course_id=course_id) }}">➕ Add PYQ</a>
         <a href="{{ url_for('admin_add_item', item_type='notes', course_id=course_id) }}">➕ Add Note</a>
         <a href="{{ url_for('admin_add_item', item_type='assignments', course_id=course_id) }}">➕ Add Assignment</a>
+        <a href="{{ url_for('admin_add_item', item_type='resources', course_id=course_id) }}">➕ Add Resource</a>
         <a href="{{ url_for('admin_logout') }}">🚪 Exit Admin</a>
     {% endif %}
 </div>
@@ -199,109 +270,194 @@
         <input type="text" id="searchInput" placeholder="Search items...">
 
         <div class="cards">
-            <!-- PYQs Card -->
-            <div class="card">
-                {% if admin_mode %}
-                    <h2>PYQs</h2>
-                {% endif %}
-                {% if pyqs %}
-                    <ul class="item-list">
-                        {% for pyq in pyqs %}
-                            <li>
-                                <span class="item-name">{{ pyq[1] }}</span>
-                                {% if pyq[2] %}
-                                    <a href="{{ url_for('increment_watch', pyq_id=pyq[0]) }}" target="_blank" class="watch-link">
-                                        {% if admin_mode %}
-                                            <span class="eye-icon">👁️</span> ({{ pyq[3] }})
-                                        {% else %}
-                                            ▶️ Watch
-                                        {% endif %}
-                                    </a>
-                                {% else %}
-                                    <span class="no-items">Coming Soon</span>
-                                {% endif %}
-                                {% if admin_mode %}
-                                    <div class="admin-links">
-                                        <a href="{{ url_for('admin_edit_item', item_type='pyqs', item_id=pyq[0], course_id=course_id) }}">Edit</a> |
-                                        <a href="{{ url_for('admin_delete_item', item_type='pyqs', course_id=course_id, item_id=pyq[0]) }}">Delete</a>
-                                    </div>
-                                {% endif %}
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p class="no-items">=== Coming Soon ===</p>
-                {% endif %}
+            <!-- First Row: PYQs, Notes, Assignments -->
+            <div class="cards-row three-items">
+                <!-- PYQs Card -->
+                <div class="card">
+                    {% if admin_mode %}
+                        <h2>PYQs</h2>
+                    {% endif %}
+                    {% if pyqs %}
+                        <ul class="item-list">
+                            {% for pyq in pyqs %}
+                                <li>
+                                    {% if admin_mode %}
+                                        <div class="reorder-buttons">
+                                            <button class="reorder-btn" onclick="moveItem('pyqs', {{ pyq[0] }}, 'up')" title="Move Up">▲</button>
+                                            <button class="reorder-btn" onclick="moveItem('pyqs', {{ pyq[0] }}, 'down')" title="Move Down">▼</button>
+                                        </div>
+                                    {% endif %}
+                                    <span class="item-name">{{ pyq[1] }}</span>
+                                    {% if pyq[2] %}
+                                        <a href="{{ url_for('increment_watch', pyq_id=pyq[0]) }}" target="_blank" class="watch-link">
+                                            {% if admin_mode %}
+                                                <span class="eye-icon">👁️</span> ({{ pyq[3] }})
+                                            {% else %}
+                                                ▶️ Watch
+                                            {% endif %}
+                                        </a>
+                                    {% else %}
+                                        <span class="no-items">Coming Soon</span>
+                                    {% endif %}
+                                    {% if admin_mode %}
+                                        <div class="admin-links">
+                                            <a href="{{ url_for('admin_edit_item', item_type='pyqs', item_id=pyq[0], course_id=course_id) }}">Edit</a> |
+                                            <a href="{{ url_for('admin_delete_item', item_type='pyqs', course_id=course_id, item_id=pyq[0]) }}">Delete</a>
+                                        </div>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="no-items">=== Coming Soon ===</p>
+                    {% endif %}
+                    {% if admin_mode %}
+                        <div class="add-btn-container">
+                            <a href="{{ url_for('admin_add_item', item_type='pyqs', course_id=course_id) }}" class="circular-add-btn" title="Add PYQ">+</a>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Notes Card -->
+                <div class="card">
+                    {% if admin_mode %}
+                        <h2>Notes</h2>
+                    {% endif %}
+                    {% if notes %}
+                        <ul class="item-list">
+                            {% for note in notes %}
+                                <li>
+                                    {% if admin_mode %}
+                                        <div class="reorder-buttons">
+                                            <button class="reorder-btn" onclick="moveItem('notes', {{ note[0] }}, 'up')" title="Move Up">▲</button>
+                                            <button class="reorder-btn" onclick="moveItem('notes', {{ note[0] }}, 'down')" title="Move Down">▼</button>
+                                        </div>
+                                    {% endif %}
+                                    <span class="item-name">{{ note[1] }}</span>
+                                    {% if note[2] %}
+                                        <a href="{{ url_for('increment_watch_note', note_id=note[0]) }}" target="_blank" class="watch-link">
+                                            {% if admin_mode %}
+                                                <span class="eye-icon">👁️</span> ({{ note[3]|default(0) }})
+                                            {% else %}
+                                                ▶️ Watch
+                                            {% endif %}
+                                        </a>
+                                    {% else %}
+                                        <span class="no-items">Coming Soon</span>
+                                    {% endif %}
+                                    {% if admin_mode %}
+                                        <div class="admin-links">
+                                            <a href="{{ url_for('admin_edit_item', item_type='notes', item_id=note[0], course_id=course_id) }}">Edit</a> |
+                                            <a href="{{ url_for('admin_delete_item', item_type='notes', course_id=course_id, item_id=note[0]) }}">Delete</a>
+                                        </div>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="no-items">=== Coming Soon ===</p>
+                    {% endif %}
+                    {% if admin_mode %}
+                        <div class="add-btn-container">
+                            <a href="{{ url_for('admin_add_item', item_type='notes', course_id=course_id) }}" class="circular-add-btn" title="Add Note">+</a>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Assignments Card -->
+                <div class="card">
+                    {% if admin_mode %}
+                        <h2>Assignments</h2>
+                    {% endif %}
+                    {% if assignments %}
+                        <ul class="item-list">
+                            {% for assignment in assignments %}
+                                <li>
+                                    {% if admin_mode %}
+                                        <div class="reorder-buttons">
+                                            <button class="reorder-btn" onclick="moveItem('assignments', {{ assignment[0] }}, 'up')" title="Move Up">▲</button>
+                                            <button class="reorder-btn" onclick="moveItem('assignments', {{ assignment[0] }}, 'down')" title="Move Down">▼</button>
+                                        </div>
+                                    {% endif %}
+                                    <span class="item-name">{{ assignment[1] }}</span>
+                                    {% if assignment[2] %}
+                                        <a href="{{ url_for('increment_watch_assignment', assignment_id=assignment[0]) }}" target="_blank" class="watch-link">
+                                            {% if admin_mode %}
+                                                <span class="eye-icon">👁️</span> ({{ assignment[3]|default(0) }})
+                                            {% else %}
+                                                ▶️ Watch
+                                            {% endif %}
+                                        </a>
+                                    {% else %}
+                                        <span class="no-items">Coming Soon</span>
+                                    {% endif %}
+                                    {% if admin_mode %}
+                                        <div class="admin-links">
+                                            <a href="{{ url_for('admin_edit_item', item_type='assignments', item_id=assignment[0], course_id=course_id) }}">Edit</a> |
+                                            <a href="{{ url_for('admin_delete_item', item_type='assignments', course_id=course_id, item_id=assignment[0]) }}">Delete</a>
+                                        </div>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="no-items">=== Coming Soon ===</p>
+                    {% endif %}
+                    {% if admin_mode %}
+                        <div class="add-btn-container">
+                            <a href="{{ url_for('admin_add_item', item_type='assignments', course_id=course_id) }}" class="circular-add-btn" title="Add Assignment">+</a>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
 
-            <!-- Notes Card -->
-            <div class="card">
-                {% if admin_mode %}
-                    <h2>Notes</h2>
-                {% endif %}
-                {% if notes %}
-                    <ul class="item-list">
-                        {% for note in notes %}
-                            <li>
-                                <span class="item-name">{{ note[1] }}</span>
-                                {% if note[2] %}
-                                    <a href="{{ url_for('increment_watch_note', note_id=note[0]) }}" target="_blank" class="watch-link">
-                                        {% if admin_mode %}
-                                            <span class="eye-icon">👁️</span> ({{ note[3]|default(0) }})
-                                        {% else %}
-                                            ▶️ Watch
-                                        {% endif %}
-                                    </a>
-                                {% else %}
-                                    <span class="no-items">Coming Soon</span>
-                                {% endif %}
-                                {% if admin_mode %}
-                                    <div class="admin-links">
-                                        <a href="{{ url_for('admin_edit_item', item_type='notes', item_id=note[0], course_id=course_id) }}">Edit</a> |
-                                        <a href="{{ url_for('admin_delete_item', item_type='notes', course_id=course_id, item_id=note[0]) }}">Delete</a>
-                                    </div>
-                                {% endif %}
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p class="no-items">=== Coming Soon ===</p>
-                {% endif %}
-            </div>
-
-            <!-- Assignments Card -->
-            <div class="card">
-                {% if admin_mode %}
-                    <h2>Assignments</h2>
-                {% endif %}
-                {% if assignments %}
-                    <ul class="item-list">
-                        {% for assignment in assignments %}
-                            <li>
-                                <span class="item-name">{{ assignment[1] }}</span>
-                                {% if assignment[2] %}
-                                    <a href="{{ url_for('increment_watch_assignment', assignment_id=assignment[0]) }}" target="_blank" class="watch-link">
-                                        {% if admin_mode %}
-                                            <span class="eye-icon">👁️</span> ({{ assignment[3]|default(0) }})
-                                        {% else %}
-                                            ▶️ Watch
-                                        {% endif %}
-                                    </a>
-                                {% else %}
-                                    <span class="no-items">Coming Soon</span>
-                                {% endif %}
-                                {% if admin_mode %}
-                                    <div class="admin-links">
-                                        <a href="{{ url_for('admin_edit_item', item_type='assignments', item_id=assignment[0], course_id=course_id) }}">Edit</a> |
-                                        <a href="{{ url_for('admin_delete_item', item_type='assignments', course_id=course_id, item_id=assignment[0]) }}">Delete</a>
-                                    </div>
-                                {% endif %}
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p class="no-items">=== Coming Soon ===</p>
-                {% endif %}
+            <!-- Second Row: Resources (centered) -->
+            <div class="cards-row one-item">
+                <!-- Resources Card -->
+                <div class="card centered">
+                    {% if admin_mode %}
+                        <h2>Resources</h2>
+                    {% endif %}
+                    {% if resources %}
+                        <ul class="item-list">
+                            {% for resource in resources %}
+                                <li>
+                                    {% if admin_mode %}
+                                        <div class="reorder-buttons">
+                                            <button class="reorder-btn" onclick="moveItem('resources', {{ resource[0] }}, 'up')" title="Move Up">▲</button>
+                                            <button class="reorder-btn" onclick="moveItem('resources', {{ resource[0] }}, 'down')" title="Move Down">▼</button>
+                                        </div>
+                                    {% endif %}
+                                    <span class="item-name">{{ resource[1] }}</span>
+                                    {% if resource[2] %}
+                                        <a href="{{ url_for('increment_watch_resource', resource_id=resource[0]) }}" target="_blank" class="watch-link">
+                                            {% if admin_mode %}
+                                                <span class="eye-icon">👁️</span> ({{ resource[3]|default(0) }})
+                                            {% else %}
+                                                ▶️ Watch
+                                            {% endif %}
+                                        </a>
+                                    {% else %}
+                                        <span class="no-items">Coming Soon</span>
+                                    {% endif %}
+                                    {% if admin_mode %}
+                                        <div class="admin-links">
+                                            <a href="{{ url_for('admin_edit_item', item_type='resources', item_id=resource[0], course_id=course_id) }}">Edit</a> |
+                                            <a href="{{ url_for('admin_delete_item', item_type='resources', course_id=course_id, item_id=resource[0]) }}">Delete</a>
+                                        </div>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="no-items">=== Coming Soon ===</p>
+                    {% endif %}
+                    {% if admin_mode %}
+                        <div class="add-btn-container">
+                            <a href="{{ url_for('admin_add_item', item_type='resources', course_id=course_id) }}" class="circular-add-btn" title="Add Resource">+</a>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
@@ -346,18 +502,22 @@
             alert('Please enter both name and link for extra stuff.');
         }
     }
- .extra-stuff-link {
-display: inline-flex;
-align-items: center;
-background: linear-gradient(90deg, #f6c7b6 60%, #a5b4fc 100%);
-color: #232946 !important;
-font-weight: 600;
-text-decoration: none;
-border-radius: 999px;
-padding: 4px 16px 4px 10px;
-margin-left: 10px;
-font-size: 1rem;
-box-shadow: 0 2px 8px rgba(246, 199, 182, 0.12);
-transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-}
-}
+    
+    // Move item up/down function
+    function moveItem(itemType, itemId, direction) {
+        fetch(`/admin/move_item`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `item_type=${itemType}&item_id=${itemId}&direction=${direction}&course_id={{ course_id }}`
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                location.reload(); // Refresh to show new order
+            } else {
+                alert('Failed to move item: ' + (data.error || 'Unknown error'));
+            }
+        })
+        .catch(() => alert('Failed to move item.'));
+    }
+</script>

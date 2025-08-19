@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is a web portal for managing and sharing resources (PYQs, notes, assignments) for courses in the IITM BS program. It is built using Flask and SQLite, with a simple admin interface for adding, editing, and deleting course content.
+This is a web portal for managing and sharing resources (PYQs, notes) for courses in the IITM BS program. It is built using Flask and SQLite, with a simple admin interface for adding, editing, and deleting course content.
 
 ## Features
 

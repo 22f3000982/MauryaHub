@@ -66,6 +66,26 @@ def init_db():
         )
     ''')
 
+    # Create 'resources' table
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS resources (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            course_id INTEGER NOT NULL,
+            name TEXT NOT NULL,
+            yt_link TEXT,
+            watch_count INTEGER DEFAULT 0,
+            sort_order INTEGER DEFAULT 0,
+            FOREIGN KEY (course_id) REFERENCES courses(id)
+        )
+    ''')
+
+    # Add sort_order columns to existing tables if they don't exist
+    for table in ['pyqs', 'notes', 'assignments']:
+        try:
+            c.execute(f'ALTER TABLE {table} ADD COLUMN sort_order INTEGER DEFAULT 0')
+        except sqlite3.OperationalError:
+            pass  # Column already exists
+
     conn.commit()
     conn.close()
 
@@ -262,14 +282,17 @@ def course_detail(course_id):
     c.execute('SELECT name FROM courses WHERE id=?', (course_id,))
     course = c.fetchone()
 
-    c.execute('SELECT id, name, yt_link, watch_count FROM pyqs WHERE course_id=?', (course_id,))
+    c.execute('SELECT id, name, yt_link, watch_count FROM pyqs WHERE course_id=? ORDER BY sort_order, id', (course_id,))
     pyqs = c.fetchall()
 
-    c.execute('SELECT id, name, yt_link, watch_count FROM notes WHERE course_id=?', (course_id,))
+    c.execute('SELECT id, name, yt_link, watch_count FROM notes WHERE course_id=? ORDER BY sort_order, id', (course_id,))
     notes = c.fetchall()
 
-    c.execute('SELECT id, name, yt_link, watch_count FROM assignments WHERE course_id=?', (course_id,))
+    c.execute('SELECT id, name, yt_link, watch_count FROM assignments WHERE course_id=? ORDER BY sort_order, id', (course_id,))
     assignments = c.fetchall()
+
+    c.execute('SELECT id, name, yt_link, watch_count FROM resources WHERE course_id=? ORDER BY sort_order, id', (course_id,))
+    resources = c.fetchall()
 
     # Fetch extra stuff for this course
     c.execute('SELECT name, link FROM extra_stuff WHERE course_id=?', (course_id,))
@@ -285,6 +308,7 @@ def course_detail(course_id):
                                pyqs=pyqs,
                                notes=notes,
                                assignments=assignments,
+                               resources=resources,
                                admin_mode=admin_mode,
                                extra_stuff=extra)
     else:
@@ -334,12 +358,19 @@ def admin_add_item(item_type, course_id):
         conn = sqlite3.connect('database.db')
         c = conn.cursor()
 
+        # Get the next sort_order value
+        c.execute(f'SELECT MAX(sort_order) FROM {item_type} WHERE course_id=?', (course_id,))
+        max_order = c.fetchone()[0]
+        next_order = (max_order + 1) if max_order is not None else 0
+
         if item_type == 'pyqs':
-            c.execute('INSERT INTO pyqs (course_id, name, yt_link) VALUES (?, ?, ?)', (course_id, item_name, yt_link))
+            c.execute('INSERT INTO pyqs (course_id, name, yt_link, sort_order) VALUES (?, ?, ?, ?)', (course_id, item_name, yt_link, next_order))
         elif item_type == 'notes':
-            c.execute('INSERT INTO notes (course_id, name, yt_link) VALUES (?, ?, ?)', (course_id, item_name, yt_link))
+            c.execute('INSERT INTO notes (course_id, name, yt_link, sort_order) VALUES (?, ?, ?, ?)', (course_id, item_name, yt_link, next_order))
         elif item_type == 'assignments':
-            c.execute('INSERT INTO assignments (course_id, name, yt_link) VALUES (?, ?, ?)', (course_id, item_name, yt_link))
+            c.execute('INSERT INTO assignments (course_id, name, yt_link, sort_order) VALUES (?, ?, ?, ?)', (course_id, item_name, yt_link, next_order))
+        elif item_type == 'resources':
+            c.execute('INSERT INTO resources (course_id, name, yt_link, sort_order) VALUES (?, ?, ?, ?)', (course_id, item_name, yt_link, next_order))
 
         conn.commit()
         conn.close()
@@ -396,6 +427,78 @@ def increment_watch_assignment(assignment_id):
     else:
         return "Link not found"
 
+@app.route('/increment_watch_resource/<int:resource_id>')
+def increment_watch_resource(resource_id):
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute('UPDATE resources SET watch_count = watch_count + 1 WHERE id = ?', (resource_id,))
+    conn.commit()
+    c.execute('SELECT yt_link FROM resources WHERE id = ?', (resource_id,))
+    link = c.fetchone()
+    conn.close()
+
+    if link:
+        return redirect(link[0])
+    else:
+        return "Link not found"
+
+# Admin - Move item up/down
+@app.route('/admin/move_item', methods=['POST'])
+def move_item():
+    if not session.get('admin_mode'):
+        return {"success": False, "error": "Unauthorized"}, 403
+    
+    item_type = request.form.get('item_type')
+    item_id = int(request.form.get('item_id'))
+    direction = request.form.get('direction')
+    course_id = int(request.form.get('course_id'))
+    
+    if item_type not in ['pyqs', 'notes', 'assignments', 'resources']:
+        return {"success": False, "error": "Invalid item type"}, 400
+    
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    
+    try:
+        # Get all items for this course ordered by current sort_order
+        c.execute(f'SELECT id, sort_order FROM {item_type} WHERE course_id=? ORDER BY sort_order, id', (course_id,))
+        items = c.fetchall()
+        
+        # Find current item's position
+        current_pos = None
+        for i, (id_, sort_order) in enumerate(items):
+            if id_ == item_id:
+                current_pos = i
+                break
+        
+        if current_pos is None:
+            return {"success": False, "error": "Item not found"}, 404
+        
+        # Calculate new position
+        if direction == 'up' and current_pos > 0:
+            new_pos = current_pos - 1
+        elif direction == 'down' and current_pos < len(items) - 1:
+            new_pos = current_pos + 1
+        else:
+            return {"success": False, "error": "Cannot move in that direction"}, 400
+        
+        # Swap sort_order values
+        current_item_id = items[current_pos][0]
+        target_item_id = items[new_pos][0]
+        
+        # Update sort_order values
+        c.execute(f'UPDATE {item_type} SET sort_order = ? WHERE id = ?', (new_pos, current_item_id))
+        c.execute(f'UPDATE {item_type} SET sort_order = ? WHERE id = ?', (current_pos, target_item_id))
+        
+        conn.commit()
+        return {"success": True}
+        
+    except Exception as e:
+        conn.rollback()
+        return {"success": False, "error": str(e)}, 500
+    finally:
+        conn.close()
+
 # Admin - Edit item (PYQ/Note/Assignment)
 @app.route('/admin/edit_item/<string:item_type>/<int:course_id>/<int:item_id>', methods=['GET', 'POST'])
 def admin_edit_item(item_type, course_id, item_id):
@@ -415,6 +518,8 @@ def admin_edit_item(item_type, course_id, item_id):
             c.execute('UPDATE notes SET name=?, yt_link=? WHERE id=?', (new_title, new_link, item_id))
         elif item_type == 'assignments':
             c.execute('UPDATE assignments SET name=?, yt_link=? WHERE id=?', (new_title, new_link, item_id))
+        elif item_type == 'resources':
+            c.execute('UPDATE resources SET name=?, yt_link=? WHERE id=?', (new_title, new_link, item_id))
 
         conn.commit()
         conn.close()
@@ -428,6 +533,8 @@ def admin_edit_item(item_type, course_id, item_id):
         c.execute('SELECT name, yt_link FROM notes WHERE id=?', (item_id,))
     elif item_type == 'assignments':
         c.execute('SELECT name, yt_link FROM assignments WHERE id=?', (item_id,))
+    elif item_type == 'resources':
+        c.execute('SELECT name, yt_link FROM resources WHERE id=?', (item_id,))
     
     item = c.fetchone()
     conn.close()
@@ -456,6 +563,8 @@ def admin_delete_item(item_type, course_id, item_id):
         c.execute('DELETE FROM notes WHERE id=?', (item_id,))
     elif item_type == 'assignments':
         c.execute('DELETE FROM assignments WHERE id=?', (item_id,))
+    elif item_type == 'resources':
+        c.execute('DELETE FROM resources WHERE id=?', (item_id,))
     else:
         flash('Invalid item type.', 'error')
         return redirect(url_for('course_detail', course_id=course_id))
@@ -465,6 +574,21 @@ def admin_delete_item(item_type, course_id, item_id):
     backup_db()  # Backup database after deleting item
     flash('Item deleted successfully!', 'success')
     return redirect(url_for('course_detail', course_id=course_id))
+
+# Contact Us route
+@app.route('/contact')
+def contact_us():
+    return render_template('contact_us.html')
+
+# About Admin route
+@app.route('/about')
+def about_admin():
+    return render_template('about_admin.html')
+
+# Settings route
+@app.route('/settings')
+def settings():
+    return render_template('settings.html')
 
 # Main
 if __name__ == '__main__':
