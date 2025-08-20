@@ -1,10 +1,23 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory
 import sqlite3
 import os
 import subprocess
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
+
+# Upload configuration
+UPLOAD_FOLDER = 'static/uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Create upload folder if it doesn't exist
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Create tables if they don't exist
 def init_db():
@@ -583,7 +596,56 @@ def contact_us():
 # About Admin route
 @app.route('/about')
 def about_admin():
-    return render_template('about_admin.html')
+    # Check if profile picture exists
+    profile_pic = None
+    pic_path = os.path.join(app.config['UPLOAD_FOLDER'], 'profile_pic.jpg')
+    if os.path.exists(pic_path):
+        profile_pic = 'uploads/profile_pic.jpg'
+    else:
+        # Check for other extensions
+        for ext in ['png', 'jpeg', 'gif']:
+            pic_path = os.path.join(app.config['UPLOAD_FOLDER'], f'profile_pic.{ext}')
+            if os.path.exists(pic_path):
+                profile_pic = f'uploads/profile_pic.{ext}'
+                break
+    
+    return render_template('about_admin.html', profile_pic=profile_pic)
+
+# Upload profile picture route
+@app.route('/upload_profile_pic', methods=['POST'])
+def upload_profile_pic():
+    if not session.get('admin_mode'):
+        return redirect(url_for('course_view'))
+    
+    if 'profile_pic' not in request.files:
+        flash('No file selected', 'error')
+        return redirect(url_for('about_admin'))
+    
+    file = request.files['profile_pic']
+    if file.filename == '':
+        flash('No file selected', 'error')
+        return redirect(url_for('about_admin'))
+    
+    if file and allowed_file(file.filename):
+        # Remove existing profile pictures
+        for ext in ['jpg', 'jpeg', 'png', 'gif']:
+            old_pic = os.path.join(app.config['UPLOAD_FOLDER'], f'profile_pic.{ext}')
+            if os.path.exists(old_pic):
+                os.remove(old_pic)
+        
+        # Save new profile picture
+        filename = f"profile_pic.{file.filename.rsplit('.', 1)[1].lower()}"
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        flash('Profile picture updated successfully!', 'success')
+    else:
+        flash('Invalid file type. Please upload PNG, JPG, JPEG, or GIF files only.', 'error')
+    
+    return redirect(url_for('about_admin'))
+
+# Serve uploaded files
+@app.route('/static/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
 # Settings route
 @app.route('/settings')
