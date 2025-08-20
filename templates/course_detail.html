@@ -37,6 +37,7 @@
             background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
             height: 100%;
             overflow-y: auto;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         .main-content {
             margin-left: 220px;
@@ -48,27 +49,51 @@
             position: fixed;
             top: 0;
             left: 0;
-            width: 200px;
+            width: 220px;
             height: 100%;
             z-index: 3;
-            background: #0f0c29;
+            background: linear-gradient(180deg, #1a173f 0%, #0f0c29 100%);
             padding: 20px;
             color: #dae1eb;
-            padding-right: 10px;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         }
         .sidebar h2 {
             margin: 0 0 20px;
-            font-size: 1.5em;
+            font-size: 1.8em;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 10px;
         }
         .sidebar a {
-            display: block;
-            color: #3498db;
+            display: flex;
+            align-items: center;
+            color: #a5b4fc;
             text-decoration: none;
-            margin: 10px 0;
+            margin: 12px 0;
             font-size: 1em;
+            font-weight: 500;
+            padding: 10px 15px;
+            border-radius: 6px;
+            transition: background 0.3s, color 0.3s, transform 0.2s;
         }
         .sidebar a:hover {
-            color: #2980b9;
+            background: rgba(52, 152, 219, 0.1);
+            color: #ffffff;
+            transform: translateX(5px);
+        }
+        .sidebar a.active {
+            background: rgba(52, 152, 219, 0.2);
+            color: #ffffff;
+            font-weight: 600;
+        }
+        .sidebar a .icon {
+            margin-right: 10px;
+            font-size: 1.2em;
         }
         .container {
             padding: 20px;
@@ -234,17 +259,13 @@
 <body>
 <div class="sidebar">
     <h2>Dashboard</h2>
-    <a href="/">🏠 Home</a>
-    <a href="{{ url_for('course_view') }}">📚 Courses</a>
-    <a href="{{ url_for('contact_us') }}">📞 Contact Us</a>
-    <a href="{{ url_for('about_admin') }}">👨‍💼 About Admin</a>
-    <a href="{{ url_for('settings') }}">⚙️ Settings</a>
+    <a href="/" class="active"><span class="icon">🏠</span> Home</a>
+    <a href="{{ url_for('course_view') }}"><span class="icon">📚</span> Courses</a>
+    <a href="{{ url_for('contact_us') }}"><span class="icon">📞</span> Contact Us</a>
+    <a href="{{ url_for('about_admin') }}"><span class="icon">👨‍💼</span> About Admin</a>
+    <a href="{{ url_for('settings') }}"><span class="icon">⚙️</span> Settings</a>
     {% if admin_mode %}
-        <a href="{{ url_for('admin_add_item', item_type='pyqs', course_id=course_id) }}">➕ Add PYQ</a>
-        <a href="{{ url_for('admin_add_item', item_type='notes', course_id=course_id) }}">➕ Add Note</a>
-        <a href="{{ url_for('admin_add_item', item_type='assignments', course_id=course_id) }}">➕ Add Assignment</a>
-        <a href="{{ url_for('admin_add_item', item_type='resources', course_id=course_id) }}">➕ Add Resource</a>
-        <a href="{{ url_for('admin_logout') }}">🚪 Exit Admin</a>
+        <a href="{{ url_for('admin_logout') }}"><span class="icon">🚪</span> Exit Admin</a>
     {% endif %}
 </div>
 
