@@ -2,8 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{{ course_name }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style8.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ course_name }} - IITM BS Portal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style2.css') }}">
+    <!-- Prevent favicon 404 -->
+    <link rel="icon" href="data:,">
     <style>
         .extra-stuff-btn {
             display: inline-flex;

@@ -716,12 +716,43 @@ def admin_restore_backup():
     
     return render_template('admin_restore_backup.html', backup_files=backup_files)
 
+# Favicon route
+@app.route('/favicon.ico')
+def favicon():
+    try:
+        return send_from_directory(os.path.join(app.root_path, 'static'),
+                              'favicon.ico', mimetype='image/vnd.microsoft.icon')
+    except:
+        # Return empty response if favicon doesn't exist
+        return '', 204
+
+# Error handlers
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def internal_server_error(error):
+    return render_template('500.html'), 500
+
 # Main
 if __name__ == '__main__':
+    # Initialize database
     if not os.path.exists('database.db'):
         init_db()
         restore_db()  # Only restore if database doesn't exist
     else:
         init_db()  # Just ensure tables exist, don't restore
 
-    app.run(debug=True)
+    # Run the app
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('DEBUG', 'True').lower() == 'true'
+    
+    app.run(host='0.0.0.0', port=port, debug=debug)
+else:
+    # For production (gunicorn)
+    if not os.path.exists('database.db'):
+        init_db()
+        restore_db()
+    else:
+        init_db()
