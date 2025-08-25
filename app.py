@@ -122,6 +122,13 @@ def backup_db():
 def restore_db():
     if os.path.exists('backup.sql'):
         try:
+            # Check if backup.sql has content
+            with open('backup.sql', 'r') as f:
+                content = f.read().strip()
+                if not content:
+                    print("backup.sql is empty, skipping restore")
+                    return
+            
             conn = sqlite3.connect('database.db')
             with open('backup.sql', 'r') as f:
                 sql = f.read()
@@ -131,6 +138,33 @@ def restore_db():
             print("Database restored from backup.sql")
         except Exception as e:
             print(f"Error restoring database: {e}")
+    else:
+        print("No backup.sql found, skipping restore")
+
+# Manual backup restore function
+def restore_from_backup_file(backup_filename):
+    """Restore database from a specific backup file"""
+    if os.path.exists(backup_filename):
+        try:
+            # Create backup of current database first
+            if os.path.exists('database.db'):
+                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+                backup_current = f'backup_before_restore_{timestamp}.db'
+                import shutil
+                shutil.copy2('database.db', backup_current)
+                print(f"Current database backed up as {backup_current}")
+            
+            # Restore from the specified backup
+            import shutil
+            shutil.copy2(backup_filename, 'database.db')
+            print(f"Database successfully restored from {backup_filename}")
+            return True
+        except Exception as e:
+            print(f"Error restoring from {backup_filename}: {e}")
+            return False
+    else:
+        print(f"Backup file {backup_filename} not found")
+        return False
 
 # Landing page route
 @app.route('/')
@@ -656,13 +690,38 @@ def uploaded_file(filename):
 def settings():
     return render_template('settings.html')
 
+# Admin backup restore route
+@app.route('/admin/restore_backup', methods=['GET', 'POST'])
+def admin_restore_backup():
+    if not session.get('admin_mode'):
+        return redirect(url_for('course_view'))
+    
+    if request.method == 'POST':
+        backup_file = request.form.get('backup_file')
+        if backup_file and backup_file.endswith('.db'):
+            success = restore_from_backup_file(backup_file)
+            if success:
+                flash(f'Successfully restored backup from {backup_file}!', 'success')
+            else:
+                flash(f'Failed to restore backup from {backup_file}', 'error')
+        else:
+            flash('Invalid backup file selected', 'error')
+        return redirect(url_for('admin_restore_backup'))
+    
+    # Get list of available backup files
+    backup_files = []
+    for file in os.listdir('.'):
+        if file.endswith('.db') and file != 'database.db':
+            backup_files.append(file)
+    
+    return render_template('admin_restore_backup.html', backup_files=backup_files)
+
 # Main
 if __name__ == '__main__':
     if not os.path.exists('database.db'):
         init_db()
-        restore_db()  # Restore database from backup.sql if it exists
+        restore_db()  # Only restore if database doesn't exist
     else:
-        init_db()
-        restore_db()  # Restore database from backup.sql if it exists
+        init_db()  # Just ensure tables exist, don't restore
 
     app.run(debug=True)

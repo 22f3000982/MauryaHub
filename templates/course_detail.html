@@ -254,6 +254,50 @@
             border-top: 1px solid #444;
             margin-top: 10px;
         }
+        
+        /* Admin Login Form Styles */
+        .admin-login-form {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .password-input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            color: #ffffff;
+            font-size: 0.9rem;
+            box-sizing: border-box;
+        }
+        .password-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        .password-input:focus {
+            outline: none;
+            border-color: #3498db;
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .login-btn {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+        .login-btn:hover {
+            background: linear-gradient(45deg, #2980b9, #1f5f8b);
+            transform: translateY(-1px);
+        }
     </style>
 </head>
 <body>
@@ -264,7 +308,15 @@
     <a href="{{ url_for('contact_us') }}"><span class="icon">📞</span> Contact Us</a>
     <a href="{{ url_for('about_admin') }}"><span class="icon">👨‍💼</span> About Admin</a>
     <a href="{{ url_for('settings') }}"><span class="icon">⚙️</span> Settings</a>
-    {% if admin_mode %}
+    {% if not session.get('admin_mode') %}
+        <!-- Admin Login Form in Sidebar -->
+        <form class="admin-login-form" action="{{ url_for('admin_login') }}" method="post">
+            <input class="password-input" type="password" name="password" placeholder="Admin Password" required>
+            <button class="btn login-btn" type="submit">🔐 Admin Login</button>
+        </form>
+    {% else %}
+        <a href="{{ url_for('admin_add_course') }}"><span class="icon">➕</span> Add Course</a>
+        <a href="{{ url_for('admin_restore_backup') }}"><span class="icon">🔄</span> Restore Database</a>
         <a href="{{ url_for('admin_logout') }}"><span class="icon">🚪</span> Exit Admin</a>
     {% endif %}
 </div>
