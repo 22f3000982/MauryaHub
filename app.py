@@ -308,11 +308,30 @@ def admin_edit_course(course_id):
     return render_template('admin_edit_course.html', course_id=course_id, course_name=course[0])
 
 # Admin - Delete course
-@app.route('/admin/delete_course/<int:course_id>')
+@app.route('/admin/delete_course/<int:course_id>', methods=['GET', 'POST'])
 def admin_delete_course(course_id):
     if not session.get('admin_mode'):
         return redirect(url_for('course_view'))
 
+    if request.method == 'GET':
+        # Get course name for confirmation
+        conn = sqlite3.connect('database.db')
+        c = conn.cursor()
+        c.execute('SELECT name FROM courses WHERE id = ?', (course_id,))
+        course = c.fetchone()
+        conn.close()
+        
+        if course:
+            return render_template('confirm_delete.html', 
+                                 item_type='course', 
+                                 item_name=course[0],
+                                 delete_url=url_for('admin_delete_course', course_id=course_id),
+                                 cancel_url=url_for('course_view'))
+        else:
+            flash('Course not found.', 'error')
+            return redirect(url_for('course_view'))
+
+    # POST request - actual deletion
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
     c.execute('DELETE FROM courses WHERE id = ?', (course_id,))
@@ -322,6 +341,7 @@ def admin_delete_course(course_id):
     conn.commit()
     conn.close()
     backup_db()  # Backup database after deleting course
+    flash('Course deleted successfully!', 'success')
     return redirect(url_for('course_view'))
 
 
@@ -605,6 +625,37 @@ def admin_delete_item(item_type, course_id, item_id):
     if not session.get('admin_mode'):
         return redirect(url_for('course_view'))
 
+    if request.method == 'GET':
+        # Get item name for confirmation
+        conn = sqlite3.connect('database.db')
+        c = conn.cursor()
+        
+        if item_type == 'pyqs':
+            c.execute('SELECT name FROM pyqs WHERE id=?', (item_id,))
+        elif item_type == 'notes':
+            c.execute('SELECT name FROM notes WHERE id=?', (item_id,))
+        elif item_type == 'assignments':
+            c.execute('SELECT name FROM assignments WHERE id=?', (item_id,))
+        elif item_type == 'resources':
+            c.execute('SELECT name FROM resources WHERE id=?', (item_id,))
+        else:
+            flash('Invalid item type.', 'error')
+            return redirect(url_for('course_detail', course_id=course_id))
+            
+        item = c.fetchone()
+        conn.close()
+        
+        if item:
+            return render_template('confirm_delete.html', 
+                                 item_type=item_type.rstrip('s'),  # Remove 's' from plural
+                                 item_name=item[0],
+                                 delete_url=url_for('admin_delete_item', item_type=item_type, course_id=course_id, item_id=item_id),
+                                 cancel_url=url_for('course_detail', course_id=course_id))
+        else:
+            flash('Item not found.', 'error')
+            return redirect(url_for('course_detail', course_id=course_id))
+
+    # POST request - actual deletion
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
 
