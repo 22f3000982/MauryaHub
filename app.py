@@ -96,6 +96,16 @@ def init_db():
         )
     ''')
 
+    # Create 'feedback' table for landing page testimonials
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS feedback (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL,
+            feedback TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
     # Add sort_order columns to existing tables if they don't exist
     for table in ['pyqs', 'notes', 'assignments']:
         try:
@@ -170,6 +180,103 @@ def restore_from_backup_file(backup_filename):
 @app.route('/')
 def landing_page():
     return render_template('landing.html')
+
+# Submit feedback route
+@app.route('/submit-feedback', methods=['POST'])
+def submit_feedback():
+    try:
+        data = request.get_json()
+        username = data.get('username', '').strip()
+        feedback_text = data.get('feedback', '').strip()
+        
+        if not username or not feedback_text:
+            return {'error': 'Missing required fields'}, 400
+            
+        # Insert feedback into database
+        conn = sqlite3.connect('database.db')
+        c = conn.cursor()
+        c.execute('''
+            INSERT INTO feedback (username, feedback)
+            VALUES (?, ?)
+        ''', (username, feedback_text))
+        conn.commit()
+        conn.close()
+        
+        # Backup database after adding feedback
+        backup_db()
+        
+        return {'success': True, 'message': 'Feedback submitted successfully'}
+        
+    except Exception as e:
+        print(f"Error submitting feedback: {e}")
+        return {'error': 'Internal server error'}, 500
+
+# Get feedback route
+@app.route('/get-feedback')
+def get_feedback():
+    try:
+        conn = sqlite3.connect('database.db')
+        c = conn.cursor()
+        c.execute('''
+            SELECT username, feedback, created_at
+            FROM feedback
+            ORDER BY created_at DESC
+            LIMIT 20
+        ''')
+        
+        feedback_list = []
+        for row in c.fetchall():
+            feedback_list.append({
+                'username': row[0],
+                'feedback': row[1],
+                'created_at': row[2]
+            })
+        
+        conn.close()
+        
+        from flask import jsonify
+        return jsonify(feedback_list)
+        
+    except Exception as e:
+        print(f"Error getting feedback: {e}")
+        from flask import jsonify
+        return jsonify([])
+
+# Delete feedback route
+@app.route('/delete-feedback', methods=['POST'])
+def delete_feedback():
+    try:
+        data = request.get_json()
+        username = data.get('username', '').strip()
+        feedback_text = data.get('feedback', '').strip()
+        created_at = data.get('created_at', '').strip()
+        
+        if not username or not feedback_text:
+            return {'error': 'Missing required fields'}, 400
+            
+        # Delete feedback from database
+        conn = sqlite3.connect('database.db')
+        c = conn.cursor()
+        c.execute('''
+            DELETE FROM feedback 
+            WHERE username = ? AND feedback = ? AND created_at = ?
+        ''', (username, feedback_text, created_at))
+        
+        if c.rowcount == 0:
+            conn.close()
+            return {'error': 'Feedback not found'}, 404
+            
+        conn.commit()
+        conn.close()
+        
+        # Backup database after deleting feedback
+        backup_db()
+        
+        return {'success': True, 'message': 'Feedback deleted successfully'}
+        
+    except Exception as e:
+        print(f"Error deleting feedback: {e}")
+        return {'error': 'Internal server error'}, 500
 
 # Home - Show all courses
 import time

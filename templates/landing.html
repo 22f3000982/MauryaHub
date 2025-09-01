@@ -3,531 +3,954 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PYQ Platform</title>
-    <!-- Include Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <title>PYQ Platform – Shine in Exams!</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Montserrat:wght@700;900&display=swap" rel="stylesheet">
     <style>
-        body {
-            margin: 0;
-            overflow-x: hidden;
-            font-family: Arial, sans-serif;
-            color: #f9f1e9;
-            background: #000029;
+        :root {
+            --primary: #5928e5; /* Main brand color */
+            --accent: #00BFFF; /* Bright accent blue */
+            --bg-dark: #1A1A2E; /* Dark background */
+            --bg-medium: #2C2C4A; /* Slightly lighter dark for cards/sections */
+            --text-light: #E0E0E0; /* Light text on dark background */
+            --text-muted: #A0A0A0; /* Muted text */
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); /* Darker shadow for depth */
+            --font-main: 'Roboto', sans-serif;
+            --font-heading: 'Montserrat', sans-serif;
+            
+            /* New animation colors from the provided code */
+            --node-color: #2ec2fa;
+            --node-glow: #45aaff;
         }
 
-        .large-header {
+        html, body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            background: var(--bg-dark);
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: var(--font-main);
+            color: var(--text-light);
+            line-height: 1.6;
             position: relative;
-            width: 100%;
+        }
+
+        #network-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
             height: 100vh;
-            overflow: hidden;
-            background-size: cover;
+            z-index: 0;
+            pointer-events: none;
+            background: transparent;
+        }
+
+        .content-wrapper > *,
+        .hero, .features-section, .testimonials-section, .social-section, .footer {
+            position: relative;
             z-index: 1;
         }
 
-        #demo-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 2;
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
         }
 
-        /* Header Section */
-        .Header {
-            position: absolute;
-            top: 51%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+        /* Hero Section */
+        .hero {
+            background-color: transparent;
+            color: var(--text-light);
+            padding: 2rem 0;
             text-align: center;
-            z-index: 3;
-            padding: 20px;
-            max-width: 800px;
+            position: relative;
+            margin-top: 0;
         }
 
-        .Header h1 {
-            font-size: 3.5em;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin: 0 0 20px;
-            color: #f9f1e9;
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: -1;
         }
 
-        .Header p {
-            font-size: 1.2em;
-            line-height: 1.5;
-            margin: 10px 0;
-            color: #d3d3d3;
+        .hero-title {
+            font-family: var(--font-heading);
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
         }
 
-        .Button {
+        .brand {
+            color: var(--accent);
+        }
+
+        .hero-desc {
+            font-size: 1.25rem;
+            font-weight: 400;
+            margin-top: 0;
+            margin-bottom: 0;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-btn {
+            background: var(--accent);
+            color: var(--bg-dark);
+            padding: 1rem 2.5rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 9999px;
+            box-shadow: 0 8px 16px rgba(0, 191, 255, 0.2);
+            font-weight: 700;
+            text-decoration: none;
             display: inline-block;
-            padding: 12px 24px;
-            background: #1e90ff;
-            color: #f9f1e9;
-            text-decoration: none;
-            text-transform: uppercase;
-            font-weight: bold;
-            border-radius: 5px;
-            margin-top: 20px;
-            transition: background 0.3s;
-        }
-
-        .Button:hover {
-            background: #4682b4;
-        }
-
-        /* Container Section */
-        .Container {
-            max-width: 800px;
-            margin: 50px auto;
-            padding: 20px;
-            text-align: center;
-            z-index: 3;
-            position: relative;
-        }
-
-        .Container h2 {
-            font-size: 2.5em;
-            text-transform: uppercase;
-            margin: 0 0 20px;
-            color: #f9f1e9;
-        }
-
-        .Container p {
-            font-size: 1.1em;
-            line-height: 1.6;
-            margin: 10px 0;
-            color: #d3d3d3;
-        }
-
-        /* Social Media Icons and Meta Links */
-        .wrapper {
-            display: inline-flex;
-            list-style: none;
-            justify-content: center;
-            margin-bottom: 30px;
-            gap: 15px;
-        }
-
-        .wrapper .icon {
-            position: relative;
-            background: #ffffff;
-            border-radius: 50%;
-            padding: 15px;
-            margin: 10px;
-            width: 50px;
-            height: 50px;
-            font-size: 18px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-
-        .wrapper .icon a {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            height: 100%;
-            text-decoration: none;
-            color: #333333; /* Default color for icons */
-        }
-
-        .wrapper .icon span {
-            color: #333333; /* Default color for tooltip text */
-        }
-
-        .wrapper .tooltip {
-            position: absolute;
-            top: -50px;
-            font-size: 14px;
-            background: #ffffff;
-            color: #333333; /* Default color for tooltip text */
-            padding: 6px 10px;
-            border-radius: 6px;
-            box-shadow: 0 10px 10px rgba(0, 0, 0, 0.1);
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-
-        .wrapper .tooltip::before {
-            position: absolute;
-            content: "";
-            height: 8px;
-            width: 8px;
-            background: #ffffff;
-            bottom: -3px;
-            left: 50%;
-            transform: translate(-50%) rotate(45deg);
-            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-
-        .wrapper .icon:hover .tooltip {
-            top: -45px;
-            opacity: 1;
-            visibility: visible;
-            pointer-events: auto;
-        }
-
-        .wrapper .icon:hover a {
-            color: #ffffff; /* White color on hover */
-        }
-
-        .wrapper .icon:hover span,
-        .wrapper .icon:hover .tooltip {
-            text-shadow: 0px -1px 0px rgba(0, 0, 0, 0.1);
-            color: #ffffff; /* White color on hover for text and tooltip */
-        }
-
-        .wrapper .linkedin:hover,
-        .wrapper .linkedin:hover .tooltip,
-        .wrapper .linkedin:hover .tooltip::before {
-            background: #0A66C2;
-            color: #ffffff;
-        }
-
-        .wrapper .instagram:hover,
-        .wrapper .instagram:hover .tooltip,
-        .wrapper .instagram:hover .tooltip::before {
-            background: #E4405F;
-            color: #ffffff;
-        }
-
-        .wrapper .github:hover,
-        .wrapper .github:hover .tooltip,
-        .wrapper .github:hover .tooltip::before {
-            background: #333333;
-            color: #ffffff;
-        }
-
-        .wrapper .youtube:hover,
-        .wrapper .youtube:hover .tooltip,
-        .wrapper .youtube:hover .tooltip::before {
-            background: #CD201F;
-            color: #ffffff;
-        }
-
-        .wrapper .website:hover,
-        .wrapper .website:hover .tooltip,
-        .wrapper .website:hover .tooltip::before {
-            background: #4CAF50;
-            color: #ffffff;
-        }
-
-        .wrapper .icon .logo {
-            width: 20px;
-            height: 20px;
-            object-fit: contain;
-            margin-left: 5px;
-        }
-
-        .meta-links {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .meta-link {
-            align-items: center;
-            backdrop-filter: blur(3px);
-            background-color: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-            display: inline-flex;
-            gap: 8px;
-            padding: 12px 24px;
-            text-decoration: none;
             transition: all 0.3s ease;
         }
 
-        .meta-link:hover {
-            background-color: rgba(255, 255, 255, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+        .cta-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px rgba(0, 191, 255, 0.3);
+            background: #00A3DF;
+        }
+
+        /* Why Choose Us Section */
+        .why-choose-us {
+            padding: 2rem 0 1.5rem 0;
+            text-align: center;
+            background: transparent;
+        }
+
+        .why-title {
+            font-family: var(--font-heading);
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .why-text {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 1rem auto;
+            line-height: 1.6;
+            font-weight: 400;
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 5rem 0;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            background: var(--bg-medium);
+            border-radius: 12px;
+            padding: 2.5rem;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            color: var(--text-light);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .feature-title {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-light);
+        }
+
+        .feature-description {
+            color: var(--text-muted);
+        }
+
+        /* Testimonials Section */
+        .testimonials-section {
+            background: var(--bg-medium);
+            padding: 5rem 0;
+            text-align: center;
+            color: var(--text-light);
+        }
+
+        .section-heading {
+            font-family: var(--font-heading);
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 3rem;
+        }
+
+        .testimonials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .testimonial-card {
+            background: var(--bg-dark);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            text-align: left;
+            color: var(--text-light);
+        }
+
+        .testimonial-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .testimonial-avatar {
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            color: var(--text-light);
+            border-radius: 50%;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            box-shadow: 0 0 20px rgba(89, 40, 229, 0.6), 0 0 40px rgba(89, 40, 229, 0.3);
+            border: 2px solid rgba(89, 40, 229, 0.8);
+            animation: avatarGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes avatarGlow {
+            from {
+                box-shadow: 0 0 20px rgba(89, 40, 229, 0.6), 0 0 40px rgba(89, 40, 229, 0.3);
+                border-color: rgba(89, 40, 229, 0.8);
+            }
+            to {
+                box-shadow: 0 0 30px rgba(89, 40, 229, 0.8), 0 0 60px rgba(89, 40, 229, 0.5);
+                border-color: rgba(89, 40, 229, 1);
+            }
+        }
+
+        .testimonial-name {
+            font-weight: 700;
+            color: var(--text-light);
+        }
+
+        .testimonial-time {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .testimonial-text {
+            font-style: italic;
+            color: var(--text-muted);
+        }
+
+        .delete-feedback-btn {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: rgba(244, 67, 54, 0.8);
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            color: white;
+            cursor: pointer;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .testimonial-card:hover .delete-feedback-btn {
+            opacity: 1;
+        }
+
+        .delete-feedback-btn:hover {
+            background: #f44336;
+            transform: scale(1.1);
+        }
+
+        .show-more-container {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .show-more-btn {
+            background: rgba(30, 144, 255, 0.2);
+            border: 2px solid rgba(30, 144, 255, 0.3);
+            color: #1e90ff;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .show-more-btn:hover {
+            background: rgba(30, 144, 255, 0.3);
+            border-color: rgba(30, 144, 255, 0.5);
             transform: translateY(-2px);
         }
 
-        .meta-link > i,
-        .meta-link > span {
-            height: 20px;
-            line-height: 20px;
+        .loading-testimonials {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 2rem;
+            color: #aaa;
         }
 
-        .meta-link > span {
-            color: white;
-            font-family: "Poppins", sans-serif;
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(30, 144, 255, 0.3);
+            border-top: 4px solid #1e90ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Feedback Form */
+        .feedback-form-container {
+            margin-top: 3rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .feedback-form {
+            background: var(--bg-dark);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .feedback-form input, .feedback-form textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid #4A4A6B;
+            background: #2A2A42;
+            color: var(--text-light);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: var(--font-main);
+            transition: border-color 0.2s ease;
+        }
+
+        .feedback-form input:focus, .feedback-form textarea:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(89, 40, 229, 0.2);
+        }
+        
+        .feedback-form input::placeholder, .feedback-form textarea::placeholder {
+            color: var(--text-muted);
+        }
+
+        .feedback-form button {
+            background: var(--primary);
+            color: var(--text-light);
+            border: none;
+            border-radius: 9999px;
+            padding: 1rem 2.5rem;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .feedback-form button:hover {
+            background: #4A1EBF;
+            transform: translateY(-2px);
+        }
+        
+        /* Message styles */
+        .success-message { background: #28a745; color: white; padding: 0.7em 1.2em; border-radius: 7px; text-align: center; margin-bottom: 0.8em; }
+        .error-message { background: #dc3545; color: white; padding: 0.7em 1.2em; border-radius: 7px; text-align: center; margin-bottom: 0.8em; }
+
+        /* Socials & Footer */
+        .social-section {
+            background: var(--bg-dark);
+            padding: 3rem 0;
+            text-align: center;
+        }
+
+        .social-icons {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .social-icons a {
+            color: var(--primary);
+            background: var(--bg-medium);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.25rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            position: relative; /* Needed for the tooltip */
+        }
+
+        /* Tooltip Styles */
+        .social-icons a::before {
+            content: attr(title);
+            position: absolute;
+            top: -45px;
+            padding: 6px 10px;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            border-radius: 6px;
             font-size: 14px;
-            font-weight: 500;
-            transition: color 0.3s ease;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            transform: translateY(10px);
+            z-index: 10;
         }
 
-        #telegram-link > i {
-            color: #0088cc;
+        .social-icons a::after {
+            content: '';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%) rotate(45deg);
+            width: 8px;
+            height: 8px;
+            background-color: var(--bg-dark);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 10;
         }
 
-        #yt-link > i {
-            color: rgb(219, 31, 106);
+        .social-icons a:hover::before,
+        .social-icons a:hover::after {
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        @media only screen and (max-width: 768px) {
-            .Header h1 {
-                font-size: 2.5em;
-            }
+        /* Specific hover styles for each social icon */
+        .social-icons a[title="Website"]:hover {
+            background-color: #4CAF50;
+            box-shadow: 0 0 15px #4CAF50;
+            border: 2px solid #5cb85c;
+            color: #fff;
+        }
 
-            .Header p {
-                font-size: 1em;
-            }
+        .social-icons a[title="LinkedIn"]:hover {
+            background-color: #0A66C2;
+            box-shadow: 0 0 15px #0A66C2;
+            border: 2px solid #0D84E8;
+            color: #fff;
+        }
 
-            .Container h2 {
-                font-size: 2em;
-            }
+        .social-icons a[title="Instagram"]:hover {
+            background-color: #E4405F;
+            box-shadow: 0 0 15px #E4405F;
+            border: 2px solid #FF5E7E;
+            color: #fff;
+        }
+        
+        .social-icons a[title="Github"]:hover {
+            background-color: #333333;
+            box-shadow: 0 0 15px #333333;
+            border: 2px solid #444444;
+            color: #fff;
+        }
 
-            .Container p {
-                font-size: 1em;
+        .social-icons a[title="Youtube"]:hover {
+            background-color: #CD201F;
+            box-shadow: 0 0 15px #CD201F;
+            border: 2px solid #E63534;
+            color: #fff;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem 0;
+            background: var(--bg-medium);
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+        
+        .footer .brand {
+            color: var(--accent);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            .hero-desc {
+                font-size: 1.1rem;
+            }
+            .section-heading {
+                font-size: 2rem;
+            }
+            .features-grid, .testimonials-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 <body>
-    <div id="large-header" class="large-header">
-        <canvas id="demo-canvas"></canvas>
-        <div class="Header">
-            <h1>Welcome</h1>
-            <p>Abhi soch rha hu ky ky Likhu yha , tab tk aap start kro, Andar sb yt waale video well organised hain</p>
-            <a href="{{ url_for('course_view') }}" class="Button">Let's Get Started</a>
-            <div class="Container">
-                <h2>Why Choose Us?</h2>
-                <p>Because my contents are like wine — they get better with time. 🍷</p>
-                <p>Got a question? Ask away — our answers are like wine too — sometimes bitter, sometimes sweet. 😉</p>
+    <canvas id="network-bg"></canvas>
+    <div class="content-wrapper">
+        <section class="hero">
+            <div class="container">
+                <h1 class="hero-title">
+                    Welcome to <span class="brand">MauryaHub👑</span>
+                </h1>
+                <p class="hero-desc">
+                    Your all-in-one platform for organized learning. Prepare, revise, and succeed with a professionally curated collection of previous year questions and video solutions.
+                </p>
+                <a href="{{ url_for('course_view') }}" class="cta-btn">Let's Get Started</a>
             </div>
-            <ul class="wrapper">
-                <li class="icon website">
-                    <a href="https://mauryahub.onrender.com/" target="_blank">
-                        <span class="tooltip">Website</span>
-                        <span><i class="fas fa-globe"></i></span>
-                    </a>
-                </li>
-                <li class="icon linkedin">
-                    <a href="https://www.linkedin.com/in/ashish-raj-02a700259/" target="_blank">
-                        <span class="tooltip">LinkedIn</span>
-                        <span><i class="fab fa-linkedin-in"></i></span>
-                    </a>
-                </li>
-                <li class="icon instagram">
-                    <a href="https://www.instagram.com/ashraj77777" target="_blank">
-                        <span class="tooltip">Instagram</span>
-                        <span><i class="fab fa-instagram"></i></span>
-                    </a>
-                </li>
-                <li class="icon github">
-                    <a href="https://github.com/22f3000982" target="_blank">
-                        <span class="tooltip">Github</span>
-                        <span><i class="fab fa-github"></i></span>
-                    </a>
-                </li>
-                <li class="icon youtube">
-                    <a href="https://www.youtube.com/@ashishmaurya7157" target="_blank">
-                        <span class="tooltip">Youtube</span>
-                        <span><i class="fab fa-youtube"></i></span>
-                    </a>
-                </li>
-            </ul>
-            <div class="meta-links">
-                <!-- <a href="https://t.me/your-telegram-channel" class="meta-link" id="telegram-link">
-                    <i class="fab fa-telegram-plane"></i>
-                    <span>Join my Telegram</span>
-                </a> -->
-                <a href="https://www.youtube.com/@ashishmaurya7157" class="meta-link" id="yt-link">
-                    <i class="fab fa-youtube"></i>
-                    <span>Subscribe my channel..❤</span>
+        </section>
+
+        <section class="why-choose-us">
+            <div class="container">
+                <h2 class="why-title">WHY CHOOSE US?</h2>
+                <p class="why-text">
+                    Because my contents are like wine — they get better with time. 🍷
+                </p>
+                <p class="why-text">
+                    Got a question? Ask away — our answers are like wine too — sometimes bitter, sometimes sweet. 😉
+                </p>
+            </div>
+        </section>
+
+        <section class="features-section">
+            <div class="container">
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <i class="feature-icon fas fa-film"></i>
+                        <div class="feature-title">Organized Video Library</div>
+                        <div class="feature-description">Find all your learning videos neatly sorted by subject and chapter. No clutter, just clarity!</div>
+                    </div>
+                    <div class="feature-card">
+                        <i class="feature-icon fas fa-bolt"></i>
+                        <div class="feature-title">Instant Search</div>
+                        <div class="feature-description">Quickly jump to any question or topic with blazing-fast search and intelligent filters.</div>
+                    </div>
+                    <div class="feature-card">
+                        <i class="feature-icon fas fa-thumbs-up"></i>
+                        <div class="feature-title">Upvoted Solutions</div>
+                        <div class="feature-description">See the most helpful answers and boost your learning — upvote what you find valuable!</div>
+                    </div>
+                    <div class="feature-card">
+                        <i class="feature-icon fas fa-user-friends"></i>
+                        <div class="feature-title">Student Community</div>
+                        <div class="feature-description">Ask questions, share tips, and learn together with a caring community around every subject.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="testimonials-section">
+            <div class="container">
+                <h2 class="section-heading">
+                    What Students Say
+                    <span id="adminBadge" style="display: none; font-size: 0.6em; background: #ff4444; color: white; padding: 4px 8px; border-radius: 12px; margin-left: 10px;">ADMIN MODE</span>
+                </h2>
+                <div class="testimonials-grid" id="testimonialsGrid">
+                    <div class="loading-testimonials">
+                        <div class="loading-spinner"></div>
+                        <p>Loading experiences...</p>
+                    </div>
+                </div>
+                <div class="feedback-form-container">
+                    <form class="feedback-form" id="feedbackForm">
+                        <input type="text" id="username" name="username" placeholder="Your Name" required />
+                        <textarea id="feedback" name="feedback" placeholder="Share your experience with PYQ Platform..." required></textarea>
+                        <button type="submit"><i class="fas fa-paper-plane"></i> Share Experience</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <section class="social-section">
+            <div class="container">
+                <ul class="social-icons">
+                    <li><a href="https://mauryahub.onrender.com/" target="_blank" title="Website"><i class="fas fa-globe"></i></a></li>
+                    <li><a href="https://www.linkedin.com/in/ashish-raj-02a700259/" target="_blank" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a></li>
+                    <li><a href="https://www.instagram.com/ashraj77777" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a></li>
+                    <li><a href="https://github.com/22f3000982" target="_blank" title="Github"><i class="fab fa-github"></i></a></li>
+                    <li><a href="https://www.youtube.com/@ashishmaurya7157" target="_blank" title="Youtube"><i class="fab fa-youtube"></i></a></li>
+                </ul>
+                <a href="https://www.youtube.com/@ashishmaurya7157" style="color:var(--primary);text-decoration:none;font-weight:700;">
+                    <i class="fab fa-youtube"></i> &nbsp;Subscribe my channel..❤
                 </a>
             </div>
-        </div>
+        </section>
+
+        <footer class="footer">
+            <div class="container">
+                © 2025 <span class="brand">PYQ Platform</span> by Ashish Maurya • All Rights Reserved.
+            </div>
+        </footer>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script>
-        (function () {
-            let width, height, largeHeader, canvas, ctx, points, target, animateHeader = true;
+    
+<script>
+    const canvas = document.getElementById('network-bg');
+    const ctx = canvas.getContext('2d');
+    let w = window.innerWidth, h = window.innerHeight;
 
-            // Main
-            initHeader();
-            initAnimation();
-            addListeners();
+    function resize() {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
 
-            function initHeader() {
-                width = window.innerWidth;
-                height = window.innerHeight;
-                target = { x: width / 2, y: height / 2 };
+    const nodes = [];
+    const NODE_COUNT = Math.floor((w * h) / 9000 + 28);
+    for (let i = 0; i < NODE_COUNT; i++) {
+        nodes.push({
+            x: Math.random() * w,
+            y: Math.random() * h,
+            vx: (Math.random() - 0.5) * 0.20,
+            vy: (Math.random() - 0.5) * 0.20
+        });
+    }
+    let mouse = {x: w/2, y: h/2};
 
-                largeHeader = document.getElementById("large-header");
-                largeHeader.style.height = height + "px";
+    document.addEventListener('mousemove', e => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+    });
+    document.addEventListener('mouseleave', e => {
+        mouse.x = w/2;
+        mouse.y = h/2;
+    });
 
-                canvas = document.getElementById("demo-canvas");
-                canvas.width = width;
-                canvas.height = height;
-                ctx = canvas.getContext("2d");
+    function draw() {
+        ctx.clearRect(0,0,w,h);
+        for (let node of nodes) {
+            node.x += node.vx;
+            node.y += node.vy;
+            if(node.x < 0 || node.x > w) node.vx *= -1;
+            if(node.y < 0 || node.y > h) node.vy *= -1;
+        }
 
-                // Create points
-                points = [];
-                for (let x = 0; x < width; x += width / 20) {
-                    for (let y = 0; y < height; y += height / 20) {
-                        const px = x + (Math.random() * width) / 20;
-                        const py = y + (Math.random() * height) / 20;
-                        const p = { x: px, originX: px, y: py, originY: py };
-                        points.push(p);
-                    }
-                }
-
-                // For each point, find the 5 closest points
-                for (const p1 of points) {
-                    const closest = [];
-                    for (const p2 of points) {
-                        if (p1 !== p2) {
-                            let placed = false;
-                            for (let k = 0; k < 5; k++) {
-                                if (!placed && !closest[k]) {
-                                    closest[k] = p2;
-                                    placed = true;
-                                }
-                            }
-                            for (let k = 0; k < 5; k++) {
-                                if (!placed && getDistance(p1, p2) < getDistance(p1, closest[k])) {
-                                    closest[k] = p2;
-                                    placed = true;
-                                }
-                            }
-                        }
-                    }
-                    p1.closest = closest;
-                }
-
-                // Assign a circle to each point
-                points.forEach(p => {
-                    const c = new Circle(p, 2 + Math.random() * 2, "rgba(255,255,255,0.3)");
-                    p.circle = c;
-                });
-            }
-
-            // Event handling
-            function addListeners() {
-                if (!("ontouchstart" in window)) {
-                    window.addEventListener("mousemove", mouseMove);
-                }
-                window.addEventListener("touchmove", touchMove);
-                window.addEventListener("scroll", scrollCheck);
-                window.addEventListener("resize", resize);
-            }
-
-            function mouseMove(e) {
-                let posx = 0, posy = 0;
-                if (e.pageX || e.pageY) {
-                    posx = e.pageX;
-                    posy = e.pageY;
-                } else if (e.clientX || e.clientY) {
-                    posx = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
-                    posy = e.clientY + document.body.scrollTop + document.documentElement.scrollTop;
-                }
-                target.x = posx;
-                target.y = posy;
-            }
-
-            function touchMove(e) {
-                const touch = e.touches[0];
-                target.x = touch.pageX;
-                target.y = touch.pageY;
-            }
-
-            function scrollCheck() {
-                animateHeader = document.body.scrollTop <= height;
-            }
-
-            function resize() {
-                width = window.innerWidth;
-                height = window.innerHeight;
-                largeHeader.style.height = height + "px";
-                canvas.width = width;
-                canvas.height = height;
-            }
-
-            // Animation
-            function initAnimation() {
-                animate();
-                points.forEach(p => shiftPoint(p));
-            }
-
-            function animate() {
-                if (animateHeader) {
-                    ctx.clearRect(0, 0, width, height);
-                    points.forEach(p => {
-                        const distance = Math.abs(getDistance(target, p));
-                        if (distance < 4000) {
-                            p.active = 0.3;
-                            p.circle.active = 0.6;
-                        } else if (distance < 20000) {
-                            p.active = 0.1;
-                            p.circle.active = 0.3;
-                        } else if (distance < 40000) {
-                            p.active = 0.02;
-                            p.circle.active = 0.1;
-                        } else {
-                            p.active = 0;
-                            p.circle.active = 0;
-                        }
-
-                        drawLines(p);
-                        p.circle.draw();
-                    });
-                }
-                requestAnimationFrame(animate);
-            }
-
-            function shiftPoint(p) {
-                gsap.to(p, {
-                    x: p.originX - 50 + Math.random() * 100,
-                    y: p.originY - 50 + Math.random() * 100,
-                    duration: 1 + 1 * Math.random(),
-                    ease: "circ.inOut",
-                    onComplete: () => shiftPoint(p)
-                });
-            }
-
-            // Canvas manipulation
-            function drawLines(p) {
-                if (!p.active) return;
-                p.closest.forEach(p2 => {
+        // Draw lines between nodes
+        for(let i=0; i<nodes.length; i++) {
+            for(let j=i+1; j<nodes.length; j++) {
+                let dx = nodes[i].x - nodes[j].x;
+                let dy = nodes[i].y - nodes[j].y;
+                let dist = Math.sqrt(dx*dx + dy*dy);
+                if(dist < 170) {
+                    ctx.strokeStyle = `rgba(46,194,250,${1-dist/170})`;
+                    ctx.lineWidth = 1.15;
                     ctx.beginPath();
-                    ctx.moveTo(p.x, p.y);
-                    ctx.lineTo(p2.x, p2.y);
-                    ctx.strokeStyle = `rgba(156,217,249,${p.active})`;
+                    ctx.moveTo(nodes[i].x, nodes[i].y);
+                    ctx.lineTo(nodes[j].x, nodes[j].y);
                     ctx.stroke();
+                }
+            }
+            // Draw line from node to mouse if close
+            let dxm = nodes[i].x - mouse.x;
+            let dym = nodes[i].y - mouse.y;
+            let distm = Math.sqrt(dxm*dxm + dym*dym);
+            if(distm < 190) {
+                ctx.strokeStyle = `rgba(69,170,255,${0.19+0.7*(1-distm/190)})`;
+                ctx.lineWidth = 1.6;
+                ctx.beginPath();
+                ctx.moveTo(nodes[i].x, nodes[i].y);
+                ctx.lineTo(mouse.x, mouse.y);
+                ctx.stroke();
+            }
+        }
+        // Draw nodes
+        for(let node of nodes) {
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, 3.7, 0, 2*Math.PI);
+            ctx.fillStyle = "#2ec2fa";
+            ctx.shadowColor = "#45aaff";
+            ctx.shadowBlur = 17;
+            ctx.globalAlpha = 0.94;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+            ctx.globalAlpha = 1.0;
+        }
+        requestAnimationFrame(draw);
+    }
+    draw();
+    </script>
+    <script>
+        // Admin mode flag
+        window.adminMode = {{ 'true' if session.get('admin_mode') else 'false' }};
+        
+        // Simple testimonials loader
+        let allFeedback = [];
+        let showAll = false;
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, starting testimonials load...');
+            console.log('Admin mode:', window.adminMode);
+            
+            // Show admin badge if admin is logged in
+            if (window.adminMode) {
+                const adminBadge = document.getElementById('adminBadge');
+                if (adminBadge) {
+                    adminBadge.style.display = 'inline-block';
+                }
+            }
+            
+            loadFeedback();
+            
+            // Setup form submission
+            const form = document.getElementById('feedbackForm');
+            if (form) {
+                form.addEventListener('submit', handleFormSubmit);
+            }
+        });
+        
+        async function loadFeedback() {
+            const grid = document.getElementById('testimonialsGrid');
+            if (!grid) {
+                console.error('Testimonials grid not found!');
+                return;
+            }
+            
+            // Show the loading state first
+            grid.innerHTML = `
+                <div class="loading-testimonials">
+                    <div class="loading-spinner"></div>
+                    <p>Loading experiences...</p>
+                </div>
+            `;
+
+            console.log('Loading feedback...');
+            
+            try {
+                const response = await fetch('/get-feedback');
+                console.log('Response status:', response.status);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Received data:', data);
+                    allFeedback = data;
+                    displayFeedback();
+                } else {
+                    console.error('Failed to load feedback');
+                    showEmptyState();
+                }
+            } catch (error) {
+                console.error('Error loading feedback:', error);
+                showEmptyState();
+            }
+        }
+        
+        function displayFeedback() {
+            const grid = document.getElementById('testimonialsGrid');
+            if (!grid) return;
+            
+            console.log('Displaying feedback, count:', allFeedback.length);
+            
+            if (allFeedback.length === 0) {
+                showEmptyState();
+                return;
+            }
+            
+            const feedbackToShow = showAll ? allFeedback : allFeedback.slice(0, 6);
+            grid.innerHTML = '';
+            
+            feedbackToShow.forEach((item, index) => {
+                const card = createFeedbackCard(item, index);
+                grid.appendChild(card);
+            });
+            
+            // Add show more button if needed
+            if (allFeedback.length > 6) {
+                const showMoreBtn = createShowMoreButton();
+                grid.appendChild(showMoreBtn);
+            }
+            
+            console.log('Feedback displayed successfully');
+        }
+        
+        function createFeedbackCard(item, index) {
+            const div = document.createElement('div');
+            div.className = 'testimonial-card';
+            
+            // Handle cases where username might not have spaces
+            const initials = item.username ? item.username.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase() : '?';
+
+            // Use template literals for cleaner code
+            div.innerHTML = `
+                <div class="testimonial-header">
+                    <div class="testimonial-avatar">${initials}</div>
+                    <div>
+                        <span class="testimonial-name">${item.username}</span>
+                    </div>
+                    ${window.adminMode ? `
+                        <button class="delete-feedback-btn" onclick="deleteFeedback(${index})" title="Delete feedback">
+                            <i class="fas fa-trash"></i>
+                        </button>` : ''}
+                </div>
+                <div class="testimonial-text">${item.feedback}</div>
+            `;
+            
+            return div;
+        }
+        
+        function createShowMoreButton() {
+            const div = document.createElement('div');
+            div.className = 'show-more-container';
+            div.innerHTML = `
+                <button class="show-more-btn" onclick="toggleShowMore()">
+                    <i class="fas fa-chevron-${showAll ? 'up' : 'down'}"></i>
+                    ${showAll ? 'Show Less' : `Show More (${allFeedback.length - 6} more)`}
+                </button>
+            `;
+            return div;
+        }
+        
+        function showEmptyState() {
+            const grid = document.getElementById('testimonialsGrid');
+            if (!grid) return;
+            
+            grid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: #aaa;">
+                    <h3>🌟 Be the First!</h3>
+                    <p>Share your experience to inspire others in their learning journey.</p>
+                </div>
+            `;
+        }
+        
+        function toggleShowMore() {
+            showAll = !showAll;
+            displayFeedback();
+        }
+        
+        // Admin function to delete feedback
+        async function deleteFeedback(index) {
+            if (!window.adminMode) {
+                alert('Access denied! Admin login required.');
+                return;
+            }
+            
+            const item = allFeedback[index]; // Use the full array for consistent deletion
+            
+            if (!confirm(`Are you sure you want to delete feedback from "${item.username}"?\n\nThis action cannot be undone.`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/delete-feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: item.username,
+                        feedback: item.feedback,
+                        created_at: item.created_at
+                    })
                 });
+                
+                if (response.ok) {
+                    alert('Feedback deleted successfully! ✅');
+                    loadFeedback(); // Reload the feedback list
+                } else {
+                    alert('Failed to delete feedback. Please try again.');
+                }
+            } catch (error) {
+                console.error('Error deleting feedback:', error);
+                alert('Network error. Please try again.');
             }
-
-            function Circle(pos, rad, color) {
-                this.pos = pos || null;
-                this.radius = rad || null;
-                this.color = color || null;
-
-                this.draw = function () {
-                    if (!this.active) return;
-                    ctx.beginPath();
-                    ctx.arc(this.pos.x, this.pos.y, this.radius, 0, 2 * Math.PI, false);
-                    ctx.fillStyle = `rgba(156,217,249,${this.active})`;
-                    ctx.fill();
-                };
+        }
+        
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const feedback = document.getElementById('feedback').value.trim();
+            
+            if (!username || !feedback) {
+                alert('Please fill in all fields!');
+                return;
             }
-
-            // Utility
-            function getDistance(p1, p2) {
-                return Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2);
+            
+            const submitBtn = e.target.querySelector('button');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+            submitBtn.disabled = true;
+            
+            try {
+                const response = await fetch('/submit-feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: username, feedback: feedback })
+                });
+                
+                if (response.ok) {
+                    alert('Thank you for your feedback! 🎉');
+                    e.target.reset();
+                    loadFeedback();
+                } else {
+                    alert('Something went wrong. Please try again!');
+                }
+            } catch {
+                alert('Network error. Please try again!');
+            } finally {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
             }
-        })();
+        }
     </script>
 </body>
 </html>
