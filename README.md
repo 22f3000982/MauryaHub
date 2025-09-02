@@ -223,3 +223,5 @@ This project is created for educational purposes and is not officially affiliate
 **Built with ❤️ for education**
 
 *Last updated: 2 September 2025*
+
+Copy-Item "last.db" -Destination "database.db" -Force
