@@ -21,6 +21,9 @@
             /* New animation colors from the provided code */
             --node-color: #2ec2fa;
             --node-glow: #45aaff;
+
+            /* New glow color */
+            --blue-laser-glow: 0 0 15px 5px rgba(0, 191, 255, 0.7);
         }
 
         html, body {
@@ -169,11 +172,12 @@
             text-align: center;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             color: var(--text-light);
+            border: 2px solid transparent;
         }
 
         .feature-card:hover {
             transform: translateY(-8px);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            box-shadow: var(--blue-laser-glow);
         }
 
         .feature-icon {
@@ -196,10 +200,14 @@
 
         /* Testimonials Section */
         .testimonials-section {
-            background: var(--bg-medium);
+            /* Set background to transparent to see the canvas effect */
+            background: transparent;
             padding: 5rem 0;
             text-align: center;
             color: var(--text-light);
+            /* Important to keep position relative and z-index for content layering */
+            position: relative; 
+            z-index: 1;
         }
 
         .section-heading {
@@ -425,7 +433,7 @@
             padding: 0;
             display: flex;
             justify-content: center;
-            gap: 1.5rem;
+            gap: 2.5rem;
             margin-bottom: 1.5rem;
         }
 
