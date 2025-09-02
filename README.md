@@ -222,4 +222,4 @@ This project is created for educational purposes and is not officially affiliate
 
 **Built with ❤️ for education**
 
-*Last updated: September 2025*
+*Last updated: 2 September 2025*
