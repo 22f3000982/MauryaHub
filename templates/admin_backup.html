@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Backup & Restore</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #232946;
+            color: #eebbc3;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: #121629;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+            padding: 32px;
+        }
+        h1 {
+            color: #eebbc3;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .status {
+            background: #393e46;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 8px 0;
+            border-radius: 6px;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #eebbc3;
+            color: #232946;
+            transition: background 0.2s;
+        }
+        .btn:hover {
+            background: #f6c7b6;
+        }
+        .instructions {
+            margin-top: 32px;
+            background: #393e46;
+            border-radius: 8px;
+            padding: 16px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+        input[type="file"] {
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" style="box-shadow: 0 8px 32px rgba(44,46,68,0.25); background: linear-gradient(135deg, #232946 0%, #393e46 100%); border: 1px solid #393e46;">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, msg in messages %}
+            {% set bg_color = '#4CAF50' if category == 'success' else '#dc2626' %}
+            <div class="toast" style="background: {{ bg_color }}; color: #fff; margin-bottom: 16px; padding: 12px; border-radius: 8px; text-align: center;">
+                {{ msg }}
+            </div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+        <h1 style="font-size:2.2rem; font-weight:800; color:#eebbc3; letter-spacing:1px; margin-bottom:32px; text-shadow:0 2px 16px #232946;">Ultra Simple Backup & Restore</h1>
+        <form action="{{ url_for('course_view') }}" method="get" style="margin-bottom: 16px; text-align:right;">
+            <button class="btn" type="submit" style="background:#eebbc3; color:#232946; font-weight:700; border-radius:8px; box-shadow:0 2px 8px #2329461a;">⬅️ Back to Courses</button>
+        </form>
+        <div class="status" style="background:#232946; border:1px solid #eebbc3; color:#eebbc3; margin-bottom:32px; box-shadow:0 2px 8px #2329461a;">
+            <strong style="font-size:1.1rem; color:#eebbc3;">Backup Available:</strong><br>
+            <span style="font-size:1.05rem; font-weight:600; color:#f6c7b6;">{{ backup_file }}</span><br>
+            <span style="font-size:0.95rem; color:#eebbc3;">{{ backup_size }} bytes</span><br>
+            <span style="font-size:0.95rem; color:#eebbc3;">{{ backup_time }}</span>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:18px; margin-bottom:32px;">
+            <form method="post" action="{{ url_for('admin_backup') }}" style="margin-bottom:0;">
+                <button class="btn" name="action" value="backup" style="background:#eebbc3; color:#232946; font-weight:700; border-radius:8px; box-shadow:0 2px 8px #2329461a;">📥 Create Database Backup & Download</button>
+            </form>
+            <form method="post" action="{{ url_for('admin_backup') }}" enctype="multipart/form-data" style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                <label for="restoreFile" style="margin-bottom:0; color:#eebbc3; font-weight:600;">Restore from backup (.db):</label>
+                <input type="file" name="restoreFile" id="restoreFile" accept=".db" required style="background:#232946; color:#eebbc3; border:1px solid #eebbc3; border-radius:6px; padding:8px;">
+                <button class="btn" name="action" value="restore" style="background:#eebbc3; color:#232946; font-weight:700; border-radius:8px; box-shadow:0 2px 8px #2329461a;">🔄 Upload & Restore</button>
+            </form>
+            <form method="post" action="{{ url_for('admin_backup') }}" style="margin-bottom:0;">
+                <button class="btn" name="action" value="restore_existing" style="background:#eebbc3; color:#232946; font-weight:700; border-radius:8px; box-shadow:0 2px 8px #2329461a;">🗄️ Restore Existing Backup</button>
+            </form>
+        </div>
+        <div class="instructions" style="background:#232946; border:1px solid #eebbc3; color:#eebbc3; box-shadow:0 2px 8px #2329461a;">
+            <h3 style="color:#eebbc3; font-size:1.15rem; font-weight:700; margin-bottom:10px;">How It Works</h3>
+            <b style="color:#f6c7b6;">Backup:</b> <span style="color:#eebbc3;">Click "Create Database Backup" to instantly copy the database.</span><br>
+            <b style="color:#f6c7b6;">Restore:</b> <span style="color:#eebbc3;">Upload a backup file or restore the latest backup.</span><br>
+            <b style="color:#f6c7b6;">All times in IST (UTC+5:30)</b>
+        </div>
+    </div>
+</body>
+</html>
