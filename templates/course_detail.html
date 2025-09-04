@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ course_name }} - IITM BS Portal</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style2.css') }}">
-    <!-- Prevent favicon 404 -->
     <link rel="icon" href="data:,">
     <style>
         /* Global Reset */
@@ -48,6 +47,7 @@
             position: fixed;
             top: 0;
             height: 100%;
+            width: 160px; /* UPDATED: Explicit width set and reduced from 180px */
             z-index: 1000;
             background: linear-gradient(180deg, #1a173f 0%, #0f0c29 100%);
             padding: 15px;
@@ -149,7 +149,7 @@
 
         /* Main Content */
         .main-content {
-            margin-left: 180px;
+            margin-left: 160px; /* UPDATED: Reduced from 180px to match sidebar */
             min-height: 100vh;
             overflow-y: auto;
             background: linear-gradient(to bottom, #15113a, #302b63, #24243e);
@@ -532,10 +532,10 @@
         /* Responsive Design */
         @media (max-width: 1024px) {
             .sidebar {
-                width: 160px;
+                width: 140px; /* UPDATED: Reduced from 160px */
             }
             .main-content {
-                margin-left: 160px;
+                margin-left: 140px; /* UPDATED: Reduced from 160px */
             }
             .container h1 {
                 font-size: 1.6em;
@@ -551,7 +551,7 @@
         @media (max-width: 768px) {
             .sidebar {
                 width: 80%;
-                max-width: 260px;
+                max-width: 240px; /* UPDATED: Reduced from 260px */
                 transform: translateX(-100%);
             }
             .sidebar.active {
@@ -610,7 +610,7 @@
         @media (max-width: 480px) {
             .sidebar {
                 width: 90%;
-                max-width: 240px;
+                max-width: 220px; /* UPDATED: Reduced from 240px */
                 padding: 10px;
             }
             .sidebar h2 {
@@ -698,10 +698,8 @@
     </style>
 </head>
 <body>
-    <!-- Sidebar Toggle Button -->
     <button class="sidebar-toggle" id="sidebarToggle">☰</button>
 
-    <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
         <h2>Dashboard</h2>
         <a href="/" class="active"><span class="icon">🏠</span> Home</a>
@@ -710,7 +708,6 @@
         <a href="{{ url_for('about_admin') }}"><span class="icon">👨‍💼</span> About Admin</a>
         <a href="{{ url_for('settings') }}"><span class="icon">⚙️</span> Settings</a>
         {% if not session.get('admin_mode') %}
-            <!-- Admin Login Form in Sidebar -->
             <form class="admin-login-form" action="{{ url_for('admin_login') }}" method="post">
                 <input class="password-input" type="password" name="password" placeholder="Admin Password" required>
                 <button class="btn login-btn" type="submit">🔐 Admin Login</button>
@@ -722,7 +719,6 @@
         {% endif %}
     </div>
 
-    <!-- Main Content -->
     <div class="main-content">
         <div class="container">
             <h1 id="courseTitle">{{ course_name }} <span id="extraStuff" style="font-size:0.9rem;">
@@ -752,9 +748,7 @@
             </div>
 
             <div class="cards">
-                <!-- First Row: PYQs, Notes, Assignments -->
                 <div class="cards-row three-items">
-                    <!-- PYQs Card -->
                     <div class="card">
                         {% if admin_mode %}
                             <h2>PYQs</h2>
@@ -800,7 +794,6 @@
                         {% endif %}
                     </div>
 
-                    <!-- Notes Card -->
                     <div class="card">
                         {% if admin_mode %}
                             <h2>Notes</h2>
@@ -846,7 +839,6 @@
                         {% endif %}
                     </div>
 
-                    <!-- Assignments Card -->
                     <div class="card">
                         {% if admin_mode %}
                             <h2>Assignments</h2>
@@ -893,9 +885,7 @@
                     </div>
                 </div>
 
-                <!-- Second Row: Resources (centered) -->
                 <div class="cards-row one-item">
-                    <!-- Resources Card -->
                     <div class="card centered">
                         {% if admin_mode %}
                             <h2>Resources</h2>
