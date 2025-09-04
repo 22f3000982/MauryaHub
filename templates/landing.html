@@ -173,6 +173,9 @@
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             color: var(--text-light);
             border: 2px solid transparent;
+            /* Flex properties for button alignment */
+            display: flex;
+            flex-direction: column;
         }
 
         .feature-card:hover {
@@ -196,16 +199,49 @@
 
         .feature-description {
             color: var(--text-muted);
+            /* New properties for button alignment */
+            flex-grow: 1;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Glowing Button Styles */
+        .glowing-btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            margin-top: auto;
+            text-decoration: none;
+            font-weight: 700;
+            color: var(--bg-dark);
+            background-color: var(--accent);
+            border-radius: 9999px;
+            box-shadow: 0 0 5px var(--accent), 0 0 10px var(--accent);
+            transition: all 0.3s ease;
+            animation: glowing 2s infinite ease-in-out;
+        }
+
+        .glowing-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0 10px var(--accent), 0 0 25px var(--accent), 0 0 40px var(--accent);
+        }
+
+        @keyframes glowing {
+            0% {
+                box-shadow: 0 0 5px var(--accent);
+            }
+            50% {
+                box-shadow: 0 0 20px var(--accent), 0 0 30px var(--accent);
+            }
+            100% {
+                box-shadow: 0 0 5px var(--accent);
+            }
         }
 
         /* Testimonials Section */
         .testimonials-section {
-            /* Set background to transparent to see the canvas effect */
             background: transparent;
             padding: 5rem 0;
             text-align: center;
             color: var(--text-light);
-            /* Important to keep position relative and z-index for content layering */
             position: relative; 
             z-index: 1;
         }
@@ -591,11 +627,18 @@
                         <div class="feature-title">Organized Video Library</div>
                         <div class="feature-description">Find all your learning videos neatly sorted by subject and chapter. No clutter, just clarity!</div>
                     </div>
+                    
                     <div class="feature-card">
                         <i class="feature-icon fas fa-bolt"></i>
-                        <div class="feature-title">Instant Search</div>
-                        <div class="feature-description">Quickly jump to any question or topic with blazing-fast search and intelligent filters.</div>
+                        <div class="feature-title">CGPA TRACKER</div>
+                        <div class="feature-description">
+                            Calculate and monitor your academic progress with our easy-to-use CGPA tracker.
+                        </div>
+                        <a href="https://study-metrics.vercel.app/" class="glowing-btn" target="_blank" rel="noopener noreferrer">
+                            Track Your CGPA Here
+                        </a>
                     </div>
+                    
                     <div class="feature-card">
                         <i class="feature-icon fas fa-thumbs-up"></i>
                         <div class="feature-title">Upvoted Solutions</div>
