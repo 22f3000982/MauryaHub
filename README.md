@@ -54,7 +54,7 @@ A comprehensive web portal for managing academic resources like PYQs, notes, and
     python app.py
     ```
     -   Access the portal at `http://localhost:5000`.
-    -   Admin login is available on any course detail page.
+    -   Admin login is available on any course detail page. 
 
 ---
 
