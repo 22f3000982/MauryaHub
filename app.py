@@ -42,7 +42,8 @@ def get_db_connection():
     """Get database connection based on environment"""
     if DATABASE_URL and DATABASE_URL.startswith("postgres"):
         # Render PostgreSQL
-        conn = psycopg2.connect(DATABASE_URL, sslmode="require", cursor_factory=RealDictCursor)
+        conn = psycopg2.connect(DATABASE_URL, options='-c client_encoding=UTF8', sslmode="require", cursor_factory=RealDictCursor)
+
     else:
         # Local SQLite fallback
         conn = sqlite3.connect('database.db')
