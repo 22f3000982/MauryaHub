@@ -30,17 +30,25 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # Database configuration
 DATABASE_URL = os.environ.get('DATABASE_URL')
 
+import os
+import psycopg2
+import sqlite3
+from psycopg2.extras import RealDictCursor
+
+# Get environment variable once at startup
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
 def get_db_connection():
     """Get database connection based on environment"""
-    if DATABASE_URL:
-        DATABASE_URL = os.environ.get("DATABASE_URL")
+    if DATABASE_URL and DATABASE_URL.startswith("postgres"):
+        # Render PostgreSQL
         conn = psycopg2.connect(DATABASE_URL, sslmode="require", cursor_factory=RealDictCursor)
-        return conn
     else:
-        # SQLite for local development
+        # Local SQLite fallback
         conn = sqlite3.connect('database.db')
         conn.row_factory = sqlite3.Row
-        return conn
+    return conn
+
 
 def allowed_file(filename):
     return '.' in filename and \
