@@ -40,15 +40,22 @@ DATABASE_URL = os.environ.get("DATABASE_URL")
 
 def get_db_connection():
     """Get database connection based on environment"""
-    if DATABASE_URL and DATABASE_URL.startswith("postgres"):
-        # Render PostgreSQL
-        conn = psycopg2.connect(DATABASE_URL, options='-c client_encoding=UTF8', sslmode="require", cursor_factory=RealDictCursor)
+    DATABASE_URL = os.environ.get("DATABASE_URL")
 
+    if DATABASE_URL:
+        # Connect to Supabase PostgreSQL (Render deployment)
+        conn = psycopg2.connect(
+            DATABASE_URL,
+            sslmode="require",
+            cursor_factory=RealDictCursor
+        )
+        return conn
     else:
-        # Local SQLite fallback
+        # Fallback for local dev (SQLite)
         conn = sqlite3.connect('database.db')
         conn.row_factory = sqlite3.Row
-    return conn
+        return conn
+
 
 
 def allowed_file(filename):
