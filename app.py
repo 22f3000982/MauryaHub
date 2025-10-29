@@ -45,25 +45,15 @@ from psycopg2.extras import RealDictCursor
 
 def get_db_connection():
     """Get database connection based on environment"""
-    DATABASE_URL = os.environ.get("DATABASE_URL")
-
-    if DATABASE_URL:
-        # Connect to Supabase PostgreSQL
-        conn = psycopg2.connect(
-            DATABASE_URL,
-            sslmode="require",
-            cursor_factory=RealDictCursor
-        )
-
-        # Supabase pooler doesn't return encoding info — set it manually
-        conn.set_client_encoding('UTF8')
+    db_url = os.environ.get("DATABASE_URL")
+    if db_url:
+        conn = psycopg2.connect(db_url, sslmode="require", cursor_factory=RealDictCursor)
         return conn
-
     else:
-        # Fallback for local development
         conn = sqlite3.connect('database.db')
         conn.row_factory = sqlite3.Row
         return conn
+
 
 
 
