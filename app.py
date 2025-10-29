@@ -12,7 +12,9 @@ from psycopg2.extras import RealDictCursor
 import time
 import shutil
 from flask import send_file
-
+import psycopg2
+from psycopg2.extras import RealDictCursor
+import os
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'your_default_secret_key') # Recommended to use environment variable
@@ -31,8 +33,8 @@ DATABASE_URL = os.environ.get('DATABASE_URL')
 def get_db_connection():
     """Get database connection based on environment"""
     if DATABASE_URL:
-        # PostgreSQL for production (Supabase)
-        conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+        DATABASE_URL = os.environ.get("DATABASE_URL")
+        conn = psycopg2.connect(DATABASE_URL, sslmode="require", cursor_factory=RealDictCursor)
         return conn
     else:
         # SQLite for local development
