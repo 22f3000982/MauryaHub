@@ -47,9 +47,32 @@ def get_db_connection():
     """Get database connection based on environment"""
     db_url = os.environ.get("DATABASE_URL")
     if db_url:
-        conn = psycopg2.connect(db_url, sslmode="require", cursor_factory=RealDictCursor)
-        return conn
+        # PostgreSQL connection with proper error handling
+        try:
+            conn = psycopg2.connect(
+                db_url,
+                cursor_factory=RealDictCursor,
+                connect_timeout=10,
+                options='-c client_encoding=UTF8'
+            )
+            return conn
+        except psycopg2.OperationalError as e:
+            print(f"PostgreSQL connection error: {e}")
+            # Try to connect without pooler if direct connection fails
+            if '.pooler.supabase.com' in db_url:
+                # Try direct connection instead
+                direct_url = db_url.replace('.pooler.supabase.com:5432', '.supabase.co:5432')
+                print(f"Retrying with direct connection...")
+                conn = psycopg2.connect(
+                    direct_url,
+                    cursor_factory=RealDictCursor,
+                    connect_timeout=10,
+                    options='-c client_encoding=UTF8'
+                )
+                return conn
+            raise
     else:
+        # SQLite for local development
         conn = sqlite3.connect('database.db')
         conn.row_factory = sqlite3.Row
         return conn
