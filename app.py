@@ -24,14 +24,16 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 # Database configuration
 DATABASE_URL = os.environ.get('DATABASE_URL')
-if not DATABASE_URL:
+if not DATABASE_URL or DATABASE_URL.strip() == '':
     # Fallback for local development - you should set DATABASE_URL environment variable
-    print("ERROR: DATABASE_URL environment variable not set!")
+    print("ERROR: DATABASE_URL environment variable not set or empty!")
     print("Please set DATABASE_URL in your Render environment variables.")
     print("Using fallback connection string...")
     DATABASE_URL = "postgresql://postgres:India117767724@db.ncssqvmglximthdbinhm.supabase.co:5432/postgres"
 else:
     print("✓ DATABASE_URL environment variable found")
+    print(f"DATABASE_URL length: {len(DATABASE_URL)}")
+    print(f"DATABASE_URL starts with: {DATABASE_URL[:20]}...")  # Show first 20 chars safely
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -43,6 +45,9 @@ def get_db_connection():
         import socket
         from urllib.parse import urlparse
         
+        print(f"Attempting to connect to database...")
+        print(f"Raw DATABASE_URL: {DATABASE_URL[:50]}..." if len(DATABASE_URL) > 50 else f"Raw DATABASE_URL: {DATABASE_URL}")
+        
         # Parse the DATABASE_URL
         if DATABASE_URL.startswith('postgres://'):
             # Fix for newer psycopg2 versions that don't support postgres://
@@ -50,22 +55,26 @@ def get_db_connection():
         else:
             url = DATABASE_URL
         
-        print(f"Attempting to connect to database...")
+        print(f"Parsed URL: {url[:50]}..." if len(url) > 50 else f"Parsed URL: {url}")
         
         # Parse connection details
         parsed = urlparse(url)
         host = parsed.hostname
         port = parsed.port or 5432
-        dbname = parsed.path.lstrip('/')
+        dbname = parsed.path.lstrip('/') if parsed.path else 'postgres'
         username = parsed.username
         password = parsed.password
         
-        print(f"Original host: {host}")
+        print(f"Parsed details - Host: {host}, Port: {port}, DB: {dbname}, User: {username}")
+        
+        # Validate required fields
+        if not host or not username or not password:
+            raise ValueError(f"Missing required connection parameters - Host: {host}, User: {username}, Password: {'***' if password else None}")
         
         # Force IPv4 DNS lookup to avoid IPv6 issues on Render
         try:
             ipv4_host = socket.gethostbyname(host)
-            print(f"Resolved to IPv4: {ipv4_host}")
+            print(f"Resolved {host} to IPv4: {ipv4_host}")
         except Exception as dns_error:
             print(f"DNS resolution failed: {dns_error}, using original host")
             ipv4_host = host
