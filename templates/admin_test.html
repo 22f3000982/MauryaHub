@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Test - MauryaHub</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 600px; 
+            margin: 50px auto; 
+            padding: 20px;
+            background: #1a1a1a;
+            color: white;
+        }
+        .form-group { 
+            margin: 20px 0; 
+        }
+        input { 
+            padding: 10px; 
+            margin: 10px; 
+            border: 1px solid #444;
+            background: #333;
+            color: white;
+            border-radius: 5px;
+        }
+        button { 
+            padding: 10px 20px; 
+            background: #1e90ff; 
+            color: white; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer;
+        }
+        button:hover { 
+            background: #0080ff; 
+        }
+        .links { 
+            margin-top: 30px; 
+        }
+        .links a { 
+            color: #1e90ff; 
+            text-decoration: none; 
+            margin-right: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔐 Admin Login Test</h1>
+    
+    <div class="form-group">
+        <h3>Step 1: Login as Admin</h3>
+        <form action="/admin_login" method="POST">
+            <input type="password" name="password" placeholder="Enter admin password (4129)" required>
+            <button type="submit">Login as Admin</button>
+        </form>
+    </div>
+    
+    <div class="form-group">
+        <h3>Step 2: Access Landing Page</h3>
+        <p>After logging in, you'll see:</p>
+        <ul>
+            <li>✅ "ADMIN MODE" badge next to "What Students Say"</li>
+            <li>🗑️ Delete buttons on each feedback card (red trash icons)</li>
+            <li>🔒 Delete confirmation dialog when clicking trash</li>
+        </ul>
+    </div>
+    
+    <div class="links">
+        <a href="/">🏠 Go to Landing Page</a>
+        <a href="/course_view">📚 Go to Course View</a>
+        <a href="/admin_logout">🚪 Logout</a>
+    </div>
+    
+    <div class="form-group">
+        <h3>📋 Admin Delete Feedback Steps:</h3>
+        <ol>
+            <li><strong>Login:</strong> Use password "4129" above</li>
+            <li><strong>Visit Landing:</strong> Click "Go to Landing Page"</li>
+            <li><strong>Locate Feedback:</strong> Scroll to "What Students Say" section</li>
+            <li><strong>See Admin Badge:</strong> Red "ADMIN MODE" badge visible</li>
+            <li><strong>Find Delete Button:</strong> Red trash icon on top-right of each feedback card</li>
+            <li><strong>Click Delete:</strong> Click the trash icon</li>
+            <li><strong>Confirm:</strong> Confirm deletion in the popup dialog</li>
+            <li><strong>Success:</strong> Feedback is removed and page refreshes</li>
+        </ol>
+    </div>
+    
+    <div class="form-group">
+        <h3>🛡️ Security Features:</h3>
+        <ul>
+            <li>Delete buttons only visible to admins</li>
+            <li>Confirmation dialog prevents accidental deletions</li>
+            <li>Server-side validation of admin session</li>
+            <li>Automatic database backup after deletion</li>
+        </ul>
+    </div>
+</body>
+</html>
