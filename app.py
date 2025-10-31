@@ -25,8 +25,12 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if not DATABASE_URL:
     # Fallback for local development - you should set DATABASE_URL environment variable
-    print("WARNING: DATABASE_URL not set! Please set your Supabase connection string.")
+    print("ERROR: DATABASE_URL environment variable not set!")
+    print("Please set DATABASE_URL in your Render environment variables.")
+    print("Using fallback connection string...")
     DATABASE_URL = "postgresql://postgres:India117767724@db.ncssqvmglximthdbinhm.supabase.co:5432/postgres"
+else:
+    print("✓ DATABASE_URL environment variable found")
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -41,11 +45,14 @@ def get_db_connection():
             url = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
         else:
             url = DATABASE_URL
-            
+        
+        print(f"Attempting to connect to database...")
         conn = psycopg2.connect(url)
+        print("✓ Database connection successful!")
         return conn
     except Exception as e:
-        print(f"Database connection error: {e}")
+        print(f"❌ Database connection error: {e}")
+        print(f"Connection URL (masked): postgresql://postgres:****@{url.split('@')[1] if '@' in url else 'unknown'}")
         return None
 
 # Create tables if they don't exist
