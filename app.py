@@ -185,7 +185,8 @@ def backup_db():
                         if value is None:
                             values.append('NULL')
                         elif isinstance(value, str):
-                            values.append(f"'{value.replace('\'', '\'\'')}'")
+                            escaped_value = value.replace("'", "''")
+                            values.append(f"'{escaped_value}'")
                         else:
                             values.append(str(value))
                     
