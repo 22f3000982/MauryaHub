@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import psycopg2
 import psycopg2.extras
 import os
+import socket
 import subprocess
 from werkzeug.utils import secure_filename
 import smtplib
@@ -37,8 +38,11 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def get_db_connection():
-    """Get database connection with proper error handling"""
+    """Get database connection with IPv4 + SSL fix for Render deployment"""
     try:
+        import socket
+        from urllib.parse import urlparse
+        
         # Parse the DATABASE_URL
         if DATABASE_URL.startswith('postgres://'):
             # Fix for newer psycopg2 versions that don't support postgres://
@@ -47,12 +51,41 @@ def get_db_connection():
             url = DATABASE_URL
         
         print(f"Attempting to connect to database...")
-        conn = psycopg2.connect(url)
+        
+        # Parse connection details
+        parsed = urlparse(url)
+        host = parsed.hostname
+        port = parsed.port or 5432
+        dbname = parsed.path.lstrip('/')
+        username = parsed.username
+        password = parsed.password
+        
+        print(f"Original host: {host}")
+        
+        # Force IPv4 DNS lookup to avoid IPv6 issues on Render
+        try:
+            ipv4_host = socket.gethostbyname(host)
+            print(f"Resolved to IPv4: {ipv4_host}")
+        except Exception as dns_error:
+            print(f"DNS resolution failed: {dns_error}, using original host")
+            ipv4_host = host
+        
+        # Connect with explicit parameters and SSL
+        conn = psycopg2.connect(
+            host=ipv4_host,
+            port=port,
+            dbname=dbname,
+            user=username,
+            password=password,
+            sslmode='require'  # Force SSL connection
+        )
+        
         print("✓ Database connection successful!")
         return conn
+        
     except Exception as e:
         print(f"❌ Database connection error: {e}")
-        print(f"Connection URL (masked): postgresql://postgres:****@{url.split('@')[1] if '@' in url else 'unknown'}")
+        print(f"Connection details - Host: {host if 'host' in locals() else 'unknown'}, Port: {port if 'port' in locals() else 'unknown'}")
         return None
 
 # Create tables if they don't exist
