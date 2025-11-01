@@ -751,23 +751,23 @@
                 <div class="cards-row three-items">
                     <div class="card">
                         {% if admin_mode %}
-                            <h2>PYQs</h2>
+                            <h2>Quiz-1</h2>
                         {% endif %}
-                        {% if pyqs %}
+                        {% if quiz1 %}
                             <ul class="item-list">
-                                {% for pyq in pyqs %}
+                                {% for quiz1_item in quiz1 %}
                                     <li>
                                         {% if admin_mode %}
                                             <div class="reorder-buttons">
-                                                <button class="reorder-btn" onclick="moveItem('pyqs', {{ pyq[0] }}, 'up')" title="Move Up">▲</button>
-                                                <button class="reorder-btn" onclick="moveItem('pyqs', {{ pyq[0] }}, 'down')" title="Move Down">▼</button>
+                                                <button class="reorder-btn" onclick="moveItem('quiz1', {{ quiz1_item[0] }}, 'up')" title="Move Up">▲</button>
+                                                <button class="reorder-btn" onclick="moveItem('quiz1', {{ quiz1_item[0] }}, 'down')" title="Move Down">▼</button>
                                             </div>
                                         {% endif %}
-                                        <span class="item-name">{{ pyq[1] }}</span>
-                                        {% if pyq[2] %}
-                                            <a href="{{ url_for('increment_watch', pyq_id=pyq[0]) }}" target="_blank" class="watch-link">
+                                        <span class="item-name">{{ quiz1_item[1] }}</span>
+                                        {% if quiz1_item[2] %}
+                                            <a href="{{ url_for('increment_watch_quiz1', quiz1_id=quiz1_item[0]) }}" target="_blank" class="watch-link">
                                                 {% if admin_mode %}
-                                                    <span class="eye-icon">👁️</span> ({{ pyq[3] }})
+                                                    <span class="eye-icon">👁️</span> ({{ quiz1_item[3] }})
                                                 {% else %}
                                                     ▶️ Watch
                                                 {% endif %}
@@ -777,8 +777,8 @@
                                         {% endif %}
                                         {% if admin_mode %}
                                             <div class="admin-links">
-                                                <a href="{{ url_for('admin_edit_item', item_type='pyqs', item_id=pyq[0], course_id=course_id) }}">Edit</a> |
-                                                <a href="{{ url_for('admin_delete_item', item_type='pyqs', course_id=course_id, item_id=pyq[0]) }}">Delete</a>
+                                                <a href="{{ url_for('admin_edit_item', item_type='quiz1', item_id=quiz1_item[0], course_id=course_id) }}">Edit</a> |
+                                                <a href="{{ url_for('admin_delete_item', item_type='quiz1', course_id=course_id, item_id=quiz1_item[0]) }}">Delete</a>
                                             </div>
                                         {% endif %}
                                     </li>
@@ -789,30 +789,30 @@
                         {% endif %}
                         {% if admin_mode %}
                             <div class="add-btn-container">
-                                <a href="{{ url_for('admin_add_item', item_type='pyqs', course_id=course_id) }}" class="circular-add-btn" title="Add PYQ">+</a>
+                                <a href="{{ url_for('admin_add_item', item_type='quiz1', course_id=course_id) }}" class="circular-add-btn" title="Add Quiz-1">+</a>
                             </div>
                         {% endif %}
                     </div>
 
                     <div class="card">
                         {% if admin_mode %}
-                            <h2>Notes</h2>
+                            <h2>Quiz-2</h2>
                         {% endif %}
-                        {% if notes %}
+                        {% if quiz2 %}
                             <ul class="item-list">
-                                {% for note in notes %}
+                                {% for quiz2_item in quiz2 %}
                                     <li>
                                         {% if admin_mode %}
                                             <div class="reorder-buttons">
-                                                <button class="reorder-btn" onclick="moveItem('notes', {{ note[0] }}, 'up')" title="Move Up">▲</button>
-                                                <button class="reorder-btn" onclick="moveItem('notes', {{ note[0] }}, 'down')" title="Move Down">▼</button>
+                                                <button class="reorder-btn" onclick="moveItem('quiz2', {{ quiz2_item[0] }}, 'up')" title="Move Up">▲</button>
+                                                <button class="reorder-btn" onclick="moveItem('quiz2', {{ quiz2_item[0] }}, 'down')" title="Move Down">▼</button>
                                             </div>
                                         {% endif %}
-                                        <span class="item-name">{{ note[1] }}</span>
-                                        {% if note[2] %}
-                                            <a href="{{ url_for('increment_watch_note', note_id=note[0]) }}" target="_blank" class="watch-link">
+                                        <span class="item-name">{{ quiz2_item[1] }}</span>
+                                        {% if quiz2_item[2] %}
+                                            <a href="{{ url_for('increment_watch_quiz2', quiz2_id=quiz2_item[0]) }}" target="_blank" class="watch-link">
                                                 {% if admin_mode %}
-                                                    <span class="eye-icon">👁️</span> ({{ note[3]|default(0) }})
+                                                    <span class="eye-icon">👁️</span> ({{ quiz2_item[3]|default(0) }})
                                                 {% else %}
                                                     ▶️ Watch
                                                 {% endif %}
@@ -822,8 +822,8 @@
                                         {% endif %}
                                         {% if admin_mode %}
                                             <div class="admin-links">
-                                                <a href="{{ url_for('admin_edit_item', item_type='notes', item_id=note[0], course_id=course_id) }}">Edit</a> |
-                                                <a href="{{ url_for('admin_delete_item', item_type='notes', course_id=course_id, item_id=note[0]) }}">Delete</a>
+                                                <a href="{{ url_for('admin_edit_item', item_type='quiz2', item_id=quiz2_item[0], course_id=course_id) }}">Edit</a> |
+                                                <a href="{{ url_for('admin_delete_item', item_type='quiz2', course_id=course_id, item_id=quiz2_item[0]) }}">Delete</a>
                                             </div>
                                         {% endif %}
                                     </li>
@@ -834,30 +834,30 @@
                         {% endif %}
                         {% if admin_mode %}
                             <div class="add-btn-container">
-                                <a href="{{ url_for('admin_add_item', item_type='notes', course_id=course_id) }}" class="circular-add-btn" title="Add Note">+</a>
+                                <a href="{{ url_for('admin_add_item', item_type='quiz2', course_id=course_id) }}" class="circular-add-btn" title="Add Quiz-2">+</a>
                             </div>
                         {% endif %}
                     </div>
 
                     <div class="card">
                         {% if admin_mode %}
-                            <h2>Assignments</h2>
+                            <h2>End Term</h2>
                         {% endif %}
-                        {% if assignments %}
+                        {% if endterm %}
                             <ul class="item-list">
-                                {% for assignment in assignments %}
+                                {% for endterm_item in endterm %}
                                     <li>
                                         {% if admin_mode %}
                                             <div class="reorder-buttons">
-                                                <button class="reorder-btn" onclick="moveItem('assignments', {{ assignment[0] }}, 'up')" title="Move Up">▲</button>
-                                                <button class="reorder-btn" onclick="moveItem('assignments', {{ assignment[0] }}, 'down')" title="Move Down">▼</button>
+                                                <button class="reorder-btn" onclick="moveItem('endterm', {{ endterm_item[0] }}, 'up')" title="Move Up">▲</button>
+                                                <button class="reorder-btn" onclick="moveItem('endterm', {{ endterm_item[0] }}, 'down')" title="Move Down">▼</button>
                                             </div>
                                         {% endif %}
-                                        <span class="item-name">{{ assignment[1] }}</span>
-                                        {% if assignment[2] %}
-                                            <a href="{{ url_for('increment_watch_assignment', assignment_id=assignment[0]) }}" target="_blank" class="watch-link">
+                                        <span class="item-name">{{ endterm_item[1] }}</span>
+                                        {% if endterm_item[2] %}
+                                            <a href="{{ url_for('increment_watch_endterm', endterm_id=endterm_item[0]) }}" target="_blank" class="watch-link">
                                                 {% if admin_mode %}
-                                                    <span class="eye-icon">👁️</span> ({{ assignment[3]|default(0) }})
+                                                    <span class="eye-icon">👁️</span> ({{ endterm_item[3]|default(0) }})
                                                 {% else %}
                                                     ▶️ Watch
                                                 {% endif %}
@@ -867,8 +867,8 @@
                                         {% endif %}
                                         {% if admin_mode %}
                                             <div class="admin-links">
-                                                <a href="{{ url_for('admin_edit_item', item_type='assignments', item_id=assignment[0], course_id=course_id) }}">Edit</a> |
-                                                <a href="{{ url_for('admin_delete_item', item_type='assignments', course_id=course_id, item_id=assignment[0]) }}">Delete</a>
+                                                <a href="{{ url_for('admin_edit_item', item_type='endterm', item_id=endterm_item[0], course_id=course_id) }}">Edit</a> |
+                                                <a href="{{ url_for('admin_delete_item', item_type='endterm', course_id=course_id, item_id=endterm_item[0]) }}">Delete</a>
                                             </div>
                                         {% endif %}
                                     </li>
@@ -879,7 +879,7 @@
                         {% endif %}
                         {% if admin_mode %}
                             <div class="add-btn-container">
-                                <a href="{{ url_for('admin_add_item', item_type='assignments', course_id=course_id) }}" class="circular-add-btn" title="Add Assignment">+</a>
+                                <a href="{{ url_for('admin_add_item', item_type='endterm', course_id=course_id) }}" class="circular-add-btn" title="Add End Term">+</a>
                             </div>
                         {% endif %}
                     </div>

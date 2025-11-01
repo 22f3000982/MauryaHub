@@ -31,7 +31,7 @@ if not DATABASE_URL or DATABASE_URL.strip() == '':
     print("Using fallback connection string...")
     DATABASE_URL = "postgresql://postgres:India117767724@db.ncssqvmglximthdbinhm.supabase.co:5432/postgres"
 else:
-    print("✓ DATABASE_URL environment variable found")
+    print("DATABASE_URL environment variable found")
     print(f"DATABASE_URL length: {len(DATABASE_URL)}")
     print(f"DATABASE_URL starts with: {DATABASE_URL[:20]}...")  # Show first 20 chars safely
 
@@ -89,11 +89,11 @@ def get_db_connection():
             sslmode='require'  # Force SSL connection
         )
         
-        print("✓ Database connection successful!")
+        print("Database connection successful!")
         return conn
         
     except Exception as e:
-        print(f"❌ Database connection error: {e}")
+        print(f"Database connection error: {e}")
         print(f"Connection details - Host: {host if 'host' in locals() else 'unknown'}, Port: {port if 'port' in locals() else 'unknown'}")
         return None
 
@@ -115,9 +115,9 @@ def init_db():
             )
         ''')
 
-        # Create 'pyqs' table
+        # Create 'quiz1' table
         cur.execute('''
-            CREATE TABLE IF NOT EXISTS pyqs (
+            CREATE TABLE IF NOT EXISTS quiz1 (
                 id SERIAL PRIMARY KEY,
                 course_id INTEGER NOT NULL,
                 name TEXT NOT NULL,
@@ -128,9 +128,9 @@ def init_db():
             )
         ''')
 
-        # Create 'notes' table
+        # Create 'quiz2' table
         cur.execute('''
-            CREATE TABLE IF NOT EXISTS notes (
+            CREATE TABLE IF NOT EXISTS quiz2 (
                 id SERIAL PRIMARY KEY,
                 course_id INTEGER NOT NULL,
                 name TEXT NOT NULL,
@@ -141,9 +141,9 @@ def init_db():
             )
         ''')
 
-        # Create 'assignments' table
+        # Create 'endterm' table
         cur.execute('''
-            CREATE TABLE IF NOT EXISTS assignments (
+            CREATE TABLE IF NOT EXISTS endterm (
                 id SERIAL PRIMARY KEY,
                 course_id INTEGER NOT NULL,
                 name TEXT NOT NULL,
@@ -214,7 +214,7 @@ def backup_db():
         backup_content.append("")
         
         # Backup each table
-        tables = ['courses', 'pyqs', 'notes', 'assignments', 'resources', 'extra_stuff', 'feedback']
+        tables = ['courses', 'quiz1', 'quiz2', 'endterm', 'resources', 'extra_stuff', 'feedback']
         
         for table in tables:
             cur.execute(f"SELECT * FROM {table}")
@@ -532,14 +532,14 @@ def course_detail(course_id):
     cur.execute('SELECT name FROM courses WHERE id=%s', (course_id,))
     course = cur.fetchone()
 
-    cur.execute('SELECT id, name, yt_link, watch_count FROM pyqs WHERE course_id=%s ORDER BY sort_order, id', (course_id,))
-    pyqs = cur.fetchall()
+    cur.execute('SELECT id, name, yt_link, watch_count FROM quiz1 WHERE course_id=%s ORDER BY sort_order, id', (course_id,))
+    quiz1 = cur.fetchall()
 
-    cur.execute('SELECT id, name, yt_link, watch_count FROM notes WHERE course_id=%s ORDER BY sort_order, id', (course_id,))
-    notes = cur.fetchall()
+    cur.execute('SELECT id, name, yt_link, watch_count FROM quiz2 WHERE course_id=%s ORDER BY sort_order, id', (course_id,))
+    quiz2 = cur.fetchall()
 
-    cur.execute('SELECT id, name, yt_link, watch_count FROM assignments WHERE course_id=%s ORDER BY sort_order, id', (course_id,))
-    assignments = cur.fetchall()
+    cur.execute('SELECT id, name, yt_link, watch_count FROM endterm WHERE course_id=%s ORDER BY sort_order, id', (course_id,))
+    endterm = cur.fetchall()
 
     cur.execute('SELECT id, name, yt_link, watch_count FROM resources WHERE course_id=%s ORDER BY sort_order, id', (course_id,))
     resources = cur.fetchall()
@@ -556,9 +556,9 @@ def course_detail(course_id):
         return render_template('course_detail.html',
                                course_id=course_id,
                                course_name=course[0],
-                               pyqs=pyqs,
-                               notes=notes,
-                               assignments=assignments,
+                               quiz1=quiz1,
+                               quiz2=quiz2,
+                               endterm=endterm,
                                resources=resources,
                                admin_mode=admin_mode,
                                extra_stuff=extra)
@@ -629,7 +629,7 @@ def admin_add_item(item_type, course_id):
         max_order = result[0] if result[0] is not None else -1
         next_order = max_order + 1
 
-        if item_type in ['pyqs', 'notes', 'assignments', 'resources']:
+        if item_type in ['quiz1', 'quiz2', 'endterm', 'resources']:
             cur.execute(f'INSERT INTO {item_type} (course_id, name, yt_link, sort_order) VALUES (%s, %s, %s, %s)', 
                        (course_id, item_name, yt_link, next_order))
 
@@ -642,16 +642,16 @@ def admin_add_item(item_type, course_id):
     return render_template('admin_add_pyq.html', course_id=course_id, item_type=item_type)
 
 # Watch Count Increment functions
-@app.route('/increment_watch/<int:pyq_id>')
-def increment_watch(pyq_id):
+@app.route('/increment_watch_quiz1/<int:quiz1_id>')
+def increment_watch_quiz1(quiz1_id):
     conn = get_db_connection()
     if not conn:
         return "Database connection failed"
         
     cur = conn.cursor()
-    cur.execute('UPDATE pyqs SET watch_count = watch_count + 1 WHERE id = %s', (pyq_id,))
+    cur.execute('UPDATE quiz1 SET watch_count = watch_count + 1 WHERE id = %s', (quiz1_id,))
     conn.commit()
-    cur.execute('SELECT yt_link FROM pyqs WHERE id = %s', (pyq_id,))
+    cur.execute('SELECT yt_link FROM quiz1 WHERE id = %s', (quiz1_id,))
     link = cur.fetchone()
     cur.close()
     conn.close()
@@ -661,16 +661,16 @@ def increment_watch(pyq_id):
     else:
         return "Link not found"
 
-@app.route('/increment_watch_note/<int:note_id>')
-def increment_watch_note(note_id):
+@app.route('/increment_watch_quiz2/<int:quiz2_id>')
+def increment_watch_quiz2(quiz2_id):
     conn = get_db_connection()
     if not conn:
         return "Database connection failed"
         
     cur = conn.cursor()
-    cur.execute('UPDATE notes SET watch_count = watch_count + 1 WHERE id = %s', (note_id,))
+    cur.execute('UPDATE quiz2 SET watch_count = watch_count + 1 WHERE id = %s', (quiz2_id,))
     conn.commit()
-    cur.execute('SELECT yt_link FROM notes WHERE id = %s', (note_id,))
+    cur.execute('SELECT yt_link FROM quiz2 WHERE id = %s', (quiz2_id,))
     link = cur.fetchone()
     cur.close()
     conn.close()
@@ -680,16 +680,16 @@ def increment_watch_note(note_id):
     else:
         return "Link not found"
 
-@app.route('/increment_watch_assignment/<int:assignment_id>')
-def increment_watch_assignment(assignment_id):
+@app.route('/increment_watch_endterm/<int:endterm_id>')
+def increment_watch_endterm(endterm_id):
     conn = get_db_connection()
     if not conn:
         return "Database connection failed"
         
     cur = conn.cursor()
-    cur.execute('UPDATE assignments SET watch_count = watch_count + 1 WHERE id = %s', (assignment_id,))
+    cur.execute('UPDATE endterm SET watch_count = watch_count + 1 WHERE id = %s', (endterm_id,))
     conn.commit()
-    cur.execute('SELECT yt_link FROM assignments WHERE id = %s', (assignment_id,))
+    cur.execute('SELECT yt_link FROM endterm WHERE id = %s', (endterm_id,))
     link = cur.fetchone()
     cur.close()
     conn.close()
@@ -729,7 +729,7 @@ def move_item():
     direction = request.form.get('direction')
     course_id = int(request.form.get('course_id'))
     
-    if item_type not in ['pyqs', 'notes', 'assignments', 'resources']:
+    if item_type not in ['quiz1', 'quiz2', 'endterm', 'resources']:
         return {"success": False, "error": "Invalid item type"}, 400
     
     conn = get_db_connection()
@@ -795,7 +795,7 @@ def admin_edit_item(item_type, course_id, item_id):
         new_title = request.form['title']
         new_link = request.form['link']
 
-        if item_type in ['pyqs', 'notes', 'assignments', 'resources']:
+        if item_type in ['quiz1', 'quiz2', 'endterm', 'resources']:
             cur.execute(f'UPDATE {item_type} SET name=%s, yt_link=%s WHERE id=%s', (new_title, new_link, item_id))
 
         conn.commit()
@@ -805,7 +805,7 @@ def admin_edit_item(item_type, course_id, item_id):
         return redirect(url_for('course_detail', course_id=course_id))
 
     # Fetch existing item
-    if item_type in ['pyqs', 'notes', 'assignments', 'resources']:
+    if item_type in ['quiz1', 'quiz2', 'endterm', 'resources']:
         cur.execute(f'SELECT name, yt_link FROM {item_type} WHERE id=%s', (item_id,))
     
     item = cur.fetchone()
@@ -835,7 +835,7 @@ def admin_delete_item(item_type, course_id, item_id):
             
         cur = conn.cursor()
         
-        if item_type in ['pyqs', 'notes', 'assignments', 'resources']:
+        if item_type in ['quiz1', 'quiz2', 'endterm', 'resources']:
             cur.execute(f'SELECT name FROM {item_type} WHERE id=%s', (item_id,))
         else:
             flash('Invalid item type.', 'error')
@@ -865,7 +865,7 @@ def admin_delete_item(item_type, course_id, item_id):
         
     cur = conn.cursor()
 
-    if item_type in ['pyqs', 'notes', 'assignments', 'resources']:
+    if item_type in ['quiz1', 'quiz2', 'endterm', 'resources']:
         cur.execute(f'DELETE FROM {item_type} WHERE id=%s', (item_id,))
     else:
         flash('Invalid item type.', 'error')
