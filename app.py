@@ -255,10 +255,52 @@ def backup_db():
             cur.close()
             conn.close()
 
+# Function to get recently added content
+def get_recent_content():
+    conn = get_db_connection()
+    if not conn:
+        return []
+    
+    cur = conn.cursor()
+    recent = []
+    
+    # Get recent items from each table
+    for table, display_name in [('quiz1', 'Quiz-1'), ('quiz2', 'Quiz-2'), ('endterm', 'End Term')]:
+        try:
+            cur.execute(f'''
+                SELECT c.name, {table}.name, {table}.id, {table}.course_id, {table}.watch_count
+                FROM {table} 
+                JOIN courses c ON {table}.course_id = c.id 
+                WHERE {table}.yt_link IS NOT NULL AND {table}.yt_link != ''
+                ORDER BY {table}.id DESC 
+                LIMIT 3
+            ''')
+            items = cur.fetchall()
+            for item in items:
+                recent.append({
+                    'course': item[0],
+                    'name': item[1], 
+                    'type': display_name,
+                    'url': f'/course/{item[3]}',
+                    'views': item[4] or 0,
+                    'item_id': item[2]
+                })
+        except Exception as e:
+            print(f"Error fetching recent {table}: {e}")
+            continue
+    
+    cur.close()
+    conn.close()
+    
+    # Sort by item_id (most recent first) and return top 6
+    recent.sort(key=lambda x: x['item_id'], reverse=True)
+    return recent[:6]
+
 # Landing page route
 @app.route('/')
 def landing_page():
-    return render_template('landing.html')
+    recent_content = get_recent_content()
+    return render_template('landing.html', recent_content=recent_content)
 
 # Submit feedback route
 @app.route('/submit-feedback', methods=['POST'])
