@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ course_name }} - IITM BS Portal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style2.css') }}">
+    <link rel="icon" href="data:,">
+    <style>
+        /* Global Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scrollbar-width: thin;
+            scrollbar-color: #6b7281 #1f2937;
+        }
+
+        /* Custom Scrollbar */
+        *::-webkit-scrollbar {
+            width: 6px;
+        }
+        *::-webkit-scrollbar-track {
+            background: #1f2937;
+            border-radius: 3px;
+        }
+        *::-webkit-scrollbar-thumb {
+            background: #6b7280;
+            border-radius: 3px;
+            transition: background 0.3s ease;
+        }
+        *::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+
+        /* Body and HTML */
+        body, html {
+            background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
+            height: 100%;
+            overflow-y: auto;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #dae1eb;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            height: 100%;
+            width: 160px; /* UPDATED: Explicit width set and reduced from 180px */
+            z-index: 1000;
+            background: linear-gradient(180deg, #1a173f 0%, #0f0c29 100%);
+            padding: 15px;
+            color: #dae1eb;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar h2 {
+            margin: 0 0 15px;
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 8px;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            color: #a5b4fc;
+            text-decoration: none;
+            margin: 8px 0;
+            font-size: 0.95em;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: background 0.3s, color 0.3s, transform 0.2s;
+        }
+
+        .sidebar a:hover {
+            background: rgba(52, 152, 219, 0.1);
+            color: #ffffff;
+            transform: translateX(5px);
+        }
+
+        .sidebar a.active {
+            background: rgba(52, 152, 219, 0.2);
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .sidebar a .icon {
+            margin-right: 8px;
+            font-size: 1.1em;
+        }
+
+        /* Admin Login Form */
+        .admin-login-form {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            color: #ffffff;
+            font-size: 0.85rem;
+            box-sizing: border-box;
+        }
+
+        .password-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .password-input:focus {
+            outline: none;
+            border-color: #3498db;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 8px;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .login-btn:hover {
+            background: linear-gradient(45deg, #2980b9, #1f5f8b);
+            transform: translateY(-1px);
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 160px; /* UPDATED: Reduced from 180px to match sidebar */
+            min-height: 100vh;
+            overflow-y: auto;
+            background: linear-gradient(to bottom, #15113a, #302b63, #24243e);
+            padding: 15px;
+        }
+
+        .container {
+            padding: 15px;
+            text-align: center;
+        }
+
+        .container h1 {
+            color: #dae1eb;
+            margin: 0 0 15px;
+            font-size: 1.8em;
+        }
+
+        /* Search Input */
+        #searchInput {
+            width: 100%;
+            max-width: 400px;
+            padding: 8px;
+            margin: 8px 0 15px;
+            font-size: 0.9em;
+            border: 1px solid #888;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        #searchInput:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
+            outline: none;
+        }
+
+        /* Search and Button Container */
+        .search-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin: 8px auto 15px;
+            flex-wrap: wrap;
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .search-container #searchInput {
+            flex: 1;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .spacer {
+            width: 150px; /* Same approximate width as the button */
+        }
+
+        /* Share Experience Button */
+        .share-experience-btn {
+            display: inline-flex;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff !important;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(138, 43, 226, 0.6);
+            cursor: pointer;
+            box-shadow: 
+                0 2px 8px rgba(102, 126, 234, 0.3), 
+                0 0 20px rgba(118, 75, 162, 0.4),
+                0 0 0 2px rgba(138, 43, 226, 0.4),
+                0 0 25px rgba(138, 43, 226, 0.5),
+                0 0 40px rgba(147, 0, 211, 0.3);
+            animation: purple-laser-pulse 2s infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .share-experience-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(138, 43, 226, 0.3), transparent);
+            transition: left 0.5s;
+        }
+
+        .share-experience-btn::after {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            background: linear-gradient(45deg, 
+                rgba(138, 43, 226, 0.6), 
+                rgba(147, 0, 211, 0.4), 
+                rgba(138, 43, 226, 0.6), 
+                rgba(186, 85, 211, 0.3), 
+                rgba(138, 43, 226, 0.6));
+            background-size: 400% 400%;
+            border-radius: 12px;
+            z-index: -1;
+            opacity: 0.7;
+            animation: purple-laser-border 4s linear infinite;
+            filter: blur(2px);
+        }
+
+        .share-experience-btn:hover::before {
+            left: 100%;
+        }
+
+        .share-experience-btn:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            transform: translateY(-2px) scale(1.02);
+            border-color: rgba(138, 43, 226, 0.9);
+            box-shadow: 
+                0 4px 15px rgba(102, 126, 234, 0.5), 
+                0 0 30px rgba(118, 75, 162, 0.6),
+                0 0 0 3px rgba(138, 43, 226, 0.7),
+                0 0 35px rgba(138, 43, 226, 0.8),
+                0 0 60px rgba(147, 0, 211, 0.5),
+                0 0 80px rgba(138, 43, 226, 0.3);
+            animation: purple-laser-pulse 1s infinite;
+        }
+
+        .share-experience-btn:hover::after {
+            opacity: 1;
+            filter: blur(1px);
+        }
+
+        @keyframes purple-laser-pulse {
+            0%, 100% {
+                box-shadow: 
+                    0 2px 8px rgba(102, 126, 234, 0.3), 
+                    0 0 20px rgba(118, 75, 162, 0.4),
+                    0 0 0 2px rgba(138, 43, 226, 0.4),
+                    0 0 25px rgba(138, 43, 226, 0.5),
+                    0 0 40px rgba(147, 0, 211, 0.3);
+            }
+            50% {
+                box-shadow: 
+                    0 2px 12px rgba(102, 126, 234, 0.5), 
+                    0 0 30px rgba(118, 75, 162, 0.6),
+                    0 0 0 3px rgba(138, 43, 226, 0.7),
+                    0 0 35px rgba(138, 43, 226, 0.8),
+                    0 0 60px rgba(147, 0, 211, 0.5);
+            }
+        }
+
+        @keyframes purple-laser-border {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .share-experience-btn .icon {
+            margin-right: 6px;
+        }
+
+        /* Extra Stuff Button */
+        .extra-stuff-btn {
+            display: inline-flex;
+            align-items: center;
+            background-image: linear-gradient(75.1deg, rgba(34,126,34,1) 6%, rgba(99,226,17,1) 84.3%);
+            color: #fff !important;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 999px;
+            padding: 6px 18px 6px 12px;
+            margin-left: 8px;
+            font-size: 0.9rem;
+            border: none;
+            box-shadow: 0 2px 8px rgba(34,126,34,0.10);
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s, filter 0.2s;
+        }
+
+        .extra-stuff-btn:hover {
+            filter: brightness(1.08) saturate(1.2);
+            color: #eaffea !important;
+            text-decoration: underline;
+            box-shadow: 0 4px 16px rgba(99,226,17,0.18);
+        }
+
+        .extra-stuff-icon {
+            margin-right: 6px;
+            font-size: 1em;
+        }
+
+        /* Cards Layout */
+        .cards {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .cards-row {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            width: 100%;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .cards-row.three-items {
+            justify-content: center;
+        }
+
+        .cards-row.one-item {
+            justify-content: center;
+        }
+
+        .card {
+            background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
+            color: #c0dbed;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(245, 246, 246, 0.204);
+            flex: 1 1 100%;
+            max-width: 410px;
+        }
+
+        .card.centered {
+            max-width: 450px;
+        }
+
+        .card h2 {
+            margin: 0 0 8px;
+            font-size: 1.3em;
+        }
+
+        .item-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .item-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 0;
+            border-bottom: 1px solid #ddd;
+            flex-wrap: wrap;
+        }
+
+        .item-name {
+            flex-grow: 1;
+            text-align: left;
+            font-size: 1em;
+        }
+
+        .watch-link {
+            color: #3498db;
+            font-weight: bold;
+            text-decoration: none;
+            transition: transform 0.2s, color 0.2s;
+            white-space: nowrap;
+            margin-left: 8px;
+            font-size: 0.95em;
+        }
+
+        .watch-link:hover {
+            transform: scale(1.1);
+            color: #2980b9;
+        }
+
+        .eye-icon {
+            font-size: 0.95em;
+            margin-right: 4px;
+        }
+
+        .admin-links {
+            margin-left: 8px;
+            font-size: 0.95em;
+        }
+
+        .admin-links a {
+            color: #3498db;
+            text-decoration: none;
+            margin: 0 4px;
+        }
+
+        .admin-links a:hover {
+            color: #2980b9;
+        }
+
+        .no-items {
+            font-style: italic;
+            color: #c0dbed;
+            font-size: 0.85em;
+        }
+
+        .reorder-buttons {
+            display: flex;
+            flex-direction: column;
+            margin-right: 6px;
+            gap: 2px;
+        }
+
+        .reorder-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            width: 18px;
+            height: 14px;
+            font-size: 9px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .reorder-btn:hover {
+            background: #2980b9;
+        }
+
+        .circular-add-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 50%;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin: 8px auto;
+        }
+
+        .circular-add-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 16px rgba(52, 152, 219, 0.4);
+        }
+
+        .add-btn-container {
+            text-align: center;
+            padding: 8px 0;
+            border-top: 1px solid #444;
+            margin-top: 8px;
+        }
+
+        /* Sidebar Toggle Button */
+        .sidebar-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: #f3f4f6;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 8px;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1100;
+        }
+
+        .sidebar-toggle:hover {
+            color: #a5b4fc;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 140px; /* UPDATED: Reduced from 160px */
+            }
+            .main-content {
+                margin-left: 140px; /* UPDATED: Reduced from 160px */
+            }
+            .container h1 {
+                font-size: 1.6em;
+            }
+            .card {
+                max-width: 300px;
+            }
+            .card.centered {
+                max-width: 400px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 80%;
+                max-width: 240px; /* UPDATED: Reduced from 260px */
+                transform: translateX(-100%);
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 60px 10px 10px;
+            }
+            .sidebar-toggle {
+                display: block;
+            }
+            .container {
+                padding: 10px;
+            }
+            .cards-row {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+            .card {
+                width: 100%;
+                max-width: 100%;
+            }
+            .card.centered {
+                width: 100%;
+                max-width: 100%;
+            }
+            #searchInput {
+                width: 100%;
+                max-width: 100%;
+            }
+            .search-container {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+            .search-container #searchInput {
+                max-width: 100%;
+            }
+            .share-experience-btn {
+                width: 100%;
+                justify-content: center;
+                font-size: 0.85em;
+                padding: 10px 16px;
+            }
+            .spacer {
+                display: none;
+            }
+            .extra-stuff-btn {
+                padding: 5px 15px 5px 10px;
+                font-size: 0.85rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                width: 90%;
+                max-width: 220px; /* UPDATED: Reduced from 240px */
+                padding: 10px;
+            }
+            .sidebar h2 {
+                font-size: 1.3em;
+                margin-bottom: 10px;
+            }
+            .sidebar a {
+                font-size: 0.9em;
+                padding: 6px 10px;
+            }
+            .admin-login-form {
+                padding: 10px;
+            }
+            .password-input {
+                padding: 6px;
+                font-size: 0.8rem;
+            }
+            .login-btn {
+                padding: 6px;
+                font-size: 0.8rem;
+            }
+            .container h1 {
+                font-size: 1.4em;
+            }
+            .card h2 {
+                font-size: 1.2em;
+            }
+            .item-name {
+                font-size: 0.9em;
+            }
+            .watch-link {
+                font-size: 0.85em;
+            }
+            .admin-links {
+                font-size: 0.85em;
+            }
+            .reorder-btn {
+                width: 16px;
+                height: 12px;
+                font-size: 8px;
+            }
+            .circular-add-btn {
+                width: 28px;
+                height: 28px;
+                font-size: 16px;
+            }
+            .extra-stuff-btn {
+                padding: 4px 12px 4px 8px;
+                font-size: 0.8rem;
+            }
+            .extra-stuff-icon {
+                font-size: 0.9em;
+            }
+        }
+
+        /* Accessibility Enhancements */
+        a:focus, button:focus, input:focus {
+            outline: 3px solid #a5b4fc;
+            outline-offset: 2px;
+        }
+
+        /* Reduced Motion for Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                transition: none !important;
+                animation: none !important;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .sidebar, .sidebar-toggle {
+                display: none;
+            }
+            .main-content {
+                margin-left: 0;
+                padding: 0;
+            }
+            .card {
+                background: none;
+                border: 1px solid #000;
+                color: #000;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+
+    <div class="sidebar" id="sidebar">
+        <h2>Dashboard</h2>
+        <a href="/" class="active"><span class="icon">🏠</span> Home</a>
+        <a href="{{ url_for('course_view') }}"><span class="icon">📚</span> Courses</a>
+        <a href="{{ url_for('contact_us') }}"><span class="icon">📞</span> Contact Us</a>
+        <a href="{{ url_for('about_admin') }}"><span class="icon">👨‍💼</span> About Admin</a>
+        <a href="{{ url_for('settings') }}"><span class="icon">⚙️</span> Settings</a>
+        {% if not session.get('admin_mode') %}
+            <form class="admin-login-form" action="{{ url_for('admin_login') }}" method="post">
+                <input class="password-input" type="password" name="password" placeholder="Admin Password" required>
+                <button class="btn login-btn" type="submit">🔐 Admin Login</button>
+            </form>
+        {% else %}
+            <a href="{{ url_for('admin_add_course') }}"><span class="icon">➕</span> Add Course</a>
+            <a href="{{ url_for('admin_backup') }}"><span class="icon">�️</span> Backup & Restore</a>
+            <a href="{{ url_for('admin_logout') }}"><span class="icon">🚪</span> Exit Admin</a>
+        {% endif %}
+    </div>
+
+    <div class="main-content">
+        <div class="container">
+            <h1 id="courseTitle">{{ course_name }} <span id="extraStuff" style="font-size:0.9rem;">
+                {% if extra_stuff %}
+                    <a href="{{ extra_stuff[1] }}" target="_blank" class="extra-stuff-btn">
+                        <span class="extra-stuff-icon">🔗</span>{{ extra_stuff[0] }}
+                    </a>
+                {% endif %}
+            </span></h1>
+            {% if admin_mode %}
+            <div style="margin-bottom:15px;">
+                <button class="btn" type="button" onclick="showExtraForm()" style="background:#a5b4fc;color:#232946;padding:6px 12px;border-radius:6px;">Add Extra Stuff</button>
+                <form id="extraForm" style="display:none; margin-top:8px;" onsubmit="addExtraStuff(event)">
+                    <input type="text" name="extraName" placeholder="Name" style="padding:5px;border-radius:5px;border:1px solid #ccc;margin-right:5px;font-size:0.85rem;">
+                    <input type="text" name="extraLink" placeholder="Link" style="padding:5px;border-radius:5px;border:1px solid #ccc;margin-right:5px;font-size:0.85rem;">
+                    <button type="submit" class="btn" style="background:#06b6d4;color:#fff;padding:5px 10px;border-radius:5px;font-size:0.85rem;">Add</button>
+                </form>
+            </div>
+            {% endif %}
+            <div class="search-container">
+                <button class="share-experience-btn" onclick="window.open('{{ url_for('landing_page') }}#testimonials-section', '_blank')">
+                    <span class="icon">💬</span>
+                    Share Your Experience
+                </button>
+                <input type="text" id="searchInput" placeholder="Search items...">
+                <div class="spacer"></div>
+            </div>
+
+            <div class="cards">
+                <div class="cards-row three-items">
+                    <div class="card">
+                        {% if admin_mode %}
+                            <h2>Quiz-1</h2>
+                        {% endif %}
+                        {% if quiz1 %}
+                            <ul class="item-list">
+                                {% for quiz1_item in quiz1 %}
+                                    <li>
+                                        {% if admin_mode %}
+                                            <div class="reorder-buttons">
+                                                <button class="reorder-btn" onclick="moveItem('quiz1', {{ quiz1_item[0] }}, 'up')" title="Move Up">▲</button>
+                                                <button class="reorder-btn" onclick="moveItem('quiz1', {{ quiz1_item[0] }}, 'down')" title="Move Down">▼</button>
+                                            </div>
+                                        {% endif %}
+                                        <span class="item-name">{{ quiz1_item[1] }}</span>
+                                        {% if quiz1_item[2] %}
+                                            <a href="{{ url_for('increment_watch_quiz1', quiz1_id=quiz1_item[0]) }}" target="_blank" class="watch-link">
+                                                {% if admin_mode %}
+                                                    <span class="eye-icon">👁️</span> ({{ quiz1_item[3] }})
+                                                {% else %}
+                                                    ▶️ Watch
+                                                {% endif %}
+                                            </a>
+                                        {% else %}
+                                            <span class="no-items">Coming Soon</span>
+                                        {% endif %}
+                                        {% if admin_mode %}
+                                            <div class="admin-links">
+                                                <a href="{{ url_for('admin_edit_item', item_type='quiz1', item_id=quiz1_item[0], course_id=course_id) }}">Edit</a> |
+                                                <a href="{{ url_for('admin_delete_item', item_type='quiz1', course_id=course_id, item_id=quiz1_item[0]) }}">Delete</a>
+                                            </div>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="no-items">=== Coming Soon ===</p>
+                        {% endif %}
+                        {% if admin_mode %}
+                            <div class="add-btn-container">
+                                <a href="{{ url_for('admin_add_item', item_type='quiz1', course_id=course_id) }}" class="circular-add-btn" title="Add Quiz-1">+</a>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="card">
+                        {% if admin_mode %}
+                            <h2>Quiz-2</h2>
+                        {% endif %}
+                        {% if quiz2 %}
+                            <ul class="item-list">
+                                {% for quiz2_item in quiz2 %}
+                                    <li>
+                                        {% if admin_mode %}
+                                            <div class="reorder-buttons">
+                                                <button class="reorder-btn" onclick="moveItem('quiz2', {{ quiz2_item[0] }}, 'up')" title="Move Up">▲</button>
+                                                <button class="reorder-btn" onclick="moveItem('quiz2', {{ quiz2_item[0] }}, 'down')" title="Move Down">▼</button>
+                                            </div>
+                                        {% endif %}
+                                        <span class="item-name">{{ quiz2_item[1] }}</span>
+                                        {% if quiz2_item[2] %}
+                                            <a href="{{ url_for('increment_watch_quiz2', quiz2_id=quiz2_item[0]) }}" target="_blank" class="watch-link">
+                                                {% if admin_mode %}
+                                                    <span class="eye-icon">👁️</span> ({{ quiz2_item[3]|default(0) }})
+                                                {% else %}
+                                                    ▶️ Watch
+                                                {% endif %}
+                                            </a>
+                                        {% else %}
+                                            <span class="no-items">Coming Soon</span>
+                                        {% endif %}
+                                        {% if admin_mode %}
+                                            <div class="admin-links">
+                                                <a href="{{ url_for('admin_edit_item', item_type='quiz2', item_id=quiz2_item[0], course_id=course_id) }}">Edit</a> |
+                                                <a href="{{ url_for('admin_delete_item', item_type='quiz2', course_id=course_id, item_id=quiz2_item[0]) }}">Delete</a>
+                                            </div>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="no-items">=== Coming Soon ===</p>
+                        {% endif %}
+                        {% if admin_mode %}
+                            <div class="add-btn-container">
+                                <a href="{{ url_for('admin_add_item', item_type='quiz2', course_id=course_id) }}" class="circular-add-btn" title="Add Quiz-2">+</a>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="card">
+                        {% if admin_mode %}
+                            <h2>End Term</h2>
+                        {% endif %}
+                        {% if endterm %}
+                            <ul class="item-list">
+                                {% for endterm_item in endterm %}
+                                    <li>
+                                        {% if admin_mode %}
+                                            <div class="reorder-buttons">
+                                                <button class="reorder-btn" onclick="moveItem('endterm', {{ endterm_item[0] }}, 'up')" title="Move Up">▲</button>
+                                                <button class="reorder-btn" onclick="moveItem('endterm', {{ endterm_item[0] }}, 'down')" title="Move Down">▼</button>
+                                            </div>
+                                        {% endif %}
+                                        <span class="item-name">{{ endterm_item[1] }}</span>
+                                        {% if endterm_item[2] %}
+                                            <a href="{{ url_for('increment_watch_endterm', endterm_id=endterm_item[0]) }}" target="_blank" class="watch-link">
+                                                {% if admin_mode %}
+                                                    <span class="eye-icon">👁️</span> ({{ endterm_item[3]|default(0) }})
+                                                {% else %}
+                                                    ▶️ Watch
+                                                {% endif %}
+                                            </a>
+                                        {% else %}
+                                            <span class="no-items">Coming Soon</span>
+                                        {% endif %}
+                                        {% if admin_mode %}
+                                            <div class="admin-links">
+                                                <a href="{{ url_for('admin_edit_item', item_type='endterm', item_id=endterm_item[0], course_id=course_id) }}">Edit</a> |
+                                                <a href="{{ url_for('admin_delete_item', item_type='endterm', course_id=course_id, item_id=endterm_item[0]) }}">Delete</a>
+                                            </div>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="no-items">=== Coming Soon ===</p>
+                        {% endif %}
+                        {% if admin_mode %}
+                            <div class="add-btn-container">
+                                <a href="{{ url_for('admin_add_item', item_type='endterm', course_id=course_id) }}" class="circular-add-btn" title="Add End Term">+</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="cards-row one-item">
+                    <div class="card centered">
+                        {% if admin_mode %}
+                            <h2>Resources</h2>
+                        {% endif %}
+                        {% if resources %}
+                            <ul class="item-list">
+                                {% for resource in resources %}
+                                    <li>
+                                        {% if admin_mode %}
+                                            <div class="reorder-buttons">
+                                                <button class="reorder-btn" onclick="moveItem('resources', {{ resource[0] }}, 'up')" title="Move Up">▲</button>
+                                                <button class="reorder-btn" onclick="moveItem('resources', {{ resource[0] }}, 'down')" title="Move Down">▼</button>
+                                            </div>
+                                        {% endif %}
+                                        <span class="item-name">{{ resource[1] }}</span>
+                                        {% if resource[2] %}
+                                            <a href="{{ url_for('increment_watch_resource', resource_id=resource[0]) }}" target="_blank" class="watch-link">
+                                                {% if admin_mode %}
+                                                    <span class="eye-icon">👁️</span> ({{ resource[3]|default(0) }})
+                                                {% else %}
+                                                    ▶️ Watch
+                                                {% endif %}
+                                            </a>
+                                        {% else %}
+                                            <span class="no-items">Coming Soon</span>
+                                        {% endif %}
+                                        {% if admin_mode %}
+                                            <div class="admin-links">
+                                                <a href="{{ url_for('admin_edit_item', item_type='resources', item_id=resource[0], course_id=course_id) }}">Edit</a> |
+                                                <a href="{{ url_for('admin_delete_item', item_type='resources', course_id=course_id, item_id=resource[0]) }}">Delete</a>
+                                            </div>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p class="no-items">=== Coming Soon ===</p>
+                        {% endif %}
+                        {% if admin_mode %}
+                            <div class="add-btn-container">
+                                <a href="{{ url_for('admin_add_item', item_type='resources', course_id=course_id) }}" class="circular-add-btn" title="Add Resource">+</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sidebar Toggle Functionality
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (event) => {
+            if (window.innerWidth <= 768 && !sidebar.contains(event.target) && !sidebarToggle.contains(event.target)) {
+                sidebar.classList.remove('active');
+            }
+        });
+
+        // Search Functionality
+        document.getElementById('searchInput').addEventListener('input', function () {
+            const searchTerm = this.value.toLowerCase();
+            document.querySelectorAll('.item-list li').forEach(function (item) {
+                const text = item.querySelector('.item-name').textContent.toLowerCase();
+                item.style.display = text.includes(searchTerm) ? 'flex' : 'none';
+            });
+        });
+
+        // Extra Stuff Logic
+        function showExtraForm() {
+            document.getElementById('extraForm').style.display = 'block';
+        }
+
+        function addExtraStuff(event) {
+            event.preventDefault();
+            const form = event.target;
+            const name = form.extraName.value.trim();
+            const link = form.extraLink.value.trim();
+            if (name && link) {
+                fetch(`/course/{{ course_id }}/add_extra`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `name=${encodeURIComponent(name)}&link=${encodeURIComponent(link)}`
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        const stuffSpan = document.getElementById('extraStuff');
+                        stuffSpan.innerHTML = `<a href="${link}" target="_blank" class="extra-stuff-btn"><span class='extra-stuff-icon'>🔗</span>${name}</a>`;
+                        form.style.display = 'none';
+                    } else {
+                        alert('Failed to add extra stuff: ' + (data.error || 'Unknown error'));
+                    }
+                })
+                .catch(() => alert('Failed to add extra stuff.'));
+            } else {
+                alert('Please enter both name and link for extra stuff.');
+            }
+        }
+
+        // Move item up/down function
+        function moveItem(itemType, itemId, direction) {
+            fetch(`/admin/move_item`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `item_type=${itemType}&item_id=${itemId}&direction=${direction}&course_id={{ course_id }}`
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Failed to move item: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(() => alert('Failed to move item.'));
+        }
+    </script>
+</body>
+</html>

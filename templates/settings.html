@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Personal IITM BS Portal</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style2.css') }}">
+    <style>
+        .settings-container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            color: white;
+        }
+        .settings-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .settings-section {
+            background: rgba(255,255,255,0.1);
+            padding: 2rem;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 2rem;
+        }
+        .settings-section h3 {
+            color: #ffd700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+        .setting-info {
+            flex-grow: 1;
+        }
+        .setting-info h4 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.1rem;
+        }
+        .setting-info p {
+            margin: 0;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9rem;
+        }
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255,255,255,0.3);
+            transition: 0.4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+        input:checked + .slider {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+        }
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        .select-control {
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s;
+            text-decoration: none;
+            text-align: center;
+        }
+        .btn-primary {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #333;
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body style="background: linear-gradient(135deg, #74b9ff 0%, #0984e3 50%, #6c5ce7 100%); min-height: 100vh; margin: 0;">
+    <a href="{{ url_for('course_view') }}" class="back-btn">← Back to Dashboard</a>
+    
+    <div class="settings-container">
+        <div class="settings-header">
+            <h1>⚙️ Portal Settings</h1>
+            <p>Customize your personal IITM BS Portal experience</p>
+        </div>
+
+        <!-- Display Settings -->
+        <div class="settings-section">
+            <h3>🎨 Display & Theme</h3>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h4>Dark Mode</h4>
+                    <p>Switch to dark theme for better viewing in low light</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="darkMode">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h4>Theme Color</h4>
+                    <p>Choose your preferred color scheme</p>
+                </div>
+                <select class="select-control" id="themeColor">
+                    <option value="blue">Blue Gradient</option>
+                    <option value="purple">Purple Gradient</option>
+                    <option value="green">Green Gradient</option>
+                    <option value="orange">Orange Gradient</option>
+                </select>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h4>Animations</h4>
+                    <p>Enable smooth animations and transitions</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="animations" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Notification Settings -->
+        <div class="settings-section">
+            <h3>🔔 Notifications</h3>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h4>Push Notifications</h4>
+                    <p>Receive browser notifications for updates</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="pushNotifications">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h4>Email Notifications</h4>
+                    <p>Get notified via email for important updates</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="emailNotifications" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h4>Assignment Reminders</h4>
+                    <p>Receive reminders for upcoming assignment deadlines</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="assignmentReminders" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Privacy & Security -->
+        <div class="settings-section">
+            <h3>🔒 Privacy & Security</h3>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h4>Auto-logout</h4>
+                    <p>Automatically logout after inactivity</p>
+                </div>
+                <select class="select-control" id="autoLogout">
+                    <option value="30">30 minutes</option>
+                    <option value="60" selected>1 hour</option>
+                    <option value="120">2 hours</option>
+                    <option value="0">Never</option>
+                </select>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h4>Data Analytics</h4>
+                    <p>Help improve the portal by sharing usage data</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="analytics" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Performance Settings -->
+        <div class="settings-section">
+            <h3>⚡ Performance</h3>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h4>Auto-save</h4>
+                    <p>Automatically save your progress</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="autoSave" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h4>Cache Resources</h4>
+                    <p>Cache resources for faster loading</p>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="cacheResources" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h4>Items per Page</h4>
+                    <p>Number of items to display per page</p>
+                </div>
+                <select class="select-control" id="itemsPerPage">
+                    <option value="10">10 items</option>
+                    <option value="20" selected>20 items</option>
+                    <option value="50">50 items</option>
+                    <option value="100">100 items</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="saveSettings()">💾 Save Settings</button>
+            <button class="btn btn-secondary" onclick="resetSettings()">🔄 Reset to Default</button>
+        </div>
+    </div>
+
+    <script>
+        // Save settings to localStorage
+        function saveSettings() {
+            const settings = {
+                darkMode: document.getElementById('darkMode').checked,
+                themeColor: document.getElementById('themeColor').value,
+                animations: document.getElementById('animations').checked,
+                pushNotifications: document.getElementById('pushNotifications').checked,
+                emailNotifications: document.getElementById('emailNotifications').checked,
+                assignmentReminders: document.getElementById('assignmentReminders').checked,
+                autoLogout: document.getElementById('autoLogout').value,
+                analytics: document.getElementById('analytics').checked,
+                autoSave: document.getElementById('autoSave').checked,
+                cacheResources: document.getElementById('cacheResources').checked,
+                itemsPerPage: document.getElementById('itemsPerPage').value
+            };
+            
+            localStorage.setItem('portalSettings', JSON.stringify(settings));
+            alert('Settings saved successfully! 🎉');
+        }
+
+        // Reset settings to default
+        function resetSettings() {
+            if (confirm('Are you sure you want to reset all settings to default?')) {
+                localStorage.removeItem('portalSettings');
+                location.reload();
+                alert('Settings reset to default! 🔄');
+            }
+        }
+
+        // Load saved settings on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedSettings = localStorage.getItem('portalSettings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+                
+                document.getElementById('darkMode').checked = settings.darkMode || false;
+                document.getElementById('themeColor').value = settings.themeColor || 'blue';
+                document.getElementById('animations').checked = settings.animations !== false;
+                document.getElementById('pushNotifications').checked = settings.pushNotifications || false;
+                document.getElementById('emailNotifications').checked = settings.emailNotifications !== false;
+                document.getElementById('assignmentReminders').checked = settings.assignmentReminders !== false;
+                document.getElementById('autoLogout').value = settings.autoLogout || '60';
+                document.getElementById('analytics').checked = settings.analytics !== false;
+                document.getElementById('autoSave').checked = settings.autoSave !== false;
+                document.getElementById('cacheResources').checked = settings.cacheResources !== false;
+                document.getElementById('itemsPerPage').value = settings.itemsPerPage || '20';
+            }
+        });
+    </script>
+</body>
+</html>
