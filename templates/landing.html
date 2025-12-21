@@ -307,7 +307,7 @@
         
         .recent-footer {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
         }
         
@@ -854,10 +854,6 @@
                         <div class="recent-course">{{ item.course }}</div>
                         <div class="recent-name">{{ item.name }}</div>
                         <div class="recent-footer">
-                            <div class="recent-views">
-                                <i class="fas fa-eye"></i>
-                                <span>{{ item.views }} views</span>
-                            </div>
                             <a href="{{ item.url }}" class="view-btn">View Course</a>
                         </div>
                     </div>
