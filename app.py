@@ -590,7 +590,7 @@ def get_recent_content():
                             'item_id': item[2]
                         })
                 except Exception as e:
-                    print(f\"Error fetching recent {table} from SQLite: {e}\")
+                    print(f'Error fetching recent {table} from SQLite: {e}')
                     continue
             
             cur.close()
@@ -600,7 +600,7 @@ def get_recent_content():
             recent.sort(key=lambda x: x['item_id'], reverse=True)
             return recent[:6]
         except Exception as e:
-            print(f\"Error with SQLite recent content: {e}\")
+            print(f'Error with SQLite recent content: {e}')
             if local_conn:
                 local_conn.close()
     
@@ -634,7 +634,7 @@ def get_recent_content():
                     'item_id': item[2]
                 })
         except Exception as e:
-            print(f\"Error fetching recent {table}: {e}\")
+            print(f'Error fetching recent {table}: {e}')
             continue
     
     cur.close()
