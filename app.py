@@ -288,17 +288,17 @@ def get_course_data_hybrid(course_id, check_new_resources=False, is_admin=False)
         course = cur.fetchone()
         course_name = course[0] if course else None
         
-        # Get static data for all tables
-        cur.execute('SELECT id, course_id, name, yt_link, watch_count, sort_order FROM quiz1 WHERE course_id = ? ORDER BY sort_order, id', (course_id,))
+        # Get static data for all tables (including is_highlighted)
+        cur.execute('SELECT id, course_id, name, yt_link, watch_count, sort_order, COALESCE(is_highlighted, 0) FROM quiz1 WHERE course_id = ? ORDER BY sort_order, id', (course_id,))
         quiz1_static = cur.fetchall()
         
-        cur.execute('SELECT id, course_id, name, yt_link, watch_count, sort_order FROM quiz2 WHERE course_id = ? ORDER BY sort_order, id', (course_id,))
+        cur.execute('SELECT id, course_id, name, yt_link, watch_count, sort_order, COALESCE(is_highlighted, 0) FROM quiz2 WHERE course_id = ? ORDER BY sort_order, id', (course_id,))
         quiz2_static = cur.fetchall()
         
-        cur.execute('SELECT id, course_id, name, yt_link, watch_count, sort_order FROM endterm WHERE course_id = ? ORDER BY sort_order, id', (course_id,))
+        cur.execute('SELECT id, course_id, name, yt_link, watch_count, sort_order, COALESCE(is_highlighted, 0) FROM endterm WHERE course_id = ? ORDER BY sort_order, id', (course_id,))
         endterm_static = cur.fetchall()
         
-        cur.execute('SELECT id, course_id, name, yt_link, watch_count, sort_order FROM resources WHERE course_id = ? ORDER BY sort_order, id', (course_id,))
+        cur.execute('SELECT id, course_id, name, yt_link, watch_count, sort_order, COALESCE(is_highlighted, 0) FROM resources WHERE course_id = ? ORDER BY sort_order, id', (course_id,))
         resources_static = cur.fetchall()
         
         cur.execute('SELECT name, link FROM extra_stuff WHERE course_id = ?', (course_id,))
@@ -344,11 +344,11 @@ def get_course_data_hybrid(course_id, check_new_resources=False, is_admin=False)
                 if item[0] not in static_resources_ids:
                     resources_merged.append(item)
         
-        # Format data to match expected structure (id, name, yt_link, watch_count)
-        quiz1_formatted = [(row[0], row[2], row[3], row[4]) for row in quiz1_merged]
-        quiz2_formatted = [(row[0], row[2], row[3], row[4]) for row in quiz2_merged]
-        endterm_formatted = [(row[0], row[2], row[3], row[4]) for row in endterm_merged]
-        resources_formatted = [(row[0], row[2], row[3], row[4]) for row in resources_merged]
+        # Format data to match expected structure (id, name, yt_link, watch_count, is_highlighted)
+        quiz1_formatted = [(row[0], row[2], row[3], row[4], row[6] if len(row) > 6 else False) for row in quiz1_merged]
+        quiz2_formatted = [(row[0], row[2], row[3], row[4], row[6] if len(row) > 6 else False) for row in quiz2_merged]
+        endterm_formatted = [(row[0], row[2], row[3], row[4], row[6] if len(row) > 6 else False) for row in endterm_merged]
+        resources_formatted = [(row[0], row[2], row[3], row[4], row[6] if len(row) > 6 else False) for row in resources_merged]
         
         return (course_name, quiz1_formatted, quiz2_formatted, endterm_formatted, resources_formatted, extra_data)
         
@@ -371,16 +371,16 @@ def get_course_data_from_supabase(course_id):
         course = cur.fetchone()
         course_name = course[0] if course else None
         
-        cur.execute('SELECT id, name, yt_link, watch_count FROM quiz1 WHERE course_id=%s ORDER BY sort_order, id', (course_id,))
+        cur.execute('SELECT id, name, yt_link, watch_count, COALESCE(is_highlighted, false) FROM quiz1 WHERE course_id=%s ORDER BY sort_order, id', (course_id,))
         quiz1 = cur.fetchall()
         
-        cur.execute('SELECT id, name, yt_link, watch_count FROM quiz2 WHERE course_id=%s ORDER BY sort_order, id', (course_id,))
+        cur.execute('SELECT id, name, yt_link, watch_count, COALESCE(is_highlighted, false) FROM quiz2 WHERE course_id=%s ORDER BY sort_order, id', (course_id,))
         quiz2 = cur.fetchall()
         
-        cur.execute('SELECT id, name, yt_link, watch_count FROM endterm WHERE course_id=%s ORDER BY sort_order, id', (course_id,))
+        cur.execute('SELECT id, name, yt_link, watch_count, COALESCE(is_highlighted, false) FROM endterm WHERE course_id=%s ORDER BY sort_order, id', (course_id,))
         endterm = cur.fetchall()
         
-        cur.execute('SELECT id, name, yt_link, watch_count FROM resources WHERE course_id=%s ORDER BY sort_order, id', (course_id,))
+        cur.execute('SELECT id, name, yt_link, watch_count, COALESCE(is_highlighted, false) FROM resources WHERE course_id=%s ORDER BY sort_order, id', (course_id,))
         resources = cur.fetchall()
         
         cur.execute('SELECT name, link FROM extra_stuff WHERE course_id=%s', (course_id,))
@@ -1374,6 +1374,44 @@ def admin_delete_item(item_type, course_id, item_id):
     backup_db()  # Backup database after deleting item
     flash('Item deleted successfully!', 'success')
     return redirect(url_for('course_detail', course_id=course_id))
+
+# Admin toggle highlight route
+@app.route('/admin/toggle_highlight/<string:item_type>/<int:course_id>/<int:item_id>', methods=['POST'])
+def admin_toggle_highlight(item_type, course_id, item_id):
+    if not session.get('admin_mode'):
+        return {"success": False, "error": "Unauthorized"}, 403
+    
+    if item_type not in ['quiz1', 'quiz2', 'endterm', 'resources']:
+        return {"success": False, "error": "Invalid item type"}, 400
+    
+    conn = get_db_connection()
+    if not conn:
+        return {"success": False, "error": "Database connection failed"}, 500
+    
+    try:
+        cur = conn.cursor()
+        # First, check if the column exists and get current value
+        cur.execute(f'SELECT is_highlighted FROM {item_type} WHERE id=%s', (item_id,))
+        result = cur.fetchone()
+        
+        if result is None:
+            cur.close()
+            conn.close()
+            return {"success": False, "error": "Item not found"}, 404
+        
+        current_value = result[0] if result[0] is not None else False
+        new_value = not current_value
+        
+        cur.execute(f'UPDATE {item_type} SET is_highlighted=%s WHERE id=%s', (new_value, item_id))
+        conn.commit()
+        cur.close()
+        conn.close()
+        
+        return {"success": True, "is_highlighted": new_value}
+    except Exception as e:
+        if conn:
+            conn.close()
+        return {"success": False, "error": str(e)}, 500
 
 # Contact Us route
 @app.route('/contact')

@@ -458,6 +458,87 @@
             font-size: 0.85em;
         }
 
+        /* Highlighted Item Styles - Glowing Effect */
+        .item-highlighted {
+            position: relative;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 165, 0, 0.1));
+            border-radius: 8px;
+            padding: 8px 12px !important;
+            margin: 4px -8px;
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            box-shadow: 
+                0 0 10px rgba(255, 215, 0, 0.3),
+                0 0 20px rgba(255, 165, 0, 0.2),
+                0 0 30px rgba(255, 215, 0, 0.1),
+                inset 0 0 15px rgba(255, 215, 0, 0.05);
+            animation: highlightGlow 2s ease-in-out infinite alternate;
+        }
+
+        .item-highlighted .item-name {
+            color: #ffd700;
+            font-weight: 600;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+        }
+
+        .item-highlighted::before {
+            content: '⭐';
+            position: absolute;
+            left: -5px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.8em;
+            animation: starPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes highlightGlow {
+            0% {
+                box-shadow: 
+                    0 0 10px rgba(255, 215, 0, 0.3),
+                    0 0 20px rgba(255, 165, 0, 0.2),
+                    0 0 30px rgba(255, 215, 0, 0.1);
+                border-color: rgba(255, 215, 0, 0.4);
+            }
+            100% {
+                box-shadow: 
+                    0 0 15px rgba(255, 215, 0, 0.5),
+                    0 0 30px rgba(255, 165, 0, 0.3),
+                    0 0 45px rgba(255, 215, 0, 0.2);
+                border-color: rgba(255, 215, 0, 0.7);
+            }
+        }
+
+        @keyframes starPulse {
+            0%, 100% { opacity: 1; transform: translateY(-50%) scale(1); }
+            50% { opacity: 0.7; transform: translateY(-50%) scale(1.2); }
+        }
+
+        /* Highlight Toggle Button */
+        .highlight-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9em;
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            color: #888;
+        }
+
+        .highlight-btn:hover {
+            background: rgba(255, 215, 0, 0.2);
+            color: #ffd700;
+        }
+
+        .highlight-btn.active {
+            color: #ffd700;
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+        }
+
+        .highlight-btn.active:hover {
+            background: rgba(255, 100, 100, 0.2);
+            color: #ff6666;
+        }
+
         .reorder-buttons {
             display: flex;
             flex-direction: column;
@@ -756,7 +837,7 @@
                         {% if quiz1 %}
                             <ul class="item-list">
                                 {% for quiz1_item in quiz1 %}
-                                    <li>
+                                    <li class="{% if quiz1_item[4] %}item-highlighted{% endif %}" data-item-id="{{ quiz1_item[0] }}" data-item-type="quiz1">
                                         {% if admin_mode %}
                                             <div class="reorder-buttons">
                                                 <button class="reorder-btn" onclick="moveItem('quiz1', {{ quiz1_item[0] }}, 'up')" title="Move Up">▲</button>
@@ -777,6 +858,7 @@
                                         {% endif %}
                                         {% if admin_mode %}
                                             <div class="admin-links">
+                                                <button class="highlight-btn {% if quiz1_item[4] %}active{% endif %}" onclick="toggleHighlight('quiz1', {{ quiz1_item[0] }}, this)" title="{% if quiz1_item[4] %}Remove Highlight{% else %}Highlight{% endif %}">{% if quiz1_item[4] %}⭐{% else %}☆{% endif %}</button>
                                                 <a href="{{ url_for('admin_edit_item', item_type='quiz1', item_id=quiz1_item[0], course_id=course_id) }}">Edit</a> |
                                                 <a href="{{ url_for('admin_delete_item', item_type='quiz1', course_id=course_id, item_id=quiz1_item[0]) }}">Delete</a>
                                             </div>
@@ -801,7 +883,7 @@
                         {% if quiz2 %}
                             <ul class="item-list">
                                 {% for quiz2_item in quiz2 %}
-                                    <li>
+                                    <li class="{% if quiz2_item[4] %}item-highlighted{% endif %}" data-item-id="{{ quiz2_item[0] }}" data-item-type="quiz2">
                                         {% if admin_mode %}
                                             <div class="reorder-buttons">
                                                 <button class="reorder-btn" onclick="moveItem('quiz2', {{ quiz2_item[0] }}, 'up')" title="Move Up">▲</button>
@@ -822,6 +904,7 @@
                                         {% endif %}
                                         {% if admin_mode %}
                                             <div class="admin-links">
+                                                <button class="highlight-btn {% if quiz2_item[4] %}active{% endif %}" onclick="toggleHighlight('quiz2', {{ quiz2_item[0] }}, this)" title="{% if quiz2_item[4] %}Remove Highlight{% else %}Highlight{% endif %}">{% if quiz2_item[4] %}⭐{% else %}☆{% endif %}</button>
                                                 <a href="{{ url_for('admin_edit_item', item_type='quiz2', item_id=quiz2_item[0], course_id=course_id) }}">Edit</a> |
                                                 <a href="{{ url_for('admin_delete_item', item_type='quiz2', course_id=course_id, item_id=quiz2_item[0]) }}">Delete</a>
                                             </div>
@@ -846,7 +929,7 @@
                         {% if endterm %}
                             <ul class="item-list">
                                 {% for endterm_item in endterm %}
-                                    <li>
+                                    <li class="{% if endterm_item[4] %}item-highlighted{% endif %}" data-item-id="{{ endterm_item[0] }}" data-item-type="endterm">
                                         {% if admin_mode %}
                                             <div class="reorder-buttons">
                                                 <button class="reorder-btn" onclick="moveItem('endterm', {{ endterm_item[0] }}, 'up')" title="Move Up">▲</button>
@@ -867,6 +950,7 @@
                                         {% endif %}
                                         {% if admin_mode %}
                                             <div class="admin-links">
+                                                <button class="highlight-btn {% if endterm_item[4] %}active{% endif %}" onclick="toggleHighlight('endterm', {{ endterm_item[0] }}, this)" title="{% if endterm_item[4] %}Remove Highlight{% else %}Highlight{% endif %}">{% if endterm_item[4] %}⭐{% else %}☆{% endif %}</button>
                                                 <a href="{{ url_for('admin_edit_item', item_type='endterm', item_id=endterm_item[0], course_id=course_id) }}">Edit</a> |
                                                 <a href="{{ url_for('admin_delete_item', item_type='endterm', course_id=course_id, item_id=endterm_item[0]) }}">Delete</a>
                                             </div>
@@ -893,7 +977,7 @@
                         {% if resources %}
                             <ul class="item-list">
                                 {% for resource in resources %}
-                                    <li>
+                                    <li class="{% if resource[4] %}item-highlighted{% endif %}" data-item-id="{{ resource[0] }}" data-item-type="resources">
                                         {% if admin_mode %}
                                             <div class="reorder-buttons">
                                                 <button class="reorder-btn" onclick="moveItem('resources', {{ resource[0] }}, 'up')" title="Move Up">▲</button>
@@ -914,6 +998,7 @@
                                         {% endif %}
                                         {% if admin_mode %}
                                             <div class="admin-links">
+                                                <button class="highlight-btn {% if resource[4] %}active{% endif %}" onclick="toggleHighlight('resources', {{ resource[0] }}, this)" title="{% if resource[4] %}Remove Highlight{% else %}Highlight{% endif %}">{% if resource[4] %}⭐{% else %}☆{% endif %}</button>
                                                 <a href="{{ url_for('admin_edit_item', item_type='resources', item_id=resource[0], course_id=course_id) }}">Edit</a> |
                                                 <a href="{{ url_for('admin_delete_item', item_type='resources', course_id=course_id, item_id=resource[0]) }}">Delete</a>
                                             </div>
@@ -1007,6 +1092,34 @@
                 }
             })
             .catch(() => alert('Failed to move item.'));
+        }
+
+        // Toggle highlight function
+        function toggleHighlight(itemType, itemId, buttonElement) {
+            fetch(`/admin/toggle_highlight/${itemType}/{{ course_id }}/${itemId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const listItem = buttonElement.closest('li');
+                    if (data.is_highlighted) {
+                        listItem.classList.add('item-highlighted');
+                        buttonElement.classList.add('active');
+                        buttonElement.innerHTML = '⭐';
+                        buttonElement.title = 'Remove Highlight';
+                    } else {
+                        listItem.classList.remove('item-highlighted');
+                        buttonElement.classList.remove('active');
+                        buttonElement.innerHTML = '☆';
+                        buttonElement.title = 'Highlight';
+                    }
+                } else {
+                    alert('Failed to toggle highlight: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(() => alert('Failed to toggle highlight.'));
         }
     </script>
 </body>
