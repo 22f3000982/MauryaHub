@@ -129,6 +129,15 @@ def get_db_connection():
 #   - Maximum performance and scalability
 # ============================================================================
 
+def ensure_url_scheme(url):
+    """Ensure URL has http:// or https:// prefix for proper redirect"""
+    if not url:
+        return url
+    url = url.strip()
+    if not url.startswith('http://') and not url.startswith('https://'):
+        return 'https://' + url
+    return url
+
 def get_local_db_connection():
     """Get connection to local SQLite database for static data"""
     try:
@@ -884,14 +893,42 @@ def admin_add_course():
 
     if request.method == 'POST':
         course_name = request.form['course_name']
+        new_course_id = None
+        
+        # First, insert into PostgreSQL (Supabase) - primary database
         conn = get_db_connection()
         if conn:
-            cur = conn.cursor()
-            cur.execute('INSERT INTO courses (name) VALUES (%s)', (course_name,))
-            conn.commit()
-            cur.close()
-            conn.close()
-            backup_db()  # Backup database after adding course
+            try:
+                cur = conn.cursor()
+                cur.execute('INSERT INTO courses (name) VALUES (%s) RETURNING id', (course_name,))
+                new_course_id = cur.fetchone()[0]
+                conn.commit()
+                cur.close()
+                conn.close()
+                backup_db()  # Backup database after adding course
+                flash(f'Course "{course_name}" added successfully!', 'success')
+            except Exception as e:
+                print(f"Error adding course to PostgreSQL: {e}")
+                flash(f'Error adding course: {e}', 'error')
+                conn.close()
+        else:
+            flash('Database connection failed!', 'error')
+        
+        # Also insert into local SQLite for hybrid database sync
+        if new_course_id:
+            local_conn = get_local_db_connection()
+            if local_conn:
+                try:
+                    cur = local_conn.cursor()
+                    cur.execute('INSERT OR REPLACE INTO courses (id, name) VALUES (?, ?)', (new_course_id, course_name))
+                    local_conn.commit()
+                    cur.close()
+                    local_conn.close()
+                    print(f"Course '{course_name}' synced to local SQLite with id {new_course_id}")
+                except Exception as e:
+                    print(f"Error syncing course to local SQLite: {e}")
+                    local_conn.close()
+        
         return redirect(url_for('course_view'))
 
     return render_template('admin_add_course.html')
@@ -1066,6 +1103,7 @@ def admin_add_item(item_type, course_id):
     if request.method == 'POST':
         item_name = request.form['item_name']
         yt_link = request.form['yt_link']
+        new_item_id = None
 
         conn = get_db_connection()
         if not conn:
@@ -1081,13 +1119,31 @@ def admin_add_item(item_type, course_id):
         next_order = max_order + 1
 
         if item_type in ['quiz1', 'quiz2', 'endterm', 'resources']:
-            cur.execute(f'INSERT INTO {item_type} (course_id, name, yt_link, sort_order) VALUES (%s, %s, %s, %s)', 
+            cur.execute(f'INSERT INTO {item_type} (course_id, name, yt_link, sort_order) VALUES (%s, %s, %s, %s) RETURNING id', 
                        (course_id, item_name, yt_link, next_order))
+            new_item_id = cur.fetchone()[0]
 
         conn.commit()
         cur.close()
         conn.close()
         backup_db()  # Backup database after adding item
+        
+        # Sync to local SQLite for hybrid database
+        if new_item_id and item_type in ['quiz1', 'quiz2', 'endterm', 'resources']:
+            local_conn = get_local_db_connection()
+            if local_conn:
+                try:
+                    cur = local_conn.cursor()
+                    cur.execute(f'INSERT OR REPLACE INTO {item_type} (id, course_id, name, yt_link, watch_count, sort_order) VALUES (?, ?, ?, ?, 0, ?)',
+                               (new_item_id, course_id, item_name, yt_link, next_order))
+                    local_conn.commit()
+                    cur.close()
+                    local_conn.close()
+                    print(f"Item '{item_name}' synced to local SQLite with id {new_item_id}")
+                except Exception as e:
+                    print(f"Error syncing item to local SQLite: {e}")
+                    local_conn.close()
+        
         return redirect(url_for('course_detail', course_id=course_id))
 
     return render_template('admin_add_pyq.html', course_id=course_id, item_type=item_type)
@@ -1095,29 +1151,38 @@ def admin_add_item(item_type, course_id):
 # Watch Count Increment functions
 @app.route('/increment_watch_quiz1/<int:quiz1_id>')
 def increment_watch_quiz1(quiz1_id):
+    link = None
+    
     # Always update watch count in Supabase (for tracking)
     conn = get_db_connection()
     if conn:
         try:
             cur = conn.cursor()
-            cur.execute('UPDATE quiz1 SET watch_count = watch_count + 1 WHERE id = %s', (quiz1_id,))
+            cur.execute('UPDATE quiz1 SET watch_count = watch_count + 1 WHERE id = %s RETURNING yt_link', (quiz1_id,))
+            result = cur.fetchone()
+            if result:
+                link = result[0]
             conn.commit()
             cur.close()
             conn.close()
         except:
             pass  # Continue even if Supabase update fails
     
-    # Get the link from SQLite (fast for users)
+    # If we already got the link from PostgreSQL, use it
+    if link:
+        return redirect(ensure_url_scheme(link))
+    
+    # Fallback: Get the link from SQLite (fast for users)
     local_conn = get_local_db_connection()
     if local_conn:
         try:
             cur = local_conn.cursor()
             cur.execute('SELECT yt_link FROM quiz1 WHERE id = ?', (quiz1_id,))
-            link = cur.fetchone()
+            result = cur.fetchone()
             cur.close()
             local_conn.close()
-            if link and link[0]:
-                return redirect(link[0])
+            if result and result[0]:
+                return redirect(ensure_url_scheme(result[0]))
         except:
             pass
     
@@ -1125,29 +1190,38 @@ def increment_watch_quiz1(quiz1_id):
 
 @app.route('/increment_watch_quiz2/<int:quiz2_id>')
 def increment_watch_quiz2(quiz2_id):
+    link = None
+    
     # Always update watch count in Supabase (for tracking)
     conn = get_db_connection()
     if conn:
         try:
             cur = conn.cursor()
-            cur.execute('UPDATE quiz2 SET watch_count = watch_count + 1 WHERE id = %s', (quiz2_id,))
+            cur.execute('UPDATE quiz2 SET watch_count = watch_count + 1 WHERE id = %s RETURNING yt_link', (quiz2_id,))
+            result = cur.fetchone()
+            if result:
+                link = result[0]
             conn.commit()
             cur.close()
             conn.close()
         except:
             pass  # Continue even if Supabase update fails
     
-    # Get the link from SQLite (fast for users)
+    # If we already got the link from PostgreSQL, use it
+    if link:
+        return redirect(ensure_url_scheme(link))
+    
+    # Fallback: Get the link from SQLite (fast for users)
     local_conn = get_local_db_connection()
     if local_conn:
         try:
             cur = local_conn.cursor()
             cur.execute('SELECT yt_link FROM quiz2 WHERE id = ?', (quiz2_id,))
-            link = cur.fetchone()
+            result = cur.fetchone()
             cur.close()
             local_conn.close()
-            if link and link[0]:
-                return redirect(link[0])
+            if result and result[0]:
+                return redirect(ensure_url_scheme(result[0]))
         except:
             pass
     
@@ -1155,29 +1229,38 @@ def increment_watch_quiz2(quiz2_id):
 
 @app.route('/increment_watch_endterm/<int:endterm_id>')
 def increment_watch_endterm(endterm_id):
+    link = None
+    
     # Always update watch count in Supabase (for tracking)
     conn = get_db_connection()
     if conn:
         try:
             cur = conn.cursor()
-            cur.execute('UPDATE endterm SET watch_count = watch_count + 1 WHERE id = %s', (endterm_id,))
+            cur.execute('UPDATE endterm SET watch_count = watch_count + 1 WHERE id = %s RETURNING yt_link', (endterm_id,))
+            result = cur.fetchone()
+            if result:
+                link = result[0]
             conn.commit()
             cur.close()
             conn.close()
         except:
             pass  # Continue even if Supabase update fails
     
-    # Get the link from SQLite (fast for users)
+    # If we already got the link from PostgreSQL, use it
+    if link:
+        return redirect(ensure_url_scheme(link))
+    
+    # Fallback: Get the link from SQLite (fast for users)
     local_conn = get_local_db_connection()
     if local_conn:
         try:
             cur = local_conn.cursor()
             cur.execute('SELECT yt_link FROM endterm WHERE id = ?', (endterm_id,))
-            link = cur.fetchone()
+            result = cur.fetchone()
             cur.close()
             local_conn.close()
-            if link and link[0]:
-                return redirect(link[0])
+            if result and result[0]:
+                return redirect(ensure_url_scheme(result[0]))
         except:
             pass
     
@@ -1185,29 +1268,38 @@ def increment_watch_endterm(endterm_id):
 
 @app.route('/increment_watch_resource/<int:resource_id>')
 def increment_watch_resource(resource_id):
+    link = None
+    
     # Always update watch count in Supabase (for tracking)
     conn = get_db_connection()
     if conn:
         try:
             cur = conn.cursor()
-            cur.execute('UPDATE resources SET watch_count = watch_count + 1 WHERE id = %s', (resource_id,))
+            cur.execute('UPDATE resources SET watch_count = watch_count + 1 WHERE id = %s RETURNING yt_link', (resource_id,))
+            result = cur.fetchone()
+            if result:
+                link = result[0]
             conn.commit()
             cur.close()
             conn.close()
         except:
             pass  # Continue even if Supabase update fails
     
-    # Get the link from SQLite (fast for users)
+    # If we already got the link from PostgreSQL, use it
+    if link:
+        return redirect(ensure_url_scheme(link))
+    
+    # Fallback: Get the link from SQLite (fast for users)
     local_conn = get_local_db_connection()
     if local_conn:
         try:
             cur = local_conn.cursor()
             cur.execute('SELECT yt_link FROM resources WHERE id = ?', (resource_id,))
-            link = cur.fetchone()
+            result = cur.fetchone()
             cur.close()
             local_conn.close()
-            if link and link[0]:
-                return redirect(link[0])
+            if result and result[0]:
+                return redirect(ensure_url_scheme(result[0]))
         except:
             pass
     
