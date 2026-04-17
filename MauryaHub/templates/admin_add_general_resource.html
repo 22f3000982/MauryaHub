@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add General Resource</title>
+    <link rel="icon" href="data:,">
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(circle at top, #1e3a8a, #0f172a 60%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .panel {
+            width: 100%;
+            max-width: 560px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35);
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            font-size: 1.5rem;
+            color: #e0f2fe;
+        }
+
+        p {
+            margin: 0 0 16px;
+            color: #cbd5e1;
+            font-size: 0.92rem;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 6px;
+            font-size: 0.9rem;
+            color: #cbd5e1;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px 11px;
+            border-radius: 8px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: rgba(15, 23, 42, 0.7);
+            color: #f8fafc;
+        }
+
+        .hint {
+            margin-top: 8px;
+            font-size: 0.85rem;
+            color: #93c5fd;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 18px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, #06b6d4, #3b82f6);
+            color: #ffffff;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #cbd5e1;
+            border: 1px solid rgba(148, 163, 184, 0.45);
+        }
+    </style>
+</head>
+<body>
+    <div class="panel">
+        <h1>Add General Resource</h1>
+        <p>You can add either a direct URL (Drive/PDF link) or upload a PDF file.</p>
+
+        <form method="post" enctype="multipart/form-data">
+            <label for="title">Title</label>
+            <input id="title" name="title" type="text" required>
+
+            <label for="program_type">Program Type</label>
+            <select id="program_type" name="program_type" required>
+                <option value="">Select Type</option>
+                <option value="diploma">Diploma</option>
+                <option value="degree">Degree</option>
+            </select>
+
+            <label for="resource_link">Direct Link (optional if uploading PDF)</label>
+            <input id="resource_link" name="resource_link" type="text" placeholder="https://drive.google.com/... or direct PDF URL">
+
+            <label for="resource_pdf">Upload PDF (optional if link provided)</label>
+            <input id="resource_pdf" name="resource_pdf" type="file" accept=".pdf,application/pdf">
+
+            <div class="hint">At least one field is required: either direct link or PDF file.</div>
+
+            <div class="actions">
+                <button class="btn btn-primary" type="submit">Save Resource</button>
+                <a class="btn btn-secondary" href="{{ url_for('general_resources_page') }}">Back to Resources</a>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Restore Backup - Admin Panel</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 50%, #6c5ce7 100%);
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            color: white;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+        
+        .backup-list {
+            background: rgba(255,255,255,0.1);
+            padding: 2rem;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            margin-bottom: 2rem;
+        }
+        
+        .backup-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .backup-info {
+            flex-grow: 1;
+        }
+        
+        .backup-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .backup-details {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9rem;
+        }
+        
+        .restore-btn {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #333;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        
+        .restore-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(255, 215, 0, 0.3);
+        }
+        
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            text-decoration: none;
+            backdrop-filter: blur(10px);
+            transition: background 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .warning {
+            background: rgba(255, 193, 7, 0.2);
+            border: 1px solid rgba(255, 193, 7, 0.5);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            color: #fff3cd;
+        }
+        
+        .no-backups {
+            text-align: center;
+            padding: 2rem;
+            color: rgba(255,255,255,0.7);
+            font-style: italic;
+        }
+        
+        .alert {
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        .alert-success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid rgba(40, 167, 69, 0.5);
+            color: #d4edda;
+        }
+        
+        .alert-error {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid rgba(220, 53, 69, 0.5);
+            color: #f8d7da;
+        }
+    </style>
+</head>
+<body>
+    <a href="{{ url_for('course_view') }}" class="back-btn">← Back to Dashboard</a>
+    
+    <div class="container">
+        <div class="header">
+            <h1>🔄 Restore Database Backup</h1>
+            <p>Select a backup file to restore your database</p>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    {% if category == 'success' %}✅{% else %}❌{% endif %} {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+        
+        <div class="warning">
+            <strong>⚠️ Warning:</strong> Restoring a backup will replace your current database. 
+            A backup of your current database will be created automatically before the restore.
+        </div>
+        
+        <div class="backup-list">
+            <h3>📂 Available Backup Files</h3>
+            {% if backup_files %}
+                {% for backup_file in backup_files %}
+                <div class="backup-item">
+                    <div class="backup-info">
+                        <div class="backup-name">{{ backup_file }}</div>
+                        <div class="backup-details">
+                            {% if 'latest_backup' in backup_file %}
+                                💾 Latest Manual Backup
+                            {% elif backup_file.startswith('simple_backup_') %}
+                                🕒 Auto Backup - {{ backup_file.split('_')[2] + '_' + backup_file.split('_')[3].split('.')[0] }}
+                            {% else %}
+                                📋 Database Backup
+                            {% endif %}
+                        </div>
+                    </div>
+                    <form method="POST" style="display: inline;" 
+                          onsubmit="return confirm('Are you sure you want to restore from {{ backup_file }}? This will replace your current database.')">
+                        <input type="hidden" name="backup_file" value="{{ backup_file }}">
+                        <button type="submit" class="restore-btn">Restore</button>
+                    </form>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="no-backups">
+                    📁 No backup files found in the project directory.
+                    <br><br>
+                    Make sure your backup files (.db) are in the root project folder.
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="backup-list">
+            <h3>💡 How to Use</h3>
+            <ul style="padding-left: 1.5rem; line-height: 1.6;">
+                <li><strong>latest_backup.db</strong> - Your manually created backup with frontend data</li>
+                <li><strong>simple_backup_*.db</strong> - Automatic timestamped backups</li>
+                <li>Current database is automatically backed up before restore</li>
+                <li>All data will be replaced with the selected backup</li>
+                <li>Make sure to be in admin mode to access this feature</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

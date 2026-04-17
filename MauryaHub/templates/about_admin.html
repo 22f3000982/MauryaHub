@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Developer - MauryaHub👑</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style2.css') }}">
+    <style>
+        /* Global Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scrollbar-width: thin;
+            scrollbar-color: #4a90e2 #1a2a44;
+        }
+
+        /* Custom Scrollbar */
+        *::-webkit-scrollbar {
+            width: 6px;
+        }
+        *::-webkit-scrollbar-track {
+            background: #1a2a44;
+            border-radius: 3px;
+        }
+        *::-webkit-scrollbar-thumb {
+            background: #4a90e2;
+            border-radius: 3px;
+            transition: background 0.3s ease;
+        }
+        *::-webkit-scrollbar-thumb:hover {
+            background: #5a9bd4;
+        }
+
+        /* Body Styling */
+        body {
+            background: linear-gradient(135deg, #1a2a44 0%, #2c3e50 50%, #34495e 100%);
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: #e6f0fa;
+        }
+
+        /* Admin Container */
+        .admin-container {
+            max-width: 1000px;
+            margin: 1.5rem auto;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            color: #e6f0fa;
+        }
+
+        /* Admin Header */
+        .admin-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .admin-header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            color: #e6f0fa;
+        }
+
+        .admin-header p {
+            font-size: 1rem;
+            color: #b0c4de;
+        }
+
+        /* Admin Profile */
+        .admin-profile {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            background: rgba(26, 42, 68, 0.3);
+            padding: 1.5rem;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(230, 240, 250, 0.2);
+            margin-bottom: 1.5rem;
+        }
+
+        .profile-pic {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #4a90e2, #5a9bd4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            flex-shrink: 0;
+            overflow: hidden;
+            border: 3px solid rgba(230, 240, 250, 0.3);
+            position: relative;
+        }
+
+        .profile-pic img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .upload-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(26, 42, 68, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+            cursor: pointer;
+            color: #e6f0fa;
+            font-size: 0.9rem;
+        }
+
+        .profile-pic:hover .upload-overlay {
+            opacity: 1;
+        }
+
+        .upload-form {
+            display: none;
+        }
+
+        .profile-info h2 {
+            color: #4a90e2;
+            margin-bottom: 0.4rem;
+            font-size: 1.5rem;
+        }
+
+        .profile-info p {
+            font-size: 0.95rem;
+            margin: 0.3rem 0;
+            color: #b0c4de;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .stat-card {
+            background: rgba(26, 42, 68, 0.3);
+            padding: 1rem;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(230, 240, 250, 0.2);
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #4a90e2;
+        }
+
+        /* Features List */
+        .features-list {
+            background: rgba(26, 42, 68, 0.3);
+            padding: 1.5rem;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(230, 240, 250, 0.2);
+        }
+
+        .features-list h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #e6f0fa;
+        }
+
+        .features-list p, .features-list ul li {
+            font-size: 0.95rem;
+            color: #b0c4de;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 0.8rem;
+            padding: 0.4rem;
+            font-size: 0.95rem;
+        }
+
+        .feature-icon {
+            font-size: 1.3rem;
+            color: #4a90e2;
+        }
+
+        /* Back Button */
+        .back-btn {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            background: rgba(26, 42, 68, 0.5);
+            color: #e6f0fa;
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            text-decoration: none;
+            backdrop-filter: blur(10px);
+            z-index: 1100;
+            transition: background 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(74, 144, 226, 0.5);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 180px;
+            height: 100%;
+            z-index: 1000;
+            background: linear-gradient(180deg, #1a2a44 0%, #2c3e50 100%);
+            padding: 15px;
+            color: #e6f0fa;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar h2 {
+            margin: 0 0 15px;
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #e6f0fa;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid rgba(230, 240, 250, 0.1);
+            padding-bottom: 8px;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            color: #4a90e2;
+            text-decoration: none;
+            margin: 8px 0;
+            font-size: 0.95em;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: background 0.3s, color 0.3s, transform 0.2s;
+        }
+
+        .sidebar a:hover {
+            background: rgba(74, 144, 226, 0.2);
+            color: #e6f0fa;
+            transform: translateX(5px);
+        }
+
+        .sidebar a.active {
+            background: rgba(74, 144, 226, 0.3);
+            color: #e6f0fa;
+            font-weight: 600;
+        }
+
+        .sidebar a .icon {
+            margin-right: 8px;
+            font-size: 1.1em;
+        }
+
+        /* Admin Login Form */
+        .admin-login-form {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(26, 42, 68, 0.3);
+            border-radius: 8px;
+            border: 1px solid rgba(230, 240, 250, 0.2);
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 8px;
+            background: rgba(230, 240, 250, 0.1);
+            border: 1px solid rgba(230, 240, 250, 0.2);
+            border-radius: 4px;
+            color: #e6f0fa;
+            font-size: 0.85rem;
+            box-sizing: border-box;
+        }
+
+        .password-input::placeholder {
+            color: rgba(230, 240, 250, 0.6);
+        }
+
+        .password-input:focus {
+            outline: none;
+            border-color: #4a90e2;
+            background: rgba(230, 240, 250, 0.15);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 8px;
+            background: linear-gradient(45deg, #4a90e2, #5a9bd4);
+            color: #e6f0fa;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .login-btn:hover {
+            background: linear-gradient(45deg, #3a7bd5, #4a90e2);
+            transform: translateY(-1px);
+        }
+
+        /* Sidebar Toggle Button */
+        .sidebar-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: #e6f0fa;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 8px;
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 1200;
+        }
+
+        .sidebar-toggle:hover {
+            color: #4a90e2;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .admin-container {
+                max-width: 90%;
+                margin: 1rem auto;
+                padding: 1.2rem;
+            }
+            .admin-header h1 {
+                font-size: 1.6rem;
+            }
+            .admin-header p {
+                font-size: 0.9rem;
+            }
+            .admin-profile {
+                gap: 1.2rem;
+                padding: 1.2rem;
+            }
+            .profile-pic {
+                width: 100px;
+                height: 100px;
+                font-size: 2rem;
+            }
+            .profile-info h2 {
+                font-size: 1.3rem;
+            }
+            .profile-info p {
+                font-size: 0.9rem;
+            }
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+                gap: 0.8rem;
+            }
+            .stat-card {
+                padding: 0.8rem;
+            }
+            .stat-number {
+                font-size: 1.6rem;
+            }
+            .sidebar {
+                width: 160px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 80%;
+                max-width: 260px;
+                transform: translateX(-100%);
+            }
+            .sidebar.active {
+                transform: translateX(0);
+            }
+            .sidebar-toggle {
+                display: block;
+            }
+            .admin-container {
+                max-width: 95%;
+                padding: 1rem;
+            }
+            .admin-header {
+                margin-bottom: 1.5rem;
+            }
+            .admin-header h1 {
+                font-size: 1.4rem;
+            }
+            .admin-header p {
+                font-size: 0.9rem;
+            }
+            .admin-profile {
+                flex-direction: column;
+                text-align: center;
+                padding: 1rem;
+            }
+            .profile-pic {
+                width: 80px;
+                height: 80px;
+                font-size: 1.8rem;
+            }
+            .upload-overlay {
+                font-size: 0.8rem;
+            }
+            .profile-info h2 {
+                font-size: 1.2rem;
+            }
+            .profile-info p {
+                font-size: 0.85rem;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 0.6rem;
+            }
+            .stat-card {
+                padding: 0.6rem;
+            }
+            .stat-number {
+                font-size: 1.4rem;
+            }
+            .features-list {
+                padding: 1rem;
+            }
+            .features-list h3 {
+                font-size: 1.2rem;
+            }
+            .feature-item {
+                font-size: 0.9rem;
+                gap: 0.6rem;
+            }
+            .feature-icon {
+                font-size: 1.2rem;
+            }
+            .back-btn {
+                top: 10px;
+                left: 50px;
+                padding: 0.3rem 0.6rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                width: 90%;
+                max-width: 240px;
+                padding: 10px;
+            }
+            .sidebar h2 {
+                font-size: 1.3em;
+                margin-bottom: 10px;
+            }
+            .sidebar a {
+                font-size: 0.9em;
+                padding: 6px 10px;
+            }
+            .admin-login-form {
+                padding: 10px;
+            }
+            .password-input {
+                padding: 6px;
+                font-size: 0.8rem;
+            }
+            .login-btn {
+                padding: 6px;
+                font-size: 0.8rem;
+            }
+            .admin-container {
+                margin: 0.8rem auto;
+                padding: 0.8rem;
+            }
+            .admin-header h1 {
+                font-size: 1.2rem;
+            }
+            .admin-header p {
+                font-size: 0.85rem;
+            }
+            .admin-profile {
+                padding: 0.8rem;
+            }
+            .profile-pic {
+                width: 70px;
+                height: 70px;
+                font-size: 1.6rem;
+            }
+            .profile-info h2 {
+                font-size: 1.1rem;
+            }
+            .profile-info p {
+                font-size: 0.8rem;
+            }
+            .stats-grid {
+                gap: 0.5rem;
+            }
+            .stat-card {
+                padding: 0.5rem;
+            }
+            .stat-number {
+                font-size: 1.3rem;
+            }
+            .features-list {
+                padding: 0.8rem;
+            }
+            .features-list h3 {
+                font-size: 1.1rem;
+            }
+            .feature-item {
+                font-size: 0.85rem;
+            }
+            .feature-icon {
+                font-size: 1.1rem;
+            }
+            .back-btn {
+                font-size: 0.8rem;
+                padding: 0.2rem 0.5rem;
+            }
+        }
+
+        /* Accessibility Enhancements */
+        a:focus, button:focus, input:focus {
+            outline: 3px solid #4a90e2;
+            outline-offset: 2px;
+        }
+
+        /* Reduced Motion for Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                transition: none !important;
+                animation: none !important;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            .sidebar, .sidebar-toggle, .back-btn {
+                display: none;
+            }
+            .admin-container {
+                background: none;
+                border: 1px solid #000;
+                color: #000;
+                box-shadow: none;
+            }
+            .admin-profile, .stat-card, .features-list {
+                background: none;
+                border: 1px solid #000;
+                color: #000;
+            }
+            .profile-pic {
+                border: 1px solid #000;
+            }
+            .profile-info h2, .stat-number, .feature-icon {
+                color: #000;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar Toggle Button -->
+    <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <h2>Dashboard</h2>
+        <a href="/"><span class="icon">🏠</span> Home</a>
+        <a href="{{ url_for('course_view') }}"><span class="icon">📚</span> Courses</a>
+        <a href="{{ url_for('contact_us') }}"><span class="icon">📞</span> Contact Us</a>
+        <a href="{{ url_for('about_admin') }}" class="active"><span class="icon">👨‍💼</span> About Admin</a>
+        <a href="{{ url_for('settings') }}"><span class="icon">⚙️</span> Settings</a>
+        {% if not session.get('admin_mode') %}
+            <form class="admin-login-form" action="{{ url_for('admin_login') }}" method="post">
+                <input class="password-input" type="password" name="password" placeholder="Admin Password" required>
+                <button class="btn login-btn" type="submit">🔐 Admin Login</button>
+            </form>
+        {% else %}
+            <a href="{{ url_for('admin_add_course') }}"><span class="icon">➕</span> Add Course</a>
+            <a href="{{ url_for('admin_restore_backup') }}"><span class="icon">🔄</span> Restore Database</a>
+            <a href="{{ url_for('admin_logout') }}"><span class="icon">🚪</span> Exit Admin</a>
+        {% endif %}
+    </div>
+
+    <!-- Main Content -->
+    <a href="{{ url_for('course_view') }}" class="back-btn">← Back to Dashboard</a>
+    
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>👨‍💻 About Developer</h1>
+            <p>Meet the creator behind MauryaHub👑</p>
+        </div>
+
+        <div class="admin-profile">
+            <div class="profile-pic" {% if session.admin_mode %}onclick="triggerFileUpload()"{% endif %}>
+                {% if profile_pic %}
+                    <img src="{{ url_for('static', filename=profile_pic) }}" alt="Profile Picture">
+                {% else %}
+                    👨‍💻
+                {% endif %}
+                {% if session.admin_mode %}
+                <div class="upload-overlay">
+                    📷 Change Photo
+                </div>
+                {% endif %}
+            </div>
+            <div class="profile-info">
+                <h2>Ashish Maurya</h2>
+                <p><strong>Role:</strong> IITM BS Student</p>
+                <p><strong>Program:</strong> IITM BS in Data Science and Applications</p>
+                <p><strong>Tech Stack:</strong> Python, Flask, JavaScript, HTML/CSS, SQLite</p>
+                <p><strong>Contact:</strong> ashraj77777@gmail.com</p>
+                <p><strong>Passion:</strong> Creating useful tools for fellow students</p>
+            </div>
+        </div>
+
+        {% if session.admin_mode %}
+        <form class="upload-form" id="uploadForm" action="{{ url_for('upload_profile_pic') }}" method="post" enctype="multipart/form-data">
+            <input type="file" id="fileInput" name="profile_pic" accept="image/*" onchange="submitForm()">
+        </form>
+        {% endif %}
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">{{ courses_count or '15+' }}</div>
+                <div>Courses Tracked</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">{{ total_resources or '100+' }}</div>
+                <div>Resources Organized</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">1</div>
+                <div>Passionate Developer</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">24/7</div>
+                <div>Learning Mode</div>
+            </div>
+        </div>
+
+        <div class="features-list">
+            <h3>🚀 Portal Features Developed</h3>
+            <div class="feature-item">
+                <span class="feature-icon">📚</span>
+                <span>Personal Course Management System</span>
+            </div>
+            <div class="feature-item">
+                <span class="feature-icon">📝</span>
+                <span>Previous Year Questions (PYQ) Database</span>
+            </div>
+            <div class="feature-item">
+                <span class="feature-icon">📋</span>
+                <span>Notes & Study Materials Organization</span>
+            </div>
+            <!-- <div class="feature-item"> -->
+                <!-- <span class="feature-icon">✅</span> -->
+                <!-- <span>Assignment Tracking & Management</span> -->
+            <!-- </div> -->
+            <div class="feature-item">
+                <span class="feature-icon">🎥</span>
+                <span>Video Resources & Tutorial Integration</span>
+            </div>
+            <div class="feature-item">
+                <span class="feature-icon">🧮</span>
+                <span>Grade Calculator Tool</span>
+            </div>
+            <div class="feature-item">
+                <span class="feature-icon">⚡</span>
+                <span>Dynamic Content Management</span>
+            </div>
+            <div class="feature-item">
+                <span class="feature-icon">🔒</span>
+                <span>Secure Personal Data Management</span>
+            </div>
+        </div>
+
+        <div class="features-list" style="margin-top: 1.5rem;">
+            <h3>💡 Personal Mission</h3>
+            <p>As an IITM BS student, I created this portal to help organize my academic resources and potentially assist fellow students. This is a personal project built with passion for learning and sharing knowledge within our community.</p>
+            
+            <h3 style="margin-top: 1.5rem;">🎯 Project Goals</h3>
+            <ul>
+                <li>Create a centralized hub for all my academic resources</li>
+                <li>Practice and showcase full-stack development skills</li>
+                <li>Build something useful for the IITM BS student community</li>
+                <li>Continuously learn new technologies and improve the portal</li>
+                <li>Share knowledge and help fellow students succeed</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Sidebar Toggle Functionality
+        const sidebar = document.getElementById('sidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (event) => {
+            if (window.innerWidth <= 768 && !sidebar.contains(event.target) && !sidebarToggle.contains(event.target)) {
+                sidebar.classList.remove('active');
+            }
+        });
+
+        // Profile Picture Upload
+        function triggerFileUpload() {
+            document.getElementById('fileInput').click();
+        }
+        
+        function submitForm() {
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput.files.length > 0) {
+                // Check file size (max 5MB)
+                if (fileInput.files[0].size > 5 * 1024 * 1024) {
+                    alert('File size must be less than 5MB');
+                    return;
+                }
+                
+                // Check file type
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+                if (!allowedTypes.includes(fileInput.files[0].type)) {
+                    alert('Please upload only JPG, PNG, or GIF files');
+                    return;
+                }
+                
+                document.getElementById('uploadForm').submit();
+            }
+        }
+    </script>
+</body>
+</html>

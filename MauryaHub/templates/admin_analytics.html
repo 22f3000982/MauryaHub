@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard - MauryaHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --bg-main: #f2f7fb;
+            --bg-panel: rgba(255, 255, 255, 0.76);
+            --bg-panel-solid: #ffffff;
+            --text-main: #102033;
+            --text-soft: #5b6f81;
+            --border-soft: rgba(16, 32, 51, 0.12);
+            --shadow-soft: 0 14px 32px rgba(15, 42, 67, 0.11);
+            --teal: #0ea5a4;
+            --blue: #2563eb;
+            --amber: #f59e0b;
+            --rose: #e11d48;
+            --lime: #65a30d;
+            --card-grad-1: linear-gradient(135deg, #0ea5a4, #2563eb);
+            --card-grad-2: linear-gradient(135deg, #2563eb, #06b6d4);
+            --card-grad-3: linear-gradient(135deg, #f59e0b, #ef4444);
+            --card-grad-4: linear-gradient(135deg, #22c55e, #0ea5a4);
+            --card-grad-5: linear-gradient(135deg, #1d4ed8, #3b82f6);
+            --card-grad-6: linear-gradient(135deg, #0f766e, #14b8a6);
+            --radius-lg: 20px;
+            --radius-md: 14px;
+        }
+
+        body.dark {
+            --bg-main: #08121d;
+            --bg-panel: rgba(16, 28, 42, 0.76);
+            --bg-panel-solid: #0f1a29;
+            --text-main: #dbe8f6;
+            --text-soft: #9fb4c8;
+            --border-soft: rgba(168, 192, 213, 0.2);
+            --shadow-soft: 0 14px 32px rgba(2, 8, 16, 0.48);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            background:
+                radial-gradient(circle at 8% 8%, rgba(37, 99, 235, 0.24), transparent 34%),
+                radial-gradient(circle at 88% 12%, rgba(14, 165, 164, 0.24), transparent 30%),
+                radial-gradient(circle at 30% 84%, rgba(245, 158, 11, 0.16), transparent 26%),
+                var(--bg-main);
+            color: var(--text-main);
+            min-height: 100vh;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+
+        .analytics-shell {
+            max-width: 1520px;
+            margin: 0 auto;
+            padding: 28px 20px 40px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border: 1px solid var(--border-soft);
+            background: var(--bg-panel);
+            color: var(--text-main);
+            border-radius: 10px;
+            padding: 9px 14px;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .btn.primary {
+            border: none;
+            background: linear-gradient(135deg, #0ea5a4, #1d4ed8);
+            color: #ffffff;
+        }
+
+        .dashboard-heading h1 {
+            font-family: 'Sora', sans-serif;
+            font-size: clamp(1.6rem, 3vw, 2.3rem);
+            letter-spacing: -0.02em;
+            margin-bottom: 6px;
+            animation: riseIn 0.45s ease;
+        }
+
+        .dashboard-heading p {
+            color: var(--text-soft);
+            font-size: 0.96rem;
+        }
+
+        .filters-card {
+            background: var(--bg-panel);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            box-shadow: var(--shadow-soft);
+            margin: 20px 0;
+            animation: riseIn 0.55s ease;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 10px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .field label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            color: var(--text-soft);
+            text-transform: uppercase;
+        }
+
+        .field input,
+        .field select {
+            border: 1px solid var(--border-soft);
+            border-radius: 10px;
+            background: var(--bg-panel-solid);
+            color: var(--text-main);
+            padding: 9px 11px;
+            font-weight: 600;
+            font-family: inherit;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(180px, 1fr));
+            gap: 12px;
+        }
+
+        .metric-card {
+            color: #ffffff;
+            border-radius: var(--radius-md);
+            padding: 14px;
+            box-shadow: var(--shadow-soft);
+            min-height: 118px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.24s ease, box-shadow 0.24s ease;
+            animation: riseIn 0.6s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 38px rgba(15, 33, 52, 0.2);
+        }
+
+        .metric-card::after {
+            content: '';
+            position: absolute;
+            width: 92px;
+            height: 92px;
+            border-radius: 50%;
+            top: -28px;
+            right: -28px;
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .metric-card .label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            opacity: 0.96;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .metric-card .value {
+            font-size: clamp(1.2rem, 2.8vw, 1.62rem);
+            font-weight: 800;
+            font-family: 'Sora', sans-serif;
+            margin-bottom: 6px;
+        }
+
+        .metric-card .meta {
+            font-size: 0.84rem;
+            font-weight: 600;
+            opacity: 0.95;
+        }
+
+        .charts-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-top: 18px;
+        }
+
+        .panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-soft);
+            backdrop-filter: blur(12px);
+            padding: 14px;
+            animation: riseIn 0.65s ease;
+        }
+
+        .panel h3 {
+            font-family: 'Sora', sans-serif;
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+
+        .chart-box {
+            min-height: 260px;
+            position: relative;
+        }
+
+        .side-charts {
+            display: contents;
+        }
+
+        .tables-wrap {
+            margin-top: 16px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .table-panel {
+            overflow: hidden;
+        }
+
+        .table-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            gap: 10px;
+        }
+
+        .chip {
+            display: inline-block;
+            border-radius: 999px;
+            background: rgba(14, 165, 164, 0.14);
+            color: #0f766e;
+            padding: 5px 10px;
+            font-weight: 800;
+            font-size: 0.74rem;
+            text-transform: uppercase;
+        }
+
+        body.dark .chip {
+            color: #5eead4;
+            background: rgba(20, 184, 166, 0.2);
+        }
+
+        .table-scroll {
+            overflow-x: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 0;
+            table-layout: fixed;
+            background: transparent;
+        }
+
+        th,
+        td {
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-soft);
+            font-size: 0.84rem;
+        }
+
+        th {
+            font-size: 0.72rem;
+            color: var(--text-soft);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        tbody tr {
+            transition: background 0.2s ease;
+        }
+
+        tbody tr:hover {
+            background: rgba(14, 165, 164, 0.08);
+        }
+
+        td:nth-child(1),
+        td:nth-child(2) {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .muted {
+            color: var(--text-soft);
+        }
+
+        @keyframes riseIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 1260px) {
+            .summary-grid {
+                grid-template-columns: repeat(3, minmax(180px, 1fr));
+            }
+
+            .charts-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .tables-wrap {
+                grid-template-columns: 1fr;
+            }
+
+            .filters-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 820px) {
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .summary-grid,
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="analytics-shell">
+        <div class="topbar">
+            <div class="topbar-left">
+                <a href="{{ url_for('course_view') }}" class="btn">Back to Dashboard</a>
+                <div class="dashboard-heading">
+                    <h1>Learning Analytics Command Center</h1>
+                    <p>Data-rich performance intelligence for video consumption, retention, and course impact.</p>
+                </div>
+            </div>
+            <div class="topbar-actions">
+                <button class="btn" id="toggleTheme">Toggle Dark Mode</button>
+                <button class="btn" id="downloadCsv">Export CSV</button>
+            </div>
+        </div>
+
+        <section class="filters-card">
+            <div class="filters-grid">
+                <div class="field">
+                    <label for="courseFilter">Course Filter</label>
+                    <select id="courseFilter">
+                        <option value="all">All Courses</option>
+                        {% for course in courses_for_filter %}
+                        <option value="{{ course }}">{{ course }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="contentFilter">Content Type</label>
+                    <select id="contentFilter">
+                        <option value="all">All Content</option>
+                        <option value="Quiz 1">Quiz 1</option>
+                        <option value="Quiz 2">Quiz 2</option>
+                        <option value="End Term">End Term</option>
+                        <option value="Resources">Resources</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="sortBy">Sort By</label>
+                    <select id="sortBy">
+                        <option value="views">Views</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>&nbsp;</label>
+                    <button class="btn primary" id="applyFilters">Apply Filters</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="summary-grid">
+            <article class="metric-card" style="background: var(--card-grad-1);">
+                <div class="label">Total Views</div>
+                <div class="value" id="totalViewsValue">{{ overview_metrics.total_views }}</div>
+                <div class="meta" id="totalViewsMeta">
+                    {% if overview_metrics.views_change_pct is not none %}
+                        {{ '+' if overview_metrics.views_change_pct >= 0 else '' }}{{ overview_metrics.views_change_pct }}% vs last week
+                    {% else %}
+                        N/A (real weekly baseline not available yet)
+                    {% endif %}
+                </div>
+            </article>
+            <article class="metric-card" style="background: var(--card-grad-2);">
+                <div class="label">Total Videos</div>
+                <div class="value" id="totalVideosValue">{{ overview_metrics.total_videos }}</div>
+                <div class="meta">Across Quiz, End Term and Resource sections</div>
+            </article>
+            <article class="metric-card" style="background: var(--card-grad-3);">
+                <div class="label">Avg Views / Video</div>
+                <div class="value" id="avgViewsValue">{{ overview_metrics.avg_views_per_video }}</div>
+                <div class="meta">Distribution quality benchmark</div>
+            </article>
+        </section>
+
+        <section class="charts-layout">
+            <div class="panel">
+                <h3>Top Performing Courses</h3>
+                <div class="chart-box"><canvas id="courseBarChart"></canvas></div>
+            </div>
+            <div class="side-charts">
+                <div class="panel">
+                    <h3>Content Distribution</h3>
+                    <div class="chart-box"><canvas id="contentPieChart"></canvas></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="tables-wrap">
+            {% set sections = [
+                ('quiz1', 'Quiz 1'),
+                ('quiz2', 'Quiz 2'),
+                ('endterm', 'End Term'),
+                ('resources', 'Resources')
+            ] %}
+
+            {% for key, label in sections %}
+            <article class="panel table-panel" data-section="{{ label }}">
+                <div class="table-head">
+                    <h3>{{ label }} Performance Table</h3>
+                    <span class="chip table-chip">{{ analytics[key].total_views }} views | {{ analytics[key].total_videos }} items</span>
+                </div>
+                <div class="table-scroll">
+                    <table class="analytics-table" data-content="{{ label }}">
+                        <thead>
+                            <tr>
+                                <th>Video Name</th>
+                                <th>Course Name</th>
+                                <th>Views</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in detailed_rows[key] %}
+                            <tr data-course="{{ row.course_name }}" data-content="{{ row.content_type }}" data-date="{{ row.last_viewed }}" data-views="{{ row.views }}">
+                                <td>{{ row.video_name }}</td>
+                                <td>{{ row.course_name }}</td>
+                                <td>{{ row.views }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+            {% endfor %}
+        </section>
+    </div>
+
+    <script>
+        const chartData = {{ chart_data | tojson }};
+        const chartRefs = {
+            bar: null,
+            pie: null
+        };
+
+        function safeChartInit() {
+            if (!window.Chart) {
+                return;
+            }
+
+            chartRefs.bar = new Chart(document.getElementById('courseBarChart'), {
+                type: 'bar',
+                data: {
+                    labels: chartData.top_courses.labels,
+                    datasets: [{
+                        data: chartData.top_courses.values,
+                        backgroundColor: ['#1d4ed8', '#0ea5a4', '#f59e0b', '#0f766e', '#ef4444', '#2563eb', '#14b8a6', '#84cc16'],
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { display: false }, grid: { display: false } },
+                        y: { beginAtZero: true, grid: { color: 'rgba(148, 163, 184, 0.18)' } }
+                    }
+                }
+            });
+
+            chartRefs.pie = new Chart(document.getElementById('contentPieChart'), {
+                type: 'pie',
+                data: {
+                    labels: chartData.content_distribution.labels,
+                    datasets: [{
+                        data: chartData.content_distribution.values,
+                        backgroundColor: ['#0ea5a4', '#1d4ed8', '#f59e0b', '#e11d48'],
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
+
+        function sortRows(rows, sortBy) {
+            return rows.sort((a, b) => {
+                return Number(b.dataset.views) - Number(a.dataset.views);
+            });
+        }
+
+        function applyTableFilters() {
+            const courseFilter = document.getElementById('courseFilter').value;
+            const contentFilter = document.getElementById('contentFilter').value;
+            const sortBy = document.getElementById('sortBy').value;
+            const allVisibleRows = [];
+
+            document.querySelectorAll('.table-panel').forEach((panel) => {
+                const table = panel.querySelector('.analytics-table');
+                const tbody = table.querySelector('tbody');
+                const rows = Array.from(tbody.querySelectorAll('tr'));
+
+                const filtered = rows.filter((row) => {
+                    const courseOk = courseFilter === 'all' || row.dataset.course === courseFilter;
+                    const contentOk = contentFilter === 'all' || row.dataset.content === contentFilter;
+                    return courseOk && contentOk;
+                });
+
+                rows.forEach((row) => { row.style.display = 'none'; });
+                sortRows(filtered, sortBy).forEach((row) => {
+                    row.style.display = '';
+                    tbody.appendChild(row);
+                    allVisibleRows.push(row);
+                });
+
+                const sectionViews = filtered.reduce((sum, row) => sum + Number(row.dataset.views || 0), 0);
+                const chip = panel.querySelector('.table-chip');
+                if (chip) {
+                    chip.textContent = `${sectionViews} views | ${filtered.length} items`;
+                }
+            });
+
+            updateSummaryCards(allVisibleRows);
+            updateCharts(allVisibleRows);
+        }
+
+        function updateSummaryCards(rows) {
+            const totalViews = rows.reduce((sum, row) => sum + Number(row.dataset.views || 0), 0);
+            const totalVideos = rows.length;
+            const avgViews = totalVideos ? (totalViews / totalVideos).toFixed(1) : '0.0';
+
+            document.getElementById('totalViewsValue').textContent = totalViews;
+            document.getElementById('totalVideosValue').textContent = totalVideos;
+            document.getElementById('avgViewsValue').textContent = avgViews;
+            document.getElementById('totalViewsMeta').textContent = 'Filtered result based on selected criteria';
+        }
+
+        function updateCharts(rows) {
+            if (!chartRefs.bar || !chartRefs.pie) {
+                return;
+            }
+
+            const courseTotals = {};
+            const contentOrder = ['Quiz 1', 'Quiz 2', 'End Term', 'Resources'];
+            const contentTotals = {
+                'Quiz 1': 0,
+                'Quiz 2': 0,
+                'End Term': 0,
+                'Resources': 0
+            };
+
+            rows.forEach((row) => {
+                const views = Number(row.dataset.views || 0);
+                const course = row.dataset.course || 'Unknown';
+                const content = row.dataset.content || 'Unknown';
+
+                courseTotals[course] = (courseTotals[course] || 0) + views;
+                if (contentTotals[content] !== undefined) {
+                    contentTotals[content] += views;
+                }
+            });
+
+            const sortedCourses = Object.entries(courseTotals)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 8);
+
+            const barLabels = sortedCourses.length ? sortedCourses.map(([label]) => label) : ['No Data'];
+            const barValues = sortedCourses.length ? sortedCourses.map(([, value]) => value) : [0];
+
+            chartRefs.bar.data.labels = barLabels;
+            chartRefs.bar.data.datasets[0].data = barValues;
+            chartRefs.bar.update();
+
+            const pieValues = contentOrder.map((label) => contentTotals[label] || 0);
+            chartRefs.pie.data.labels = contentOrder;
+            chartRefs.pie.data.datasets[0].data = pieValues;
+            chartRefs.pie.update();
+        }
+
+        function exportVisibleRowsToCsv() {
+            const headers = ['Section', 'Video Name', 'Course Name', 'Views'];
+            const lines = [headers.join(',')];
+
+            document.querySelectorAll('.table-panel').forEach((panel) => {
+                const section = panel.dataset.section;
+                panel.querySelectorAll('tbody tr').forEach((row) => {
+                    if (row.style.display === 'none') {
+                        return;
+                    }
+                    const cols = Array.from(row.querySelectorAll('td')).map((td) => `"${td.textContent.replace(/"/g, '""')}"`);
+                    lines.push(`"${section}",${cols.join(',')}`);
+                });
+            });
+
+            const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'mauryahub_analytics_export.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function initTheme() {
+            const saved = localStorage.getItem('analytics-theme');
+            if (saved === 'dark') {
+                document.body.classList.add('dark');
+            }
+        }
+
+        document.getElementById('toggleTheme').addEventListener('click', () => {
+            document.body.classList.toggle('dark');
+            localStorage.setItem('analytics-theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+        });
+
+        document.getElementById('applyFilters').addEventListener('click', applyTableFilters);
+        document.getElementById('downloadCsv').addEventListener('click', exportVisibleRowsToCsv);
+        document.getElementById('courseFilter').addEventListener('change', applyTableFilters);
+        document.getElementById('contentFilter').addEventListener('change', applyTableFilters);
+        document.getElementById('sortBy').addEventListener('change', applyTableFilters);
+
+        initTheme();
+        safeChartInit();
+        applyTableFilters();
+    </script>
+</body>
+</html>
