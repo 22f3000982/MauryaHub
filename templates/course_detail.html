@@ -7,13 +7,29 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style2.css') }}">
     <link rel="icon" href="data:,">
     <style>
+        :root {
+            --bg-1: #090412;
+            --bg-2: #120523;
+            --bg-3: #1b0a31;
+            --panel: rgba(25, 12, 44, 0.84);
+            --panel-strong: rgba(33, 16, 58, 0.92);
+            --panel-hover: rgba(48, 24, 82, 0.92);
+            --text-main: #ecf0ff;
+            --text-muted: #ac9dcb;
+            --border-soft: rgba(192, 132, 252, 0.24);
+            --accent-a: #a855f7;
+            --accent-b: #ec4899;
+            --accent-c: #38bdf8;
+            --shadow-main: 0 16px 36px rgba(5, 2, 14, 0.55);
+        }
+
         /* Global Reset */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             scrollbar-width: thin;
-            scrollbar-color: #6b7281 #1f2937;
+            scrollbar-color: #6f57aa #160a2a;
         }
 
         /* Custom Scrollbar */
@@ -21,25 +37,37 @@
             width: 6px;
         }
         *::-webkit-scrollbar-track {
-            background: #1f2937;
+            background: #160a2a;
             border-radius: 3px;
         }
         *::-webkit-scrollbar-thumb {
-            background: #6b7280;
+            background: #6f57aa;
             border-radius: 3px;
             transition: background 0.3s ease;
         }
         *::-webkit-scrollbar-thumb:hover {
-            background: #9ca3af;
+            background: #9e7bdb;
         }
 
         /* Body and HTML */
         body, html {
-            background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
+            background: linear-gradient(180deg, var(--bg-3) 0%, var(--bg-2) 45%, var(--bg-1) 100%);
             height: 100%;
             overflow-y: auto;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            color: #dae1eb;
+            color: var(--text-main);
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background:
+                radial-gradient(circle at 12% 8%, rgba(168, 85, 247, 0.26), transparent 30rem),
+                radial-gradient(circle at 90% 10%, rgba(236, 72, 153, 0.22), transparent 26rem),
+                radial-gradient(circle at 70% 88%, rgba(56, 189, 248, 0.18), transparent 30rem);
+            z-index: 0;
         }
 
         /* Sidebar Styling */
@@ -49,10 +77,11 @@
             height: 100%;
             width: 160px; /* UPDATED: Explicit width set and reduced from 180px */
             z-index: 1000;
-            background: linear-gradient(180deg, #1a173f 0%, #0f0c29 100%);
+            background: linear-gradient(180deg, rgba(35, 16, 61, 0.95) 0%, rgba(15, 7, 30, 0.94) 100%);
             padding: 15px;
-            color: #dae1eb;
-            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+            color: var(--text-main);
+            box-shadow: var(--shadow-main);
+            border-right: 1px solid var(--border-soft);
             display: flex;
             flex-direction: column;
             transition: transform 0.3s ease;
@@ -64,34 +93,50 @@
             font-weight: 700;
             color: #ffffff;
             letter-spacing: 0.5px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid var(--border-soft);
             padding-bottom: 8px;
         }
 
         .sidebar a {
             display: flex;
             align-items: center;
-            color: #a5b4fc;
+            color: #ccbff0;
             text-decoration: none;
             margin: 8px 0;
             font-size: 0.95em;
             font-weight: 500;
             padding: 8px 12px;
             border-radius: 6px;
+            border: 1px solid transparent;
             transition: background 0.3s, color 0.3s, transform 0.2s;
         }
 
         .sidebar a:hover {
-            background: rgba(52, 152, 219, 0.1);
+            background: rgba(95, 48, 170, 0.32);
             color: #ffffff;
+            border-color: var(--border-soft);
             transform: translateX(5px);
         }
 
         .sidebar a.active {
-            background: rgba(52, 152, 219, 0.2);
+            background: linear-gradient(90deg, rgba(168, 85, 247, 0.32), rgba(236, 72, 153, 0.22));
             color: #ffffff;
             font-weight: 600;
+            border-color: var(--border-soft);
         }
+
+        .sidebar a.resource-link {
+            background: linear-gradient(90deg, rgba(6, 182, 212, 0.2), rgba(59, 130, 246, 0.2));
+            border: 1px solid rgba(125, 211, 252, 0.45);
+            color: #e0f2fe;
+            box-shadow: 0 0 0 1px rgba(14, 165, 233, 0.18), 0 6px 16px rgba(14, 165, 233, 0.16);
+        }
+
+        .sidebar a.resource-link:hover {
+            background: linear-gradient(90deg, rgba(6, 182, 212, 0.34), rgba(59, 130, 246, 0.34));
+            transform: translateX(5px) scale(1.02);
+        }
+
 
         .sidebar a .icon {
             margin-right: 8px;
@@ -102,17 +147,17 @@
         .admin-login-form {
             margin-top: 15px;
             padding: 12px;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.04);
             border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--border-soft);
         }
 
         .password-input {
             width: 100%;
             padding: 8px;
             margin-bottom: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(21, 10, 39, 0.9);
+            border: 1px solid var(--border-soft);
             border-radius: 4px;
             color: #ffffff;
             font-size: 0.85rem;
@@ -125,14 +170,14 @@
 
         .password-input:focus {
             outline: none;
-            border-color: #3498db;
-            background: rgba(255, 255, 255, 0.15);
+            border-color: #a855f7;
+            background: rgba(34, 16, 63, 0.96);
         }
 
         .login-btn {
             width: 100%;
             padding: 8px;
-            background: linear-gradient(45deg, #3498db, #2980b9);
+            background: linear-gradient(135deg, #9333ea, #d946ef 52%, #ec4899);
             color: white;
             border: none;
             border-radius: 4px;
@@ -143,7 +188,7 @@
         }
 
         .login-btn:hover {
-            background: linear-gradient(45deg, #2980b9, #1f5f8b);
+            background: linear-gradient(135deg, #a855f7, #ec4899 52%, #f43f5e);
             transform: translateY(-1px);
         }
 
@@ -152,8 +197,10 @@
             margin-left: 160px; /* UPDATED: Reduced from 180px to match sidebar */
             min-height: 100vh;
             overflow-y: auto;
-            background: linear-gradient(to bottom, #15113a, #302b63, #24243e);
+            background: transparent;
             padding: 15px;
+            position: relative;
+            z-index: 1;
         }
 
         .container {
@@ -162,9 +209,11 @@
         }
 
         .container h1 {
-            color: #dae1eb;
+            color: var(--text-main);
             margin: 0 0 15px;
             font-size: 1.8em;
+            letter-spacing: -0.02em;
+            text-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
         }
 
         /* Search Input */
@@ -174,17 +223,22 @@
             padding: 8px;
             margin: 8px 0 15px;
             font-size: 0.9em;
-            border: 1px solid #888;
+            border: 1px solid var(--border-soft);
             border-radius: 4px;
-            background-color: #f9f9f9;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            background-color: rgba(20, 10, 36, 0.9);
+            color: var(--text-main);
+            box-shadow: 0 6px 16px rgba(4, 1, 10, 0.4);
             transition: border-color 0.3s, box-shadow 0.3s;
         }
 
         #searchInput:focus {
-            border-color: #3498db;
-            box-shadow: 0 0 8px rgba(52, 152, 219, 0.3);
+            border-color: #a855f7;
+            box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.25);
             outline: none;
+        }
+
+        #searchInput::placeholder {
+            color: var(--text-muted);
         }
 
         /* Search and Button Container */
@@ -378,11 +432,12 @@
         }
 
         .card {
-            background: linear-gradient(to bottom, #0f0c29, #302b63, #24243e);
-            color: #c0dbed;
+            background: linear-gradient(180deg, rgba(36, 15, 63, 0.94), rgba(20, 9, 37, 0.92));
+            color: var(--text-main);
             padding: 12px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(245, 246, 246, 0.204);
+            border-radius: 14px;
+            border: 1px solid var(--border-soft);
+            box-shadow: 0 14px 30px rgba(3, 1, 10, 0.45);
             flex: 1 1 100%;
             max-width: 410px;
         }
@@ -407,7 +462,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 6px 0;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid rgba(192, 132, 252, 0.18);
             flex-wrap: wrap;
         }
 
@@ -418,7 +473,7 @@
         }
 
         .watch-link {
-            color: #3498db;
+            color: #93c5fd;
             font-weight: bold;
             text-decoration: none;
             transition: transform 0.2s, color 0.2s;
@@ -429,7 +484,7 @@
 
         .watch-link:hover {
             transform: scale(1.1);
-            color: #2980b9;
+            color: #e9d5ff;
         }
 
         .eye-icon {
@@ -443,19 +498,100 @@
         }
 
         .admin-links a {
-            color: #3498db;
+            color: #c4b5fd;
             text-decoration: none;
             margin: 0 4px;
         }
 
         .admin-links a:hover {
-            color: #2980b9;
+            color: #f9a8d4;
         }
 
         .no-items {
             font-style: italic;
-            color: #c0dbed;
+            color: var(--text-muted);
             font-size: 0.85em;
+        }
+
+        /* Highlighted Item Styles - Glowing Effect */
+        .item-highlighted {
+            position: relative;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 165, 0, 0.1));
+            border-radius: 8px;
+            padding: 8px 12px !important;
+            margin: 4px -8px;
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            box-shadow: 
+                0 0 10px rgba(255, 215, 0, 0.3),
+                0 0 20px rgba(255, 165, 0, 0.2),
+                0 0 30px rgba(255, 215, 0, 0.1),
+                inset 0 0 15px rgba(255, 215, 0, 0.05);
+            animation: highlightGlow 2s ease-in-out infinite alternate;
+        }
+
+        .item-highlighted .item-name {
+            color: #ffd700;
+            font-weight: 600;
+            text-shadow: 0 0 8px rgba(255, 215, 0, 0.5);
+        }
+
+        .item-highlighted::before {
+            content: '⭐';
+            position: absolute;
+            left: -5px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.8em;
+            animation: starPulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes highlightGlow {
+            0% {
+                box-shadow: 
+                    0 0 10px rgba(255, 215, 0, 0.3),
+                    0 0 20px rgba(255, 165, 0, 0.2),
+                    0 0 30px rgba(255, 215, 0, 0.1);
+                border-color: rgba(255, 215, 0, 0.4);
+            }
+            100% {
+                box-shadow: 
+                    0 0 15px rgba(255, 215, 0, 0.5),
+                    0 0 30px rgba(255, 165, 0, 0.3),
+                    0 0 45px rgba(255, 215, 0, 0.2);
+                border-color: rgba(255, 215, 0, 0.7);
+            }
+        }
+
+        @keyframes starPulse {
+            0%, 100% { opacity: 1; transform: translateY(-50%) scale(1); }
+            50% { opacity: 0.7; transform: translateY(-50%) scale(1.2); }
+        }
+
+        /* Highlight Toggle Button */
+        .highlight-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9em;
+            padding: 2px 6px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            color: #888;
+        }
+
+        .highlight-btn:hover {
+            background: rgba(255, 215, 0, 0.2);
+            color: #ffd700;
+        }
+
+        .highlight-btn.active {
+            color: #ffd700;
+            text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+        }
+
+        .highlight-btn.active:hover {
+            background: rgba(255, 100, 100, 0.2);
+            color: #ff6666;
         }
 
         .reorder-buttons {
@@ -466,7 +602,7 @@
         }
 
         .reorder-btn {
-            background: #3498db;
+            background: linear-gradient(135deg, #7c3aed, #a855f7);
             color: white;
             border: none;
             width: 18px;
@@ -478,7 +614,7 @@
         }
 
         .reorder-btn:hover {
-            background: #2980b9;
+            background: linear-gradient(135deg, #9333ea, #db2777);
         }
 
         .circular-add-btn {
@@ -487,26 +623,26 @@
             justify-content: center;
             width: 30px;
             height: 30px;
-            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            background: linear-gradient(135deg, #9333ea 0%, #ec4899 100%);
             color: white;
             text-decoration: none;
             border-radius: 50%;
             font-size: 18px;
             font-weight: bold;
-            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+            box-shadow: 0 2px 10px rgba(168, 85, 247, 0.36);
             transition: transform 0.2s, box-shadow 0.2s;
             margin: 8px auto;
         }
 
         .circular-add-btn:hover {
             transform: scale(1.1);
-            box-shadow: 0 4px 16px rgba(52, 152, 219, 0.4);
+            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4);
         }
 
         .add-btn-container {
             text-align: center;
             padding: 8px 0;
-            border-top: 1px solid #444;
+            border-top: 1px solid rgba(192, 132, 252, 0.2);
             margin-top: 8px;
         }
 
@@ -526,7 +662,7 @@
         }
 
         .sidebar-toggle:hover {
-            color: #a5b4fc;
+            color: #d8b4fe;
         }
 
         /* Responsive Design */
@@ -668,7 +804,7 @@
 
         /* Accessibility Enhancements */
         a:focus, button:focus, input:focus {
-            outline: 3px solid #a5b4fc;
+            outline: 3px solid #a855f7;
             outline-offset: 2px;
         }
 
@@ -704,9 +840,9 @@
         <h2>Dashboard</h2>
         <a href="/" class="active"><span class="icon">🏠</span> Home</a>
         <a href="{{ url_for('course_view') }}"><span class="icon">📚</span> Courses</a>
+        <a href="{{ url_for('general_resources_page') }}" class="resource-link"><span class="icon">📂</span> Resources</a>
         <a href="{{ url_for('contact_us') }}"><span class="icon">📞</span> Contact Us</a>
         <a href="{{ url_for('about_admin') }}"><span class="icon">👨‍💼</span> About Admin</a>
-        <a href="{{ url_for('settings') }}"><span class="icon">⚙️</span> Settings</a>
         {% if not session.get('admin_mode') %}
             <form class="admin-login-form" action="{{ url_for('admin_login') }}" method="post">
                 <input class="password-input" type="password" name="password" placeholder="Admin Password" required>
@@ -714,7 +850,7 @@
             </form>
         {% else %}
             <a href="{{ url_for('admin_add_course') }}"><span class="icon">➕</span> Add Course</a>
-            <a href="{{ url_for('admin_restore_backup') }}"><span class="icon">🔄</span> Restore Database</a>
+            <a href="{{ url_for('admin_backup') }}"><span class="icon">�️</span> Backup & Restore</a>
             <a href="{{ url_for('admin_logout') }}"><span class="icon">🚪</span> Exit Admin</a>
         {% endif %}
     </div>
@@ -751,23 +887,23 @@
                 <div class="cards-row three-items">
                     <div class="card">
                         {% if admin_mode %}
-                            <h2>PYQs</h2>
+                            <h2>Quiz-1</h2>
                         {% endif %}
-                        {% if pyqs %}
+                        {% if quiz1 %}
                             <ul class="item-list">
-                                {% for pyq in pyqs %}
-                                    <li>
+                                {% for quiz1_item in quiz1 %}
+                                    <li class="{% if quiz1_item[4] %}item-highlighted{% endif %}" data-item-id="{{ quiz1_item[0] }}" data-item-type="quiz1">
                                         {% if admin_mode %}
                                             <div class="reorder-buttons">
-                                                <button class="reorder-btn" onclick="moveItem('pyqs', {{ pyq[0] }}, 'up')" title="Move Up">▲</button>
-                                                <button class="reorder-btn" onclick="moveItem('pyqs', {{ pyq[0] }}, 'down')" title="Move Down">▼</button>
+                                                <button class="reorder-btn" onclick="moveItem('quiz1', {{ quiz1_item[0] }}, 'up')" title="Move Up">▲</button>
+                                                <button class="reorder-btn" onclick="moveItem('quiz1', {{ quiz1_item[0] }}, 'down')" title="Move Down">▼</button>
                                             </div>
                                         {% endif %}
-                                        <span class="item-name">{{ pyq[1] }}</span>
-                                        {% if pyq[2] %}
-                                            <a href="{{ url_for('increment_watch', pyq_id=pyq[0]) }}" target="_blank" class="watch-link">
+                                        <span class="item-name">{{ quiz1_item[1] }}</span>
+                                        {% if quiz1_item[2] %}
+                                            <a href="{{ url_for('increment_watch_quiz1', quiz1_id=quiz1_item[0]) }}" target="_blank" class="watch-link">
                                                 {% if admin_mode %}
-                                                    <span class="eye-icon">👁️</span> ({{ pyq[3] }})
+                                                    <span class="eye-icon">👁️</span> ({{ quiz1_item[3] }})
                                                 {% else %}
                                                     ▶️ Watch
                                                 {% endif %}
@@ -777,8 +913,9 @@
                                         {% endif %}
                                         {% if admin_mode %}
                                             <div class="admin-links">
-                                                <a href="{{ url_for('admin_edit_item', item_type='pyqs', item_id=pyq[0], course_id=course_id) }}">Edit</a> |
-                                                <a href="{{ url_for('admin_delete_item', item_type='pyqs', course_id=course_id, item_id=pyq[0]) }}">Delete</a>
+                                                <button class="highlight-btn {% if quiz1_item[4] %}active{% endif %}" onclick="toggleHighlight('quiz1', {{ quiz1_item[0] }}, this)" title="{% if quiz1_item[4] %}Remove Highlight{% else %}Highlight{% endif %}">{% if quiz1_item[4] %}⭐{% else %}☆{% endif %}</button>
+                                                <a href="{{ url_for('admin_edit_item', item_type='quiz1', item_id=quiz1_item[0], course_id=course_id) }}">Edit</a> |
+                                                <a href="{{ url_for('admin_delete_item', item_type='quiz1', course_id=course_id, item_id=quiz1_item[0]) }}">Delete</a>
                                             </div>
                                         {% endif %}
                                     </li>
@@ -789,30 +926,30 @@
                         {% endif %}
                         {% if admin_mode %}
                             <div class="add-btn-container">
-                                <a href="{{ url_for('admin_add_item', item_type='pyqs', course_id=course_id) }}" class="circular-add-btn" title="Add PYQ">+</a>
+                                <a href="{{ url_for('admin_add_item', item_type='quiz1', course_id=course_id) }}" class="circular-add-btn" title="Add Quiz-1">+</a>
                             </div>
                         {% endif %}
                     </div>
 
                     <div class="card">
                         {% if admin_mode %}
-                            <h2>Notes</h2>
+                            <h2>Quiz-2</h2>
                         {% endif %}
-                        {% if notes %}
+                        {% if quiz2 %}
                             <ul class="item-list">
-                                {% for note in notes %}
-                                    <li>
+                                {% for quiz2_item in quiz2 %}
+                                    <li class="{% if quiz2_item[4] %}item-highlighted{% endif %}" data-item-id="{{ quiz2_item[0] }}" data-item-type="quiz2">
                                         {% if admin_mode %}
                                             <div class="reorder-buttons">
-                                                <button class="reorder-btn" onclick="moveItem('notes', {{ note[0] }}, 'up')" title="Move Up">▲</button>
-                                                <button class="reorder-btn" onclick="moveItem('notes', {{ note[0] }}, 'down')" title="Move Down">▼</button>
+                                                <button class="reorder-btn" onclick="moveItem('quiz2', {{ quiz2_item[0] }}, 'up')" title="Move Up">▲</button>
+                                                <button class="reorder-btn" onclick="moveItem('quiz2', {{ quiz2_item[0] }}, 'down')" title="Move Down">▼</button>
                                             </div>
                                         {% endif %}
-                                        <span class="item-name">{{ note[1] }}</span>
-                                        {% if note[2] %}
-                                            <a href="{{ url_for('increment_watch_note', note_id=note[0]) }}" target="_blank" class="watch-link">
+                                        <span class="item-name">{{ quiz2_item[1] }}</span>
+                                        {% if quiz2_item[2] %}
+                                            <a href="{{ url_for('increment_watch_quiz2', quiz2_id=quiz2_item[0]) }}" target="_blank" class="watch-link">
                                                 {% if admin_mode %}
-                                                    <span class="eye-icon">👁️</span> ({{ note[3]|default(0) }})
+                                                    <span class="eye-icon">👁️</span> ({{ quiz2_item[3]|default(0) }})
                                                 {% else %}
                                                     ▶️ Watch
                                                 {% endif %}
@@ -822,8 +959,9 @@
                                         {% endif %}
                                         {% if admin_mode %}
                                             <div class="admin-links">
-                                                <a href="{{ url_for('admin_edit_item', item_type='notes', item_id=note[0], course_id=course_id) }}">Edit</a> |
-                                                <a href="{{ url_for('admin_delete_item', item_type='notes', course_id=course_id, item_id=note[0]) }}">Delete</a>
+                                                <button class="highlight-btn {% if quiz2_item[4] %}active{% endif %}" onclick="toggleHighlight('quiz2', {{ quiz2_item[0] }}, this)" title="{% if quiz2_item[4] %}Remove Highlight{% else %}Highlight{% endif %}">{% if quiz2_item[4] %}⭐{% else %}☆{% endif %}</button>
+                                                <a href="{{ url_for('admin_edit_item', item_type='quiz2', item_id=quiz2_item[0], course_id=course_id) }}">Edit</a> |
+                                                <a href="{{ url_for('admin_delete_item', item_type='quiz2', course_id=course_id, item_id=quiz2_item[0]) }}">Delete</a>
                                             </div>
                                         {% endif %}
                                     </li>
@@ -834,30 +972,30 @@
                         {% endif %}
                         {% if admin_mode %}
                             <div class="add-btn-container">
-                                <a href="{{ url_for('admin_add_item', item_type='notes', course_id=course_id) }}" class="circular-add-btn" title="Add Note">+</a>
+                                <a href="{{ url_for('admin_add_item', item_type='quiz2', course_id=course_id) }}" class="circular-add-btn" title="Add Quiz-2">+</a>
                             </div>
                         {% endif %}
                     </div>
 
                     <div class="card">
                         {% if admin_mode %}
-                            <h2>Assignments</h2>
+                            <h2>End Term</h2>
                         {% endif %}
-                        {% if assignments %}
+                        {% if endterm %}
                             <ul class="item-list">
-                                {% for assignment in assignments %}
-                                    <li>
+                                {% for endterm_item in endterm %}
+                                    <li class="{% if endterm_item[4] %}item-highlighted{% endif %}" data-item-id="{{ endterm_item[0] }}" data-item-type="endterm">
                                         {% if admin_mode %}
                                             <div class="reorder-buttons">
-                                                <button class="reorder-btn" onclick="moveItem('assignments', {{ assignment[0] }}, 'up')" title="Move Up">▲</button>
-                                                <button class="reorder-btn" onclick="moveItem('assignments', {{ assignment[0] }}, 'down')" title="Move Down">▼</button>
+                                                <button class="reorder-btn" onclick="moveItem('endterm', {{ endterm_item[0] }}, 'up')" title="Move Up">▲</button>
+                                                <button class="reorder-btn" onclick="moveItem('endterm', {{ endterm_item[0] }}, 'down')" title="Move Down">▼</button>
                                             </div>
                                         {% endif %}
-                                        <span class="item-name">{{ assignment[1] }}</span>
-                                        {% if assignment[2] %}
-                                            <a href="{{ url_for('increment_watch_assignment', assignment_id=assignment[0]) }}" target="_blank" class="watch-link">
+                                        <span class="item-name">{{ endterm_item[1] }}</span>
+                                        {% if endterm_item[2] %}
+                                            <a href="{{ url_for('increment_watch_endterm', endterm_id=endterm_item[0]) }}" target="_blank" class="watch-link">
                                                 {% if admin_mode %}
-                                                    <span class="eye-icon">👁️</span> ({{ assignment[3]|default(0) }})
+                                                    <span class="eye-icon">👁️</span> ({{ endterm_item[3]|default(0) }})
                                                 {% else %}
                                                     ▶️ Watch
                                                 {% endif %}
@@ -867,8 +1005,9 @@
                                         {% endif %}
                                         {% if admin_mode %}
                                             <div class="admin-links">
-                                                <a href="{{ url_for('admin_edit_item', item_type='assignments', item_id=assignment[0], course_id=course_id) }}">Edit</a> |
-                                                <a href="{{ url_for('admin_delete_item', item_type='assignments', course_id=course_id, item_id=assignment[0]) }}">Delete</a>
+                                                <button class="highlight-btn {% if endterm_item[4] %}active{% endif %}" onclick="toggleHighlight('endterm', {{ endterm_item[0] }}, this)" title="{% if endterm_item[4] %}Remove Highlight{% else %}Highlight{% endif %}">{% if endterm_item[4] %}⭐{% else %}☆{% endif %}</button>
+                                                <a href="{{ url_for('admin_edit_item', item_type='endterm', item_id=endterm_item[0], course_id=course_id) }}">Edit</a> |
+                                                <a href="{{ url_for('admin_delete_item', item_type='endterm', course_id=course_id, item_id=endterm_item[0]) }}">Delete</a>
                                             </div>
                                         {% endif %}
                                     </li>
@@ -879,7 +1018,7 @@
                         {% endif %}
                         {% if admin_mode %}
                             <div class="add-btn-container">
-                                <a href="{{ url_for('admin_add_item', item_type='assignments', course_id=course_id) }}" class="circular-add-btn" title="Add Assignment">+</a>
+                                <a href="{{ url_for('admin_add_item', item_type='endterm', course_id=course_id) }}" class="circular-add-btn" title="Add End Term">+</a>
                             </div>
                         {% endif %}
                     </div>
@@ -893,7 +1032,7 @@
                         {% if resources %}
                             <ul class="item-list">
                                 {% for resource in resources %}
-                                    <li>
+                                    <li class="{% if resource[4] %}item-highlighted{% endif %}" data-item-id="{{ resource[0] }}" data-item-type="resources">
                                         {% if admin_mode %}
                                             <div class="reorder-buttons">
                                                 <button class="reorder-btn" onclick="moveItem('resources', {{ resource[0] }}, 'up')" title="Move Up">▲</button>
@@ -914,6 +1053,7 @@
                                         {% endif %}
                                         {% if admin_mode %}
                                             <div class="admin-links">
+                                                <button class="highlight-btn {% if resource[4] %}active{% endif %}" onclick="toggleHighlight('resources', {{ resource[0] }}, this)" title="{% if resource[4] %}Remove Highlight{% else %}Highlight{% endif %}">{% if resource[4] %}⭐{% else %}☆{% endif %}</button>
                                                 <a href="{{ url_for('admin_edit_item', item_type='resources', item_id=resource[0], course_id=course_id) }}">Edit</a> |
                                                 <a href="{{ url_for('admin_delete_item', item_type='resources', course_id=course_id, item_id=resource[0]) }}">Delete</a>
                                             </div>
@@ -1007,6 +1147,34 @@
                 }
             })
             .catch(() => alert('Failed to move item.'));
+        }
+
+        // Toggle highlight function
+        function toggleHighlight(itemType, itemId, buttonElement) {
+            fetch(`/admin/toggle_highlight/${itemType}/{{ course_id }}/${itemId}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const listItem = buttonElement.closest('li');
+                    if (data.is_highlighted) {
+                        listItem.classList.add('item-highlighted');
+                        buttonElement.classList.add('active');
+                        buttonElement.innerHTML = '⭐';
+                        buttonElement.title = 'Remove Highlight';
+                    } else {
+                        listItem.classList.remove('item-highlighted');
+                        buttonElement.classList.remove('active');
+                        buttonElement.innerHTML = '☆';
+                        buttonElement.title = 'Highlight';
+                    }
+                } else {
+                    alert('Failed to toggle highlight: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(() => alert('Failed to toggle highlight.'));
         }
     </script>
 </body>

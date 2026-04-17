@@ -1,3 +1,0 @@
-# Uploads folder - personal files
-static/uploads/*
-!static/uploads/.gitkeep
