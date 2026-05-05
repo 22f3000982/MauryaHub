@@ -1,0 +1,1680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Software Engineering Quiz</title>
+<style>
+  :root {
+    --primary: #4f46e5;
+    --primary-light: #eef2ff;
+    --primary-dark: #3730a3;
+    --success: #16a34a;
+    --success-light: #dcfce7;
+    --danger: #dc2626;
+    --danger-light: #fee2e2;
+    --warning: #d97706;
+    --warning-light: #fef3c7;
+    --gray-50: #f9fafb;
+    --gray-100: #f3f4f6;
+    --gray-200: #e5e7eb;
+    --gray-300: #d1d5db;
+    --gray-400: #9ca3af;
+    --gray-500: #6b7280;
+    --gray-600: #4b5563;
+    --gray-700: #374151;
+    --gray-800: #1f2937;
+    --gray-900: #111827;
+    --bg: #ffffff;
+    --surface: #f9fafb;
+    --border: #e5e7eb;
+    --text: #111827;
+    --text-muted: #6b7280;
+    --sidebar-w: 260px;
+    --radius: 10px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05);
+  }
+  [data-theme="dark"] {
+    --bg: #0f172a;
+    --surface: #1e293b;
+    --border: #334155;
+    --text: #f1f5f9;
+    --text-muted: #94a3b8;
+    --primary-light: #1e1b4b;
+    --success-light: #052e16;
+    --danger-light: #450a0a;
+    --warning-light: #422006;
+    --gray-50: #1e293b;
+    --gray-100: #1e293b;
+    --gray-200: #334155;
+    --gray-700: #cbd5e1;
+    --gray-800: #e2e8f0;
+    --shadow: 0 1px 3px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.3);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); transition: background 0.2s, color 0.2s; min-height: 100vh; }
+
+  /* LAYOUT */
+  .app { display: flex; min-height: 100vh; }
+  .sidebar { width: var(--sidebar-w); background: var(--surface); border-right: 1px solid var(--border); padding: 1.25rem 1rem; position: fixed; top: 0; left: 0; height: 100vh; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; z-index: 100; transition: transform 0.3s; }
+  .main { margin-left: var(--sidebar-w); flex: 1; padding: 1.5rem; max-width: 860px; }
+
+  /* SIDEBAR */
+  .sidebar-logo { font-size: 0.85rem; font-weight: 700; color: var(--primary); letter-spacing: 0.05em; text-transform: uppercase; }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+  .stat-card { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 0.6rem 0.7rem; }
+  .stat-label { font-size: 0.7rem; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
+  .stat-value { font-size: 1.3rem; font-weight: 700; color: var(--text); line-height: 1.2; margin-top: 2px; }
+  .stat-card.correct .stat-value { color: var(--success); }
+  .stat-card.wrong .stat-value { color: var(--danger); }
+  .progress-wrap { background: var(--gray-200); border-radius: 999px; height: 8px; overflow: hidden; }
+  .progress-bar { height: 100%; background: linear-gradient(90deg, var(--primary), #7c3aed); border-radius: 999px; transition: width 0.4s ease; }
+  .progress-label { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.3rem; display: flex; justify-content: space-between; }
+  .q-nav-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin-top: 0.25rem; }
+  .q-dot { width: 100%; aspect-ratio: 1; border-radius: 5px; border: 1px solid var(--border); background: var(--bg); font-size: 0.65rem; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 600; color: var(--text-muted); transition: all 0.15s; }
+  .q-dot:hover { border-color: var(--primary); color: var(--primary); }
+  .q-dot.current { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .q-dot.correct { background: var(--success-light); border-color: var(--success); color: var(--success); }
+  .q-dot.wrong { background: var(--danger-light); border-color: var(--danger); color: var(--danger); }
+  .q-dot.marked { border-color: var(--warning); color: var(--warning); background: var(--warning-light); }
+  .sidebar-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
+
+  /* TOP BAR */
+  .topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; gap: 1rem; flex-wrap: wrap; }
+  .topbar-left { display: flex; align-items: center; gap: 0.75rem; }
+  .topic-badge { background: var(--primary-light); color: var(--primary); border-radius: 999px; padding: 0.25rem 0.75rem; font-size: 0.75rem; font-weight: 600; }
+  .q-counter { font-size: 0.85rem; color: var(--text-muted); font-weight: 500; }
+  .topbar-right { display: flex; gap: 0.5rem; align-items: center; }
+  .btn { padding: 0.45rem 1rem; border-radius: 8px; border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.15s; display: inline-flex; align-items: center; gap: 0.4rem; }
+  .btn:hover { background: var(--gray-100); border-color: var(--gray-300); }
+  .btn.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .btn.primary:hover { background: var(--primary-dark); }
+  .btn.danger { background: var(--danger); color: #fff; border-color: var(--danger); }
+  .btn.small { padding: 0.3rem 0.7rem; font-size: 0.75rem; }
+  .btn.marked-btn.active { background: var(--warning-light); border-color: var(--warning); color: var(--warning); }
+
+  /* TIMER */
+  .timer-display { font-size: 0.85rem; font-weight: 700; color: var(--text); background: var(--gray-100); border-radius: 8px; padding: 0.35rem 0.75rem; font-variant-numeric: tabular-nums; }
+  .timer-display.warning { color: var(--danger); background: var(--danger-light); }
+
+  /* QUESTION CARD */
+  .question-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); margin-bottom: 1rem; animation: fadeSlide 0.25s ease; }
+  @keyframes fadeSlide { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  .question-text { font-size: 1rem; font-weight: 600; line-height: 1.6; color: var(--text); margin-bottom: 1.25rem; }
+  .options-list { display: flex; flex-direction: column; gap: 0.6rem; }
+  .option-btn { width: 100%; text-align: left; padding: 0.75rem 1rem; border-radius: 8px; border: 1.5px solid var(--border); background: var(--bg); color: var(--text); font-size: 0.9rem; cursor: pointer; transition: all 0.15s; display: flex; align-items: flex-start; gap: 0.75rem; line-height: 1.5; }
+  .option-btn:hover:not(:disabled) { border-color: var(--primary); background: var(--primary-light); }
+  .option-btn.selected { border-color: var(--primary); background: var(--primary-light); }
+  .option-btn.correct { border-color: var(--success); background: var(--success-light); color: var(--success); font-weight: 600; }
+  .option-btn.wrong { border-color: var(--danger); background: var(--danger-light); color: var(--danger); }
+  .option-btn.show-correct { border-color: var(--success); background: var(--success-light); color: var(--success); }
+  .option-btn:disabled { cursor: default; }
+  .option-letter { min-width: 24px; height: 24px; border-radius: 6px; border: 1.5px solid currentColor; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
+  .option-icon { margin-left: auto; flex-shrink: 0; font-size: 1rem; }
+
+  /* EXPLANATION */
+  .explanation-card { background: var(--gray-50); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-top: 1rem; animation: fadeSlide 0.2s ease; }
+  .explanation-card h4 { font-size: 0.85rem; font-weight: 700; color: var(--primary); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+  .exp-item { padding: 0.6rem 0.75rem; border-radius: 8px; font-size: 0.85rem; line-height: 1.5; margin-bottom: 0.4rem; }
+  .exp-item.correct { background: var(--success-light); border-left: 3px solid var(--success); }
+  .exp-item.wrong { background: var(--danger-light); border-left: 3px solid var(--danger); }
+  .exp-label { font-weight: 700; margin-right: 0.4rem; }
+
+  /* NAV BUTTONS */
+  .nav-row { display: flex; justify-content: space-between; align-items: center; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap; }
+
+  /* SCREENS */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* HOME SCREEN */
+  .home-card { max-width: 580px; margin: 3rem auto; text-align: center; }
+  .home-card h1 { font-size: 1.8rem; font-weight: 800; color: var(--text); margin-bottom: 0.5rem; }
+  .home-card p { color: var(--text-muted); margin-bottom: 1.5rem; }
+  .home-stats { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem; }
+  .home-stat { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1.25rem; text-align: center; }
+  .home-stat-num { font-size: 1.5rem; font-weight: 800; color: var(--primary); }
+  .home-stat-lbl { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+  .topic-select-wrap { text-align: left; margin-bottom: 1.5rem; }
+  .topic-select-wrap label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 0.4rem; }
+  select { width: 100%; padding: 0.6rem 0.75rem; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); font-size: 0.9rem; }
+  .toggle-row { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.5rem; }
+  .toggle-row label { font-size: 0.85rem; font-weight: 500; }
+  .toggle { position: relative; display: inline-flex; align-items: center; }
+  .toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .toggle-track { width: 36px; height: 20px; background: var(--gray-300); border-radius: 999px; cursor: pointer; transition: background 0.2s; display: block; }
+  .toggle input:checked + .toggle-track { background: var(--primary); }
+  .toggle-thumb { position: absolute; left: 3px; top: 3px; width: 14px; height: 14px; background: #fff; border-radius: 50%; transition: left 0.2s; pointer-events: none; }
+  .toggle input:checked ~ .toggle-thumb { left: 19px; }
+  .btn-group { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+
+  /* RESULTS SCREEN */
+  .results-wrap { max-width: 700px; margin: 0 auto; }
+  .score-hero { text-align: center; padding: 2rem; background: var(--primary-light); border-radius: var(--radius); margin-bottom: 1.5rem; border: 1px solid rgba(79,70,229,0.2); }
+  .score-big { font-size: 3.5rem; font-weight: 800; color: var(--primary); line-height: 1; }
+  .score-pct { font-size: 1.1rem; color: var(--primary-dark); margin-top: 0.25rem; font-weight: 600; }
+  .score-msg { font-size: 0.9rem; color: var(--text-muted); margin-top: 0.5rem; }
+  .results-grid { display: flex; gap: 1rem; justify-content: center; margin-bottom: 1.5rem; flex-wrap: wrap; }
+  .r-stat { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1.5rem; text-align: center; }
+  .r-stat-num { font-size: 1.4rem; font-weight: 700; }
+  .r-stat-lbl { font-size: 0.75rem; color: var(--text-muted); }
+  .r-stat.c .r-stat-num { color: var(--success); }
+  .r-stat.w .r-stat-num { color: var(--danger); }
+  .topic-breakdown { margin-bottom: 1.5rem; }
+  .topic-breakdown h3 { font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 0.75rem; }
+  .topic-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.6rem; font-size: 0.85rem; padding: 0.6rem 0.75rem; background: var(--surface); border-radius: 8px; }
+  .topic-name { flex: 1; font-weight: 500; }
+  .topic-bar-wrap { width: 120px; background: var(--gray-200); border-radius: 999px; height: 6px; flex-shrink: 0; }
+  .topic-bar { height: 100%; border-radius: 999px; }
+  .topic-pct { width: 40px; text-align: right; font-weight: 700; }
+  .tag { display: inline-block; font-size: 0.65rem; font-weight: 700; padding: 2px 7px; border-radius: 999px; margin-left: 0.4rem; }
+  .tag.strong { background: var(--success-light); color: var(--success); }
+  .tag.weak { background: var(--danger-light); color: var(--danger); }
+  .tag.mid { background: var(--warning-light); color: var(--warning); }
+  .history-wrap { margin-top: 1.5rem; }
+  .history-item { font-size: 0.8rem; color: var(--text-muted); padding: 0.4rem 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+
+  /* MOBILE */
+  .sidebar-toggle { display: none; position: fixed; top: 1rem; left: 1rem; z-index: 200; background: var(--primary); color: #fff; border: none; border-radius: 8px; width: 36px; height: 36px; font-size: 1rem; cursor: pointer; align-items: center; justify-content: center; }
+  @media (max-width: 768px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .main { margin-left: 0; padding: 1rem; padding-top: 4rem; }
+    .sidebar-toggle { display: flex; }
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 99; }
+    .overlay.show { display: block; }
+  }
+
+  /* DARK TOGGLE */
+  .dark-btn { position: fixed; top: 1rem; right: 1rem; z-index: 200; }
+  .msq-note { font-size: 0.75rem; color: var(--warning); background: var(--warning-light); border-radius: 6px; padding: 0.3rem 0.6rem; display: inline-block; margin-bottom: 0.75rem; font-weight: 600; }
+
+  /* Checkbox style for MSQ */
+  .option-btn.msq-option { align-items: flex-start; }
+  .check-box { min-width: 20px; height: 20px; border-radius: 5px; border: 1.5px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; transition: all 0.15s; }
+  .option-btn.selected .check-box { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .option-btn.correct .check-box { background: var(--success); border-color: var(--success); color: #fff; }
+  .option-btn.wrong .check-box { background: var(--danger); border-color: var(--danger); color: #fff; }
+  .option-btn.show-correct .check-box { background: var(--success); border-color: var(--success); color: #fff; }
+</style>
+</head>
+<body>
+
+<button class="sidebar-toggle" id="sidebarToggle">☰</button>
+<div class="overlay" id="overlay"></div>
+<button class="btn small dark-btn" id="darkBtn">🌙 Dark</button>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">SE Quiz</div>
+    <div>
+      <div class="sidebar-title" style="margin-bottom:0.5rem">Progress</div>
+      <div class="progress-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+      <div class="progress-label"><span id="progressPct">0%</span><span id="progressFrac">0/0</span></div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value" id="statTotal">0</div></div>
+      <div class="stat-card"><div class="stat-label">Attempted</div><div class="stat-value" id="statAttempted">0</div></div>
+      <div class="stat-card correct"><div class="stat-label">Correct</div><div class="stat-value" id="statCorrect">0</div></div>
+      <div class="stat-card wrong"><div class="stat-label">Wrong</div><div class="stat-value" id="statWrong">0</div></div>
+      <div class="stat-card"><div class="stat-label">Remaining</div><div class="stat-value" id="statRemaining">0</div></div>
+      <div class="stat-card"><div class="stat-label">Marked</div><div class="stat-value" id="statMarked">0</div></div>
+    </div>
+    <div>
+      <div class="sidebar-title" style="margin-bottom:0.5rem">Jump to Question</div>
+      <div class="q-nav-grid" id="qNavGrid"></div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <!-- HOME SCREEN -->
+    <div class="screen active" id="screenHome">
+      <div class="home-card">
+        <h1>Software Engineering Quiz</h1>
+        <p>Test your knowledge across 16 topics with 55 questions</p>
+        <div class="home-stats">
+          <div class="home-stat"><div class="home-stat-num">55</div><div class="home-stat-lbl">Questions</div></div>
+          <div class="home-stat"><div class="home-stat-num">16</div><div class="home-stat-lbl">Topics</div></div>
+          <div class="home-stat"><div class="home-stat-num" id="homeHistScore">—</div><div class="home-stat-lbl">Best Score</div></div>
+        </div>
+        <div class="topic-select-wrap">
+          <label>Practice by Topic (optional)</label>
+          <select id="topicFilter">
+            <option value="all">All Topics</option>
+          </select>
+        </div>
+        <div class="toggle-row"><label>Shuffle Questions</label><label class="toggle"><input type="checkbox" id="toggleShuffle" checked><span class="toggle-track"></span><span class="toggle-thumb"></span></label></div>
+        <div class="toggle-row"><label>Timer per Question (60s)</label><label class="toggle"><input type="checkbox" id="toggleTimer"><span class="toggle-track"></span><span class="toggle-thumb"></span></label></div>
+        <div style="height:1.25rem"></div>
+        <div class="btn-group">
+          <button class="btn primary" onclick="startQuiz('all')">Start Full Quiz</button>
+          <button class="btn" onclick="startQuiz('wrong')">Retry Wrong Only</button>
+        </div>
+        <div style="margin-top:1.5rem" id="historySection"></div>
+      </div>
+    </div>
+
+    <!-- QUIZ SCREEN -->
+    <div class="screen" id="screenQuiz">
+      <div class="topbar">
+        <div class="topbar-left">
+          <span class="topic-badge" id="topicBadge">Topic</span>
+          <span class="q-counter" id="qCounter">Q 1 / 55</span>
+        </div>
+        <div class="topbar-right">
+          <div class="timer-display" id="timerDisplay" style="display:none">1:00</div>
+          <button class="btn small marked-btn" id="markBtn" onclick="toggleMark()">🏷 Mark</button>
+          <button class="btn small" onclick="showHome()">✕ Exit</button>
+        </div>
+      </div>
+
+      <div class="question-card" id="questionCard">
+        <div class="question-text" id="questionText"></div>
+        <div id="msqNote" style="display:none"><span class="msq-note">Multiple answers may be correct — select all that apply</span></div>
+        <div class="options-list" id="optionsList"></div>
+      </div>
+
+      <div id="explanationCard" style="display:none"></div>
+
+      <div class="nav-row">
+        <button class="btn" id="prevBtn" onclick="navigate(-1)">← Previous</button>
+        <button class="btn primary" id="submitBtn" onclick="submitAnswer()">Submit Answer</button>
+        <button class="btn" id="nextBtn" onclick="navigate(1)">Next →</button>
+      </div>
+    </div>
+
+    <!-- RESULTS SCREEN -->
+    <div class="screen" id="screenResults">
+      <div class="results-wrap">
+        <div class="score-hero">
+          <div class="score-big" id="rScore">0/0</div>
+          <div class="score-pct" id="rPct">0%</div>
+          <div class="score-msg" id="rMsg"></div>
+        </div>
+        <div class="results-grid">
+          <div class="r-stat c"><div class="r-stat-num" id="rCorrect">0</div><div class="r-stat-lbl">Correct</div></div>
+          <div class="r-stat w"><div class="r-stat-num" id="rWrong">0</div><div class="r-stat-lbl">Wrong</div></div>
+          <div class="r-stat"><div class="r-stat-num" id="rSkipped">0</div><div class="r-stat-lbl">Skipped</div></div>
+          <div class="r-stat"><div class="r-stat-num" id="rPctNum">0%</div><div class="r-stat-lbl">Accuracy</div></div>
+        </div>
+        <div class="topic-breakdown">
+          <h3>Topic-wise Breakdown</h3>
+          <div id="topicBreakdown"></div>
+        </div>
+        <div class="btn-group" style="margin-bottom:1.5rem">
+          <button class="btn primary" onclick="startQuiz('all')">Restart Full Quiz</button>
+          <button class="btn danger" onclick="startQuiz('wrong')">Retry Wrong Questions</button>
+          <button class="btn" onclick="showHome()">Back to Home</button>
+        </div>
+        <div class="history-wrap" id="historyWrap" style="display:none">
+          <div class="sidebar-title" style="margin-bottom:0.5rem">Previous Attempts</div>
+          <div id="historyList"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const QUESTIONS = [
+  // ── TOPIC 1: Testing ──────────────────────────────────────────────────
+  {
+    id: 1, topic: "Testing",
+    text: "In which of the following types of testing is the fully integrated system tested by a selected group of customers?",
+    type: "MCQ",
+    options: ["Integration testing","Acceptance testing","Alpha testing","Beta testing"],
+    answer: [3],
+    explanations: [
+      "Integration testing checks how modules work together — not done by customers.",
+      "Acceptance testing is formal, done to verify requirements are met — but not by a selected external customer group.",
+      "Alpha testing is conducted by the internal test team within the organization.",
+      "Beta testing is conducted by a selected group of real customers in a real environment before full release."
+    ]
+  },
+  {
+    id: 2, topic: "Testing",
+    text: "In which of the following types of testing is the fully integrated system tested by the test team within the organization?",
+    type: "MCQ",
+    options: ["Integration testing","Acceptance testing","Alpha testing","Beta testing"],
+    answer: [2],
+    explanations: [
+      "Integration testing checks module interaction but is not specific to an internal test team testing the full system.",
+      "Acceptance testing is done by clients/stakeholders to verify requirements, not the internal test team.",
+      "Alpha testing is performed by the internal test team within the organization on the fully integrated system.",
+      "Beta testing is done externally by a selected group of customers."
+    ]
+  },
+  {
+    id: 3, topic: "Testing",
+    text: "Consider a function that takes a string as input. If the length of the string is more than 80, it prints 'Invalid input'. If the length ≤ 80 and the string is a palindrome, it returns true; otherwise false. Identify the number of equivalence classes for black box testing.",
+    type: "MCQ",
+    options: ["2","3","4","5"],
+    answer: [1],
+    explanations: [
+      "2 classes is too few — the function has multiple distinct behaviors.",
+      "There are 3 equivalence classes: (1) length > 80 → Invalid, (2) length ≤ 80 and palindrome → true, (3) length ≤ 80 and not palindrome → false.",
+      "4 is an overcount; no additional boundary splits the input further.",
+      "5 is incorrect; only 3 distinct behaviors exist."
+    ]
+  },
+  {
+    id: 4, topic: "Testing",
+    text: "Consider a function that compares the length of two strings, returning 0 if equal, positive if first is longer, negative if first is shorter. Identify the number of equivalence classes for black box testing.",
+    type: "MCQ",
+    options: ["2","3","4","5"],
+    answer: [1],
+    explanations: [
+      "2 is too few — there are 3 distinct output behaviors.",
+      "There are 3 equivalence classes: len(s1) == len(s2), len(s1) > len(s2), and len(s1) < len(s2), matching the 3 return cases.",
+      "4 is an overcount for this simple comparison.",
+      "5 is incorrect."
+    ]
+  },
+  {
+    id: 5, topic: "Testing",
+    text: "Consider the printPrimes(lower, upper) Python function with nested loops. Identify the number of linearly independent paths for path coverage.",
+    type: "MCQ",
+    options: ["2","3","4","5"],
+    answer: [2],
+    explanations: [
+      "2 paths is too few for a nested loop with multiple branches.",
+      "3 paths is too few to cover the for loop, inner loop, and divisor check branches.",
+      "4 linearly independent paths cover: outer loop not entered, inner loop not entered (num≤1), inner loop finds divisor (break), inner loop finds no divisor (prime printed).",
+      "5 paths is an overcount."
+    ]
+  },
+  {
+    id: 6, topic: "Testing",
+    text: "Consider the countDivisorsInRange(lower, upper) Python function with nested loops (outer range loop, inner divisor-finding loop). Identify the number of linearly independent paths for path coverage.",
+    type: "MCQ",
+    options: ["2","3","4","5"],
+    answer: [1],
+    explanations: [
+      "2 paths is too few.",
+      "3 linearly independent paths: outer loop not entered, inner loop not entered (num=0 or 1), inner loop executes for divisors.",
+      "4 is an overcount.",
+      "5 is incorrect."
+    ]
+  },
+  {
+    id: 7, topic: "Testing",
+    text: "Consider isEligible(age): prints 'Invalid input' if age<0 or age>100; else 'Not eligible' if age<18 or age>38; else 'Eligible'. Identify the set of test cases that provides multiple condition coverage.",
+    type: "MCQ",
+    options: [
+      "{age=10, age=20, age=110}",
+      "{age=-10, age=10, age=20, age=110}",
+      "{age=-10, age=10, age=20, age=40, age=110}",
+      "{age=-10, age=10, age=20, age=30, age=110}"
+    ],
+    answer: [2],
+    explanations: [
+      "Missing negative age — doesn't cover age<0 condition.",
+      "Missing age>38 case — 4 values insufficient for all condition combinations.",
+      "Covers all conditions: age<0 (-10), age>100 (110), age<18 (10), age>38 (40), and eligible (20). This is the complete set.",
+      "Missing age>38 case — doesn't cover the 'Not eligible' via upper bound."
+    ]
+  },
+  {
+    id: 8, topic: "Testing",
+    text: "Password validation: invalid if len<3 or len>8; strong if len>5; else weak. Identify the set of test cases that provides multiple condition coverage.",
+    type: "MCQ",
+    options: [
+      "{password='ab', password='abcd', password='abcdef'}",
+      "{password='ab', password='abcdefghi', password='abcdef'}",
+      "{password='ab', password='abcdefghi', password='', password='abcd'}",
+      "{password='ab', password='abcdefghi', password='abcdef', password='abcd'}"
+    ],
+    answer: [3],
+    explanations: [
+      "Missing len>8 case — doesn't cover all invalid conditions.",
+      "Missing a weak password case (len 3-5).",
+      "Empty string and 'abcdefghi' cover invalids, but missing strong password case.",
+      "Covers all: len<3 ('ab'), len>8 ('abcdefghi'), strong (len>5, valid: 'abcdef'), weak (len≤5, valid: 'abcd')."
+    ]
+  },
+  {
+    id: 9, topic: "Testing",
+    text: "Which of the following is/are true about designing test cases for whitebox testing?",
+    type: "MSQ",
+    options: [
+      "Test cases are designed to examine only the input and output values.",
+      "Designing test cases necessitates access to the source code.",
+      "No knowledge of design or code required.",
+      "The structure of the program needs to be analyzed using some heuristics."
+    ],
+    answer: [1, 3],
+    explanations: [
+      "FALSE — Whitebox testing examines internal code structure, not just inputs/outputs.",
+      "TRUE — Whitebox testing requires full access to the source code.",
+      "FALSE — Whitebox testing requires detailed knowledge of the internal code structure.",
+      "TRUE — The program structure is analyzed (e.g., control flow, paths) to derive test cases."
+    ]
+  },
+  {
+    id: 10, topic: "Testing",
+    text: "Which of the following is/are true about designing test cases for blackbox testing?",
+    type: "MSQ",
+    options: [
+      "Test cases are designed to examine only the input and output values.",
+      "Designing test cases necessitates access to the source code.",
+      "No knowledge of the underlying design or code required.",
+      "The structure of the program needs to be analyzed using some heuristics."
+    ],
+    answer: [0, 2],
+    explanations: [
+      "TRUE — Black box testing treats the software as a black box and only looks at inputs and outputs.",
+      "FALSE — Source code access is NOT needed for black box testing.",
+      "TRUE — No knowledge of the internal code or design is required.",
+      "FALSE — That applies to white box testing, not black box."
+    ]
+  },
+
+  // ── TOPIC 2: Deployment ───────────────────────────────────────────────
+  {
+    id: 11, topic: "Deployment",
+    text: "Which deployment strategy keeps all different versions of the production environment live, allowing users to freely choose the version they prefer?",
+    type: "MCQ",
+    options: ["Blue/Green Deployment","Canary Deployment","Versioned Deployment","None of these"],
+    answer: [2],
+    explanations: [
+      "Blue/Green deployment switches between two identical environments — it doesn't keep multiple versions live simultaneously.",
+      "Canary deployment gradually rolls out to a subset of users — it doesn't let users choose versions.",
+      "Versioned Deployment keeps all versions live simultaneously, letting users choose which version to use.",
+      "This is incorrect as Versioned Deployment fits perfectly."
+    ]
+  },
+  {
+    id: 12, topic: "Deployment",
+    text: "Which deployment strategy gradually rolls out changes to a small subset of users?",
+    type: "MCQ",
+    options: ["Blue/Green Deployment","Canary Deployment","Versioned Deployment","None of these"],
+    answer: [1],
+    explanations: [
+      "Blue/Green deployment switches 100% of traffic between two environments — no gradual rollout.",
+      "Canary deployment releases to a small subset of users first to test before full rollout.",
+      "Versioned deployment keeps all versions live — doesn't gradually roll out.",
+      "This is incorrect; Canary deployment fits."
+    ]
+  },
+  {
+    id: 13, topic: "Deployment",
+    text: "Which of the following is the major drawback of continuous integration?",
+    type: "MCQ",
+    options: [
+      "Long deployment time.",
+      "Initial effort required to set up the process.",
+      "Last-minute confusion and rush at release date.",
+      "Prototypes are available very late in the process."
+    ],
+    answer: [1],
+    explanations: [
+      "CI actually reduces deployment time by automating builds and tests.",
+      "Setting up a CI pipeline requires significant initial effort — infrastructure, scripts, test coverage, etc.",
+      "CI eliminates last-minute rushes by integrating continuously.",
+      "CI doesn't delay prototypes; that is more related to waterfall methodology."
+    ]
+  },
+  {
+    id: 14, topic: "Deployment",
+    text: "Which of the following are the key tasks in a continuous integration server?",
+    type: "MSQ",
+    options: [
+      "Developers commit the code to a continuous integration server.",
+      "After each commit, the continuous integration server pulls the new code from the version control system.",
+      "The code pulled from the version control system is built and tested on the continuous integration server.",
+      "The code is finally built, tested, and deployed by the continuous integration server."
+    ],
+    answer: [1, 2],
+    explanations: [
+      "FALSE — Developers commit code to the VCS (e.g., Git), not directly to the CI server.",
+      "TRUE — After each commit, the CI server pulls new code from the version control system.",
+      "TRUE — The CI server builds and tests the pulled code automatically.",
+      "FALSE — Deployment is typically handled separately (CD), not by the CI server alone."
+    ]
+  },
+
+  // ── TOPIC 3: Hosting ──────────────────────────────────────────────────
+  {
+    id: 15, topic: "Hosting & Infrastructure",
+    text: "You want to deploy a web application. Your main concern is highest performance, and you want full control of the hardware and software. Which hosting option is most suitable?",
+    type: "MCQ",
+    options: ["Bare metal servers","Infrastructure-as-a-service","Platform-as-a-service","Software-as-a-service"],
+    answer: [0],
+    explanations: [
+      "Bare metal servers give full physical hardware control with no virtualization overhead, offering maximum performance.",
+      "IaaS provides virtual machines — you control software but not the physical hardware.",
+      "PaaS abstracts away both hardware and most OS management — less control.",
+      "SaaS is fully managed software; users have virtually no control over infrastructure."
+    ]
+  },
+  {
+    id: 16, topic: "Hosting & Infrastructure",
+    text: "You are deploying a data-intensive analytics application. Priority is scalability, pay-as-you-go pricing, without managing hardware but with control of the software layer. Which hosting option is most suitable?",
+    type: "MCQ",
+    options: ["Bare metal servers","Infrastructure-as-a-service","Platform-as-a-service","Software-as-a-service"],
+    answer: [1],
+    explanations: [
+      "Bare metal servers require managing physical hardware and don't support pay-as-you-go easily.",
+      "IaaS (e.g., AWS EC2) provides scalable virtual machines with pay-as-you-go pricing, letting you control the software layer without managing physical hardware.",
+      "PaaS abstracts the software runtime too — you lose control of the software stack.",
+      "SaaS is fully managed; no software-layer control."
+    ]
+  },
+
+  // ── TOPIC 4: Performance ──────────────────────────────────────────────
+  {
+    id: 17, topic: "Web Performance",
+    text: "Which of the following strategies uses tools like Brotli and Gzip to improve the performance of web applications?",
+    type: "MCQ",
+    options: ["Caching","Task queues","Loading and rendering pages","Monitoring"],
+    answer: [2],
+    explanations: [
+      "Caching stores precomputed results — not specifically about compression.",
+      "Task queues offload background processing — unrelated to compression.",
+      "Loading and rendering optimization includes compression tools like Brotli and Gzip to reduce asset sizes for faster page loads.",
+      "Monitoring tracks performance metrics but doesn't use compression tools."
+    ]
+  },
+  {
+    id: 18, topic: "Web Performance",
+    text: "Which of the following strategies uses tools like Memcached and Redis to improve the performance of web applications?",
+    type: "MCQ",
+    options: ["Caching","Task queues","Loading and rendering pages","Monitoring"],
+    answer: [0],
+    explanations: [
+      "Caching strategies use tools like Redis and Memcached to store frequently accessed data in memory for fast retrieval.",
+      "Task queues use tools like Celery or RabbitMQ — not Redis/Memcached primarily.",
+      "Loading/rendering focuses on compression and lazy loading — different tools.",
+      "Monitoring uses APM tools — not Memcached/Redis."
+    ]
+  },
+
+  // ── TOPIC 5: Organisation Tools ───────────────────────────────────────
+  {
+    id: 19, topic: "Software Organization",
+    text: "A software organization wants to reuse the knowledge of one project in another project. The knowledge must be documented and archived properly. Which kind of tools can be used?",
+    type: "MCQ",
+    options: ["Project management tools","Development tools","Knowledge-sharing tools","None of these"],
+    answer: [2],
+    explanations: [
+      "Project management tools manage timelines and tasks — not knowledge archiving.",
+      "Development tools (IDEs, version control) are for building software, not knowledge documentation.",
+      "Knowledge-sharing tools (wikis, Confluence, Notion) allow documenting, archiving, and reusing project knowledge across teams.",
+      "Knowledge-sharing tools exist and are the correct answer."
+    ]
+  },
+  {
+    id: 20, topic: "Software Organization",
+    text: "A software organization wants a tool that enables team members to get both a big-picture view and a detailed view of progress. What kind of tool can the organization use?",
+    type: "MCQ",
+    options: ["Project management tools","Development tools","Knowledge-sharing tools","None of these"],
+    answer: [0],
+    explanations: [
+      "Project management tools (like Jira, Asana, MS Project) provide dashboards for high-level progress and detailed task views simultaneously.",
+      "Development tools focus on coding — not progress tracking.",
+      "Knowledge-sharing tools document knowledge — not project progress.",
+      "This is incorrect; project management tools fit perfectly."
+    ]
+  },
+  {
+    id: 21, topic: "Software Organization",
+    text: "Which of the following is/are the primary task/s of a project manager in a software organization?",
+    type: "MSQ",
+    options: [
+      "Conduct market research and look for opportunities in the market.",
+      "Coordinating between different teams.",
+      "Resolving interpersonal conflict between engineers.",
+      "Provide feedback to marketing, product, and design teams about the product and its defects/shortcomings."
+    ],
+    answer: [1, 2],
+    explanations: [
+      "FALSE — Market research is the responsibility of the marketing or product team, not the project manager.",
+      "TRUE — Coordinating between different teams is a core responsibility of the project manager.",
+      "TRUE — Resolving interpersonal conflicts within the team is part of the project manager's people management role.",
+      "FALSE — Providing product feedback to other teams is primarily the responsibility of the development/QA team or product owner."
+    ]
+  },
+  {
+    id: 22, topic: "Software Organization",
+    text: "Which of the following is/are the primary task/s of the sales team in a software organization?",
+    type: "MSQ",
+    options: [
+      "Conduct market research and look for opportunities in the market.",
+      "Sell the product to users that the marketing team has identified.",
+      "Resolving interpersonal conflict between engineers.",
+      "Provide feedback to marketing, product, and design teams regarding the product, which engineers then address."
+    ],
+    answer: [1, 3],
+    explanations: [
+      "FALSE — Market research is typically a marketing/product team responsibility.",
+      "TRUE — The sales team's primary role is to sell the product to potential customers identified by marketing.",
+      "FALSE — Resolving internal conflicts is the project manager's or HR's responsibility.",
+      "TRUE — Sales teams relay customer feedback and product pain points back to internal teams."
+    ]
+  },
+
+  // ── TOPIC 6: Software Design (Coupling/Cohesion) ──────────────────────
+  {
+    id: 23, topic: "Software Design",
+    text: "The order module passes a flag to the delivery module to indicate whether the order is eligible for express or normal delivery, determining which functions to invoke. Identify the type of coupling.",
+    type: "MCQ",
+    options: ["Data coupling","Control coupling","Common coupling","Content coupling"],
+    answer: [1],
+    explanations: [
+      "Data coupling passes simple data — not a control flag that drives behavior.",
+      "Control coupling occurs when one module passes a flag/control parameter that dictates the flow of execution in another module.",
+      "Common coupling involves sharing a global data structure — not the case here.",
+      "Content coupling means one module directly modifies another's internals — not happening here."
+    ]
+  },
+  {
+    id: 24, topic: "Software Design",
+    text: "Both inventory and billing modules access and modify a shared global variable 'tax_rate'. Identify the type of coupling.",
+    type: "MCQ",
+    options: ["Data coupling","Control coupling","Common coupling","Content coupling"],
+    answer: [2],
+    explanations: [
+      "Data coupling shares data through parameters — not shared global variables.",
+      "Control coupling involves control flags between modules — not the case here.",
+      "Common coupling occurs when multiple modules share a common global data structure (like a global variable tax_rate).",
+      "Content coupling means one module accesses another's internal code — not the case here."
+    ]
+  },
+  {
+    id: 25, topic: "Software Design",
+    text: "What are the desired characteristics of a good software design?",
+    type: "MCQ",
+    options: ["Low cohesion and low coupling","Low cohesion and high coupling","High cohesion and low coupling","High cohesion and high coupling"],
+    answer: [2],
+    explanations: [
+      "Low cohesion means a module does too many unrelated things — undesirable.",
+      "Low cohesion and high coupling are both undesirable qualities.",
+      "High cohesion means each module focuses on a single well-defined task; low coupling means modules are independent. This combination is the gold standard.",
+      "High coupling means modules are overly interdependent — makes changes difficult."
+    ]
+  },
+  {
+    id: 26, topic: "Software Design",
+    text: "Each module performs varied operations and significant data is exchanged between modules. Identify the types of cohesion and coupling.",
+    type: "MCQ",
+    options: ["Low cohesion and low coupling","Low cohesion and high coupling","High cohesion and low coupling","High cohesion and high coupling"],
+    answer: [1],
+    explanations: [
+      "Varied operations in a module indicates low cohesion, but significant data exchange means high coupling — not low.",
+      "Varied operations per module = low cohesion; significant inter-module data exchange = high coupling. This matches.",
+      "High cohesion requires modules to be focused — varied operations contradict this.",
+      "High cohesion is contradicted by varied operations in each module."
+    ]
+  },
+
+  // ── TOPIC 7: Metrics ──────────────────────────────────────────────────
+  {
+    id: 27, topic: "Software Metrics",
+    text: "Which software metrics decides the quality of the code based on the number of lines of the source code?",
+    type: "MCQ",
+    options: ["Cyclomatic Complexity","Raw Metrics","Halstead's Metrics","All of these"],
+    answer: [1],
+    explanations: [
+      "Cyclomatic Complexity measures the number of independent paths through code — not lines of code.",
+      "Raw Metrics are simple, count-based metrics like Lines of Code (LOC), number of methods, etc.",
+      "Halstead's Metrics are based on operators and operands — not lines of code.",
+      "'All of these' is incorrect since only Raw Metrics use lines of code."
+    ]
+  },
+  {
+    id: 28, topic: "Software Metrics",
+    text: "Which software metric determines the quality of the code based on the number of operands and operations involved?",
+    type: "MCQ",
+    options: ["Cyclomatic Complexity","Raw Metrics","Halstead's Metrics","All of these"],
+    answer: [2],
+    explanations: [
+      "Cyclomatic Complexity counts independent paths through control flow — not operands/operators.",
+      "Raw Metrics count lines of code and similar surface-level measures.",
+      "Halstead's Metrics are calculated from the number of distinct/total operators and operands in the source code.",
+      "'All of these' is incorrect; only Halstead's Metrics use operands and operators."
+    ]
+  },
+
+  // ── TOPIC 8: Debugging ────────────────────────────────────────────────
+  {
+    id: 29, topic: "Debugging",
+    text: "Debugging by controlling execution flow line by line in a debugger, inspecting variables and understanding program behavior in detail. What type of debugging technique is this?",
+    type: "MCQ",
+    options: ["Logging","Dump and diff","Stepping in debugger","Profiling tool"],
+    answer: [2],
+    explanations: [
+      "Logging records events to a file — not interactive line-by-line execution.",
+      "Dump and diff captures memory state and compares — not line-by-line stepping.",
+      "Stepping in a debugger means using breakpoints and step-in/step-over controls to execute code line by line and inspect state.",
+      "Profiling measures performance (time/memory) — not for behavioral inspection."
+    ]
+  },
+  {
+    id: 30, topic: "Debugging",
+    text: "Analyzing a program to identify performance bottlenecks by measuring time taken by each function or frequency of function calls. What type of technique is this?",
+    type: "MCQ",
+    options: ["Logging","Dump and diff","Stepping in debugger","Profiling tool"],
+    answer: [3],
+    explanations: [
+      "Logging records runtime events but doesn't measure execution time per function.",
+      "Dump and diff captures and compares memory snapshots — not performance-focused.",
+      "Stepping in debugger is for behavioral inspection — not automated performance measurement.",
+      "Profiling tools measure function call times and frequencies to identify bottlenecks (e.g., cProfile in Python)."
+    ]
+  },
+  {
+    id: 31, topic: "Debugging",
+    text: "Match the following: 1.Error, 2.Failure, 3.Fault, 4.Debugging — with A.Observable errors, B.Where the error has occurred, C.Discrepancy between actual and desired behaviors, D.Determining the cause of failure.",
+    type: "MCQ",
+    options: ["1-B, 2-D, 3-C, 4-A","1-B, 2-D, 3-A, 4-C","1-C, 2-A, 3-D, 4-B","1-C, 2-A, 3-B, 4-D"],
+    answer: [3],
+    explanations: [
+      "Incorrect — Error is a discrepancy, not the location.",
+      "Incorrect matching — Failure is observable errors, not the cause determination.",
+      "Incorrect — Fault is the location of error, Debugging is the process, not the other way.",
+      "Correct: Error(1)=Discrepancy(C), Failure(2)=Observable errors(A), Fault(3)=Where error occurred(B), Debugging(4)=Determining cause(D)."
+    ]
+  },
+
+  // ── TOPIC 9: Architecture ─────────────────────────────────────────────
+  {
+    id: 32, topic: "Software Architecture",
+    text: "In a weather app, users send requests to a central system which fetches data from external APIs and sends forecasts back. Which type of architecture is used?",
+    type: "MCQ",
+    options: ["Client-server","Pipe and filter","Model-view-controller","Peer-to-peer"],
+    answer: [0],
+    explanations: [
+      "Client-server architecture: clients (users) make requests, a central server processes them and returns responses. This exactly matches the weather app scenario.",
+      "Pipe and filter passes data through sequential processing stages — not a request-response model.",
+      "MVC separates data (model), presentation (view), and logic (controller) — not the primary architecture here.",
+      "Peer-to-peer has no central server — all nodes communicate directly."
+    ]
+  },
+  {
+    id: 33, topic: "Software Architecture",
+    text: "Raw sensor data is passed through stages: cleaned → normalized → statistical analysis → visualization, each stage processing the previous output. Which architecture is used?",
+    type: "MCQ",
+    options: ["Client-server","Pipe and filter","Model-view-controller","Peer-to-peer"],
+    answer: [1],
+    explanations: [
+      "Client-server requires a client making requests to a server — not a sequential stage-by-stage pipeline.",
+      "Pipe and filter architecture processes data through a series of sequential stages (filters), each connected by pipes. This exactly describes the sensor data flow.",
+      "MVC is about separating concerns in a UI application — not sequential data processing.",
+      "Peer-to-peer has distributed nodes — not sequential pipeline stages."
+    ]
+  },
+
+  // ── TOPIC 10: Risk Management ─────────────────────────────────────────
+  {
+    id: 34, topic: "Risk Management",
+    text: "What are the risks related to budget, schedule, and staffing commonly known as?",
+    type: "MCQ",
+    options: ["Technical risks","Project risks","Business risks","None of these"],
+    answer: [1],
+    explanations: [
+      "Technical risks relate to technology choices, performance, and security — not budget/schedule.",
+      "Project risks are management-related risks including budget overruns, schedule delays, and staffing issues.",
+      "Business risks relate to market and competition — not internal project management.",
+      "This is incorrect; 'Project risks' is the standard term."
+    ]
+  },
+  {
+    id: 35, topic: "Risk Management",
+    text: "Which of the following risks arises when the development team has insufficient knowledge of the product?",
+    type: "MCQ",
+    options: ["Technical risks","Project risks","Business risks","None of these"],
+    answer: [0],
+    explanations: [
+      "Technical risks include insufficient domain/technical knowledge that can affect the product's technical implementation.",
+      "Project risks are about schedule, budget, staffing — not knowledge gaps about the product.",
+      "Business risks relate to market viability — not team knowledge.",
+      "Technical risks is the correct category."
+    ]
+  },
+  {
+    id: 36, topic: "Risk Management",
+    text: "Risk assessment: Personnel shortfall (prob 0.3, risk 0.9), Gold plating (0.4, 0.4), Product not competitive (0.1, 0.4), Insufficient domain knowledge (0.5, 1.0). Which risk has the highest impact?",
+    type: "MCQ",
+    options: ["Personnel shortfall","Gold plating","Product not competitive in the market","Insufficient domain knowledge"],
+    answer: [3],
+    explanations: [
+      "Personnel shortfall: impact = 0.3 × 0.9 = 0.27 — not the highest.",
+      "Gold plating: impact = 0.4 × 0.4 = 0.16 — lowest.",
+      "Product not competitive: impact = 0.1 × 0.4 = 0.04 — very low.",
+      "Insufficient domain knowledge: impact = 0.5 × 1.0 = 0.50 — highest impact on the project."
+    ]
+  },
+  {
+    id: 37, topic: "Risk Management",
+    text: "Risk assessment: Schedule Slippage (impact 3, assessed 0.9), Gold plating (1, 0.4), Shortcomings in external components (3, 0.6), Insufficient domain knowledge (2, 1.0). Which risk is most probable to occur?",
+    type: "MCQ",
+    options: ["Schedule Slippage","Gold plating","Shortcomings in external components","Insufficient domain knowledge"],
+    answer: [3],
+    explanations: [
+      "Schedule Slippage assessed risk = 0.9 — high, but 'assessed risk' here represents probability of occurrence.",
+      "Gold plating assessed risk = 0.4 — lowest probability.",
+      "Shortcomings in external components assessed risk = 0.6 — moderate.",
+      "Insufficient domain knowledge assessed risk = 1.0 — the highest probability of occurrence."
+    ]
+  },
+
+  // ── TOPIC 11: Agile / Scrum ───────────────────────────────────────────
+  {
+    id: 38, topic: "Agile & Scrum",
+    text: "In the Scrum framework, which role is responsible for monitoring all the activities of a sprint and ensuring their successful completion?",
+    type: "MCQ",
+    options: ["Product owner","Scrum master","Development team","Client"],
+    answer: [1],
+    explanations: [
+      "The product owner manages the product backlog and priorities — not sprint monitoring.",
+      "The Scrum master facilitates the Scrum process, monitors sprint activities, removes impediments, and ensures the team follows Scrum practices.",
+      "The development team executes the sprint tasks but doesn't monitor/ensure overall completion.",
+      "The client is external — not responsible for sprint monitoring."
+    ]
+  },
+  {
+    id: 39, topic: "Agile & Scrum",
+    text: "In the Scrum framework, what does velocity mean?",
+    type: "MCQ",
+    options: [
+      "Number of user stories completed per iteration/sprint",
+      "Number of user stories completed for all the sprints",
+      "Number of points per iteration/sprint",
+      "Amount of effort for each user story"
+    ],
+    answer: [2],
+    explanations: [
+      "Velocity is measured in story points, not just the count of user stories.",
+      "Velocity is per sprint, not cumulative across all sprints.",
+      "Velocity is the total story points completed in a sprint — used to predict future sprint capacity.",
+      "Effort per story is story points/estimation — not velocity itself."
+    ]
+  },
+  {
+    id: 40, topic: "Agile & Scrum",
+    text: "Which of the SMART characteristics suggests stopping implementation of a feature once the time budget is exceeded?",
+    type: "MCQ",
+    options: ["Measurable","Achievable","Relevant","Timeboxed"],
+    answer: [3],
+    explanations: [
+      "Measurable means the goal has quantifiable success criteria — not about time limits.",
+      "Achievable means the goal is realistic given constraints — not about stopping at time limit.",
+      "Relevant means the story provides business value — not about time boxing.",
+      "Timeboxed means a fixed time budget is allocated; once exceeded, implementation stops rather than going over scope."
+    ]
+  },
+  {
+    id: 41, topic: "Agile & Scrum",
+    text: "Which SMART characteristic specifies that a user story should provide business value to at least one stakeholder?",
+    type: "MCQ",
+    options: ["Measurable","Achievable","Relevant","Timeboxed"],
+    answer: [2],
+    explanations: [
+      "Measurable means success can be quantified — not about stakeholder value.",
+      "Achievable means the story is realistic — not specifically about business value.",
+      "Relevant means the user story provides business value to at least one stakeholder — directly matches the definition.",
+      "Timeboxed refers to time constraints — not business value."
+    ]
+  },
+
+  // ── TOPIC 12: Requirements ────────────────────────────────────────────
+  {
+    id: 42, topic: "Requirements Engineering",
+    text: "Developers observe doctors and nurses in a hospital to see how they interact with the EHR system, identifying challenges like delays in data entry. Identify the type of requirement collection technique.",
+    type: "MCQ",
+    options: ["Questionnaires","Interviews","Focus Groups","Naturalistic Observations"],
+    answer: [3],
+    explanations: [
+      "Questionnaires collect responses via written surveys — not real-world observation.",
+      "Interviews are structured conversations with individuals — not passive observation.",
+      "Focus groups gather opinions from a group discussion — not field observation.",
+      "Naturalistic Observations involve watching users in their real environment to understand natural behavior and identify real challenges."
+    ]
+  },
+  {
+    id: 43, topic: "Requirements Engineering",
+    text: "A startup studies daily gym operations to understand how staff manage memberships, sessions, and equipment. Identify the type of requirement collection technique.",
+    type: "MCQ",
+    options: ["Questionnaires","Interviews","Focus Groups","Naturalistic Observations"],
+    answer: [3],
+    explanations: [
+      "Questionnaires use written forms — not field study.",
+      "Interviews involve direct questioning — not passive observation in the environment.",
+      "Focus groups involve group discussion — not observational study.",
+      "Naturalistic Observations involve studying people in their actual work environment to discover real workflow issues."
+    ]
+  },
+
+  // ── TOPIC 13: UI/UX ───────────────────────────────────────────────────
+  {
+    id: 44, topic: "UI/UX & Usability",
+    text: "An employee portal provides field validation, disables Submit until all fields are correctly filled, and shows a confirmation dialog before submitting. Which UI evaluation heuristic is fulfilled?",
+    type: "MCQ",
+    options: ["Freedom","Flexibility","Prevent error","Provide help"],
+    answer: [2],
+    explanations: [
+      "Freedom heuristic allows users to undo/redo actions — not about preventing errors before submission.",
+      "Flexibility allows expert users shortcuts — not about form validation.",
+      "Prevent error heuristic means designing the interface to prevent mistakes before they occur — validation and disabling Submit until correct matches this exactly.",
+      "Provide help gives guidance when users are stuck — not preemptive error prevention."
+    ]
+  },
+  {
+    id: 45, topic: "UI/UX & Usability",
+    text: "A project management tool allows adding tasks via forms, drag-and-drop, keyboard shortcuts, and lets advanced users customize workspace layouts. Which UI evaluation heuristic is demonstrated?",
+    type: "MCQ",
+    options: ["Freedom","Flexibility","Prevent error","Provide help"],
+    answer: [1],
+    explanations: [
+      "Freedom allows users to navigate freely and undo actions — not multiple interaction methods.",
+      "Flexibility heuristic means the interface supports multiple ways of achieving the same goal, catering to both novice and expert users.",
+      "Prevent error is about reducing mistakes — not multiple interaction modes.",
+      "Provide help gives guidance — not about offering multiple ways to interact."
+    ]
+  },
+  {
+    id: 46, topic: "UI/UX & Usability",
+    text: "An event planning app uses unique icons and labels that are hard to recall. Users struggle to access features after not using the app for a while. What usability goal is missing?",
+    type: "MCQ",
+    options: ["Efficiency","Memorability","Safety","Learnability"],
+    answer: [1],
+    explanations: [
+      "Efficiency is about performing tasks quickly — not about recalling how to use the app.",
+      "Memorability means users can return to the app after not using it for a while and remember how to use it — exactly what's missing here.",
+      "Safety is about preventing dangerous errors — not about icon recall.",
+      "Learnability is about how easy it is to learn the first time — the problem here is with returning users, not new users."
+    ]
+  },
+  {
+    id: 47, topic: "UI/UX & Usability",
+    text: "Which of the following statements regarding the Flask framework are correct?",
+    type: "MSQ",
+    options: [
+      "It is a framework for developing mobile applications.",
+      "It is a framework for building web applications.",
+      "It is classified as a micro-framework.",
+      "It enforces limitations on application development, such as the types of databases and web servers that can be used."
+    ],
+    answer: [1, 2],
+    explanations: [
+      "FALSE — Flask is a web framework, not a mobile framework.",
+      "TRUE — Flask is a Python framework specifically designed for building web applications.",
+      "TRUE — Flask is a micro-framework, meaning it provides minimal built-in components, giving developers flexibility.",
+      "FALSE — Flask is deliberately unopinionated; it does NOT enforce database or server choices."
+    ]
+  },
+
+  // ── TOPIC 14: Design Patterns & SOLID ─────────────────────────────────
+  {
+    id: 48, topic: "Design Patterns & SOLID",
+    text: "A class orchestrates calls to formatting, validation, printing, and tracking classes, providing a single method for clients to generate invoices. Which design pattern does this represent?",
+    type: "MCQ",
+    options: ["Builder design pattern","Facade design pattern","Adapter design pattern","Strategy design pattern"],
+    answer: [1],
+    explanations: [
+      "Builder pattern constructs complex objects step by step — not about simplifying interfaces to subsystems.",
+      "Facade pattern provides a simplified, unified interface to a complex set of subsystems — exactly what the invoice class does.",
+      "Adapter pattern converts one interface to another — not about unifying multiple subsystems.",
+      "Strategy pattern defines interchangeable algorithms — not about simplifying access to subsystems."
+    ]
+  },
+  {
+    id: 49, topic: "Design Patterns & SOLID",
+    text: "A portfolio management system defines a common interface for ROI calculation (Fixed Deposit, Stock Market, Real Estate), and dynamically selects the method based on client's choice. Which design pattern does this represent?",
+    type: "MCQ",
+    options: ["Builder design pattern","Facade design pattern","Adapter design pattern","Strategy design pattern"],
+    answer: [3],
+    explanations: [
+      "Builder pattern is about constructing complex objects — not about interchangeable algorithms.",
+      "Facade pattern simplifies interfaces — not about selecting algorithms at runtime.",
+      "Adapter pattern converts interfaces — not about pluggable calculation methods.",
+      "Strategy pattern defines a family of algorithms (ROI methods), encapsulates each, and makes them interchangeable at runtime."
+    ]
+  },
+  {
+    id: 50, topic: "Design Patterns & SOLID",
+    text: "DeliveryManager was directly dependent on CompanyVehicle. To fix this, a Vehicle interface was introduced that both CompanyVehicle and ThirdPartyVehicle implement, and DeliveryManager depends on the interface. Which SOLID principle is applied?",
+    type: "MCQ",
+    options: ["Open-Closed principle","Liskov substitution principle","Interface segregation principle","Dependency inversion principle"],
+    answer: [3],
+    explanations: [
+      "Open-Closed principle is about extending behavior without modifying existing code — not about introducing abstractions.",
+      "Liskov substitution principle is about subclasses being substitutable for their base class — not the primary principle here.",
+      "Interface segregation principle is about splitting large interfaces — not about depending on abstractions.",
+      "Dependency Inversion Principle states high-level modules should depend on abstractions, not concretions — exactly what was applied."
+    ]
+  },
+  {
+    id: 51, topic: "Design Patterns & SOLID",
+    text: "Content interface (play, download, share) was split into Playable, Downloadable, Shareable — so each content type implements only what it supports. Which SOLID principle is applied?",
+    type: "MCQ",
+    options: ["Open-Closed principle","Liskov substitution principle","Interface segregation principle","Dependency inversion principle"],
+    answer: [2],
+    explanations: [
+      "Open-Closed principle is about open for extension, closed for modification — not about interface splitting.",
+      "Liskov substitution is about subclass substitutability — not interface granularity.",
+      "Interface Segregation Principle states that clients should not be forced to implement interfaces they don't use — splitting Content into Playable, Downloadable, Shareable applies this directly.",
+      "Dependency Inversion is about depending on abstractions — not about splitting interfaces."
+    ]
+  },
+
+  // ── TOPIC 15: OOP Relationships ───────────────────────────────────────
+  {
+    id: 52, topic: "OOP & Class Relationships",
+    text: "Music player OOP: User creates Playlists of Music objects. Music implements Playable interface. Rock, Jazz, Pop extend Music. MusicPlayer plays Music. Identify correct class relationships.",
+    type: "MSQ",
+    options: [
+      "Music is a subclass of MusicPlayer",
+      "Rock, Jazz, and Pop are subclasses of Music",
+      "PlayList is composition of Music",
+      "Playable depends on Player"
+    ],
+    answer: [1, 2],
+    explanations: [
+      "FALSE — Music is not a subclass of MusicPlayer; MusicPlayer uses Music objects (dependency/association).",
+      "TRUE — Rock, Jazz, and Pop are specific types of Music — they are subclasses (inheritance).",
+      "TRUE — PlayList is a composition of Music objects; if a PlayList is deleted, the Music objects it manages may also be removed (composition).",
+      "FALSE — The Music class implements the Playable interface; Music depends on Playable, not the other way around."
+    ]
+  },
+  {
+    id: 53, topic: "OOP & Class Relationships",
+    text: "E-commerce OOP: Customer has Orders of Items. Electronics, Clothing, Books extend Item. Item implements Purchasable. Cart manages items. Identify correct class relationships.",
+    type: "MSQ",
+    options: [
+      "Item is a subclass of Order",
+      "Electronics, Clothing, and Books are subclasses of Item",
+      "Order is composition of Item",
+      "Purchasable depends on Item"
+    ],
+    answer: [1, 2],
+    explanations: [
+      "FALSE — Item is not a subclass of Order; an Order contains Items (composition/aggregation).",
+      "TRUE — Electronics, Clothing, and Books are specific types of Item — they inherit from Item.",
+      "TRUE — An Order is composed of Items; Order has a composition relationship with Item.",
+      "FALSE — Item implements/depends on Purchasable (Item depends on the interface), not the other way around."
+    ]
+  },
+
+  // ── TOPIC 16: COCOMO ──────────────────────────────────────────────────
+  {
+    id: 54, topic: "COCOMO & Estimation",
+    text: "A small e-commerce site (well-understood requirements, small experienced team, 44,000 lines of code). Using COCOMO organic model (a=2.4, b=1.05), what is the initial estimated effort?",
+    type: "MCQ",
+    options: ["128 person-month","208 person-month","338 person-month","181 person-month"],
+    answer: [0],
+    explanations: [
+      "Effort = 2.4 × (44)^1.05 ≈ 2.4 × 53.3 ≈ 128 person-months. Organic model applies (well-understood, small team). KLOC = 44.",
+      "208 person-months would use semi-detached constants — not applicable here.",
+      "338 is too high — that would be embedded model calculation.",
+      "181 doesn't match any standard COCOMO organic calculation for 44 KLOC."
+    ]
+  },
+  {
+    id: 55, topic: "COCOMO & Estimation",
+    text: "A smart home controller system (hardware + software, 1,00,000 lines). Using COCOMO embedded model (a=3.6, b=1.20), what is the initial estimated effort?",
+    type: "MCQ",
+    options: ["303 person-month","208 person-month","522 person-month","905 person-month"],
+    answer: [3],
+    explanations: [
+      "303 is too low for 100 KLOC with embedded constants.",
+      "208 would apply to a much smaller project or organic model.",
+      "522 doesn't match the embedded model calculation for 100 KLOC.",
+      "Effort = 3.6 × (100)^1.20 ≈ 3.6 × 251.2 ≈ 905 person-months. Embedded model applies (hardware+software integration)."
+    ]
+  },
+  {
+    id: 56, topic: "COCOMO & Estimation",
+    text: "For the e-commerce project with estimated effort of 128 person-months and average developer salary of Rs. 50,000/month, what is the estimated project cost?",
+    type: "MCQ",
+    options: ["Rs. 7,68,00,000/-","Rs. 64,00,000/-","Rs. 10,40,000/-","Rs. 1,69,00,000/-"],
+    answer: [1],
+    explanations: [
+      "Rs. 7,68,00,000 = 128 × 60,000 — uses wrong salary figure.",
+      "Rs. 64,00,000 = 128 person-months × Rs. 50,000/month = Rs. 64,00,000. Correct calculation.",
+      "Rs. 10,40,000 is far too low — uses incorrect effort or salary.",
+      "Rs. 1,69,00,000 doesn't match 128 × 50,000."
+    ]
+  },
+  {
+    id: 57, topic: "COCOMO & Estimation",
+    text: "The smart home project has initial estimated effort of 905 person-months and effort adjustment factor (EAF) of 1.62. What is the final estimated effort?",
+    type: "MCQ",
+    options: ["1467 person-month","491 person-month","524 person-month","907 person-month"],
+    answer: [0],
+    explanations: [
+      "Final effort = initial effort × EAF = 905 × 1.62 ≈ 1467 person-months. Correct.",
+      "491 would result from dividing — EAF multiplies, not divides.",
+      "524 doesn't match 905 × 1.62.",
+      "907 is almost equal to the initial effort — EAF of 1.62 should significantly increase it."
+    ]
+  },
+
+  // ── TOPIC 17: Maintenance ─────────────────────────────────────────────
+  {
+    id: 58, topic: "Software Maintenance",
+    text: "What is/are the main activities in the maintenance phase of the software engineering process?",
+    type: "MSQ",
+    options: [
+      "To monitor how users are using the software.",
+      "To ensure that the software behaves according to the requirements.",
+      "To change the code for upgrades/updates.",
+      "To generate developer documentation and precise interface definitions."
+    ],
+    answer: [0, 1, 2],
+    explanations: [
+      "TRUE — Monitoring user behavior is part of maintenance to understand usage patterns and issues.",
+      "TRUE — Ensuring software meets requirements through bug fixes and regression testing is core to maintenance.",
+      "TRUE — Upgrading and updating code for new features or fixes is a primary maintenance activity.",
+      "FALSE — Generating developer documentation and interface definitions is part of the development/design phase, not maintenance."
+    ]
+  },
+  {
+    id: 59, topic: "Software Maintenance",
+    text: "In distributed environments, which statement(s) regarding interface definitions is/are correct?",
+    type: "MSQ",
+    options: [
+      "It describes the capabilities of a function.",
+      "It provides the implementation details of a function.",
+      "It tells which requests are allowed and how the output will be formatted.",
+      "The code implementing the interface should remain unchanged until the interface remains the same."
+    ],
+    answer: [0, 2, 3],
+    explanations: [
+      "TRUE — An interface definition describes what a function can do (its capabilities/contract).",
+      "FALSE — Interface definitions explicitly hide implementation details; they only describe the contract.",
+      "TRUE — Interface definitions specify allowed requests (method signatures) and output formats.",
+      "TRUE — As long as the interface contract is unchanged, the implementing code can be freely modified internally."
+    ]
+  }
+];
+
+// ── STATE ────────────────────────────────────────────────────────────────
+let state = {
+  questions: [],
+  current: 0,
+  answers: {},
+  marked: new Set(),
+  timerEnabled: false,
+  shuffleEnabled: true,
+  timerInterval: null,
+  timeLeft: 60,
+  mode: 'all',
+  submitted: false
+};
+
+// ── INIT ─────────────────────────────────────────────────────────────────
+function init() {
+  // Populate topic dropdown
+  const topics = [...new Set(QUESTIONS.map(q => q.topic))];
+  const sel = document.getElementById('topicFilter');
+  topics.forEach(t => {
+    const o = document.createElement('option');
+    o.value = t; o.textContent = t;
+    sel.appendChild(o);
+  });
+  loadHistory();
+  loadSavedState();
+  setupDarkMode();
+  setupMobile();
+}
+
+function setupDarkMode() {
+  const btn = document.getElementById('darkBtn');
+  const saved = localStorage.getItem('se_quiz_theme');
+  if (saved === 'dark') { document.documentElement.setAttribute('data-theme','dark'); btn.textContent = '☀️ Light'; }
+  btn.onclick = () => {
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    btn.textContent = isDark ? '🌙 Dark' : '☀️ Light';
+    localStorage.setItem('se_quiz_theme', isDark ? 'light' : 'dark');
+  };
+}
+
+function setupMobile() {
+  const toggle = document.getElementById('sidebarToggle');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('overlay');
+  toggle.onclick = () => { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); };
+  overlay.onclick = () => { sidebar.classList.remove('open'); overlay.classList.remove('show'); };
+}
+
+// ── QUIZ START ────────────────────────────────────────────────────────────
+function startQuiz(mode) {
+  state.mode = mode;
+  clearTimer();
+  let qs = [...QUESTIONS];
+  const topicFilter = document.getElementById('topicFilter').value;
+
+  if (topicFilter !== 'all') qs = qs.filter(q => q.topic === topicFilter);
+  if (mode === 'wrong') {
+    const wrongIds = Object.entries(state.answers)
+      .filter(([,a]) => !a.correct).map(([id]) => parseInt(id));
+    qs = qs.filter(q => wrongIds.includes(q.id));
+    if (!qs.length) { alert('No wrong answers to retry! Start a fresh quiz.'); return; }
+  }
+
+  state.timerEnabled = document.getElementById('toggleTimer').checked;
+  state.shuffleEnabled = document.getElementById('toggleShuffle').checked;
+  if (state.shuffleEnabled) qs = shuffle(qs);
+  state.questions = qs;
+  state.current = 0;
+  state.answers = {};
+  state.marked = new Set();
+
+  updateSidebar();
+  buildQNav();
+  showScreen('screenQuiz');
+  renderQuestion();
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ── RENDER QUESTION ───────────────────────────────────────────────────────
+function renderQuestion() {
+  clearTimer();
+  const q = state.questions[state.current];
+  if (!q) return;
+
+  document.getElementById('topicBadge').textContent = q.topic;
+  document.getElementById('qCounter').textContent = `Q ${state.current + 1} / ${state.questions.length}`;
+  document.getElementById('questionText').textContent = q.text;
+
+  const isMSQ = q.type === 'MSQ';
+  document.getElementById('msqNote').style.display = isMSQ ? 'block' : 'none';
+
+  const existing = state.answers[q.id];
+  const list = document.getElementById('optionsList');
+  list.innerHTML = '';
+  const letters = ['A','B','C','D','E'];
+
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn' + (isMSQ ? ' msq-option' : '');
+    btn.disabled = !!existing;
+
+    const indicator = document.createElement('span');
+    if (isMSQ) {
+      indicator.className = 'check-box';
+      indicator.innerHTML = existing && existing.selected.includes(i) ? '✓' : '';
+    } else {
+      indicator.className = 'option-letter';
+      indicator.textContent = letters[i];
+    }
+
+    const text = document.createElement('span');
+    text.textContent = opt;
+    btn.appendChild(indicator);
+    btn.appendChild(text);
+
+    if (existing) {
+      const isSelected = existing.selected.includes(i);
+      const isCorrect = q.answer.includes(i);
+      if (isSelected && isCorrect) btn.classList.add('correct');
+      else if (isSelected && !isCorrect) btn.classList.add('wrong');
+      else if (!isSelected && isCorrect) btn.classList.add('show-correct');
+    } else {
+      btn.onclick = () => selectOption(i, btn, isMSQ);
+    }
+
+    list.appendChild(btn);
+  });
+
+  // Show explanation if already answered
+  if (existing) {
+    showExplanation(q, existing);
+    document.getElementById('submitBtn').style.display = 'none';
+  } else {
+    document.getElementById('explanationCard').style.display = 'none';
+    document.getElementById('submitBtn').style.display = isMSQ ? '' : 'none';
+    document.getElementById('submitBtn').textContent = 'Submit Answer';
+    document.getElementById('submitBtn').disabled = true;
+  }
+
+  // Mark button state
+  const markBtn = document.getElementById('markBtn');
+  markBtn.classList.toggle('active', state.marked.has(q.id));
+
+  // Timer
+  if (state.timerEnabled && !existing) {
+    state.timeLeft = 60;
+    updateTimerDisplay();
+    document.getElementById('timerDisplay').style.display = '';
+    state.timerInterval = setInterval(() => {
+      state.timeLeft--;
+      updateTimerDisplay();
+      if (state.timeLeft <= 0) { clearTimer(); submitAnswer(true); }
+    }, 1000);
+  } else {
+    document.getElementById('timerDisplay').style.display = 'none';
+  }
+
+  updateNavButtons();
+  updateQNavHighlight();
+}
+
+let selectedOptions = [];
+
+function selectOption(i, btn, isMSQ) {
+  const q = state.questions[state.current];
+  const list = document.getElementById('optionsList');
+  const btns = list.querySelectorAll('.option-btn');
+
+  if (isMSQ) {
+    if (selectedOptions.includes(i)) {
+      selectedOptions = selectedOptions.filter(x => x !== i);
+      btn.classList.remove('selected');
+      btn.querySelector('.check-box').innerHTML = '';
+    } else {
+      selectedOptions.push(i);
+      btn.classList.add('selected');
+      btn.querySelector('.check-box').innerHTML = '✓';
+    }
+  } else {
+    selectedOptions = [i];
+    btns.forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    submitAnswer();
+  }
+
+  document.getElementById('submitBtn').disabled = selectedOptions.length === 0;
+}
+
+function submitAnswer(timedOut = false) {
+  const q = state.questions[state.current];
+  if (state.answers[q.id]) return;
+  clearTimer();
+
+  const sel = timedOut ? [] : [...selectedOptions];
+  selectedOptions = [];
+
+  const correctSet = new Set(q.answer);
+  const selSet = new Set(sel);
+  const isCorrect = sel.length > 0 &&
+    sel.every(s => correctSet.has(s)) &&
+    q.answer.every(a => selSet.has(a));
+
+  state.answers[q.id] = { selected: sel, correct: isCorrect };
+
+  // Color options
+  const list = document.getElementById('optionsList');
+  const btns = list.querySelectorAll('.option-btn');
+  btns.forEach((btn, i) => {
+    btn.disabled = true;
+    btn.classList.remove('selected');
+    const isS = sel.includes(i);
+    const isC = q.answer.includes(i);
+    if (isS && isC) btn.classList.add('correct');
+    else if (isS && !isC) btn.classList.add('wrong');
+    else if (!isS && isC) btn.classList.add('show-correct');
+    if (q.type === 'MSQ' && btn.querySelector('.check-box')) {
+      btn.querySelector('.check-box').innerHTML = (isS || isC) ? '✓' : '';
+    }
+  });
+
+  showExplanation(q, state.answers[q.id]);
+  document.getElementById('submitBtn').style.display = 'none';
+  updateSidebar();
+  updateQNavDot(q.id, isCorrect);
+  saveState();
+
+  if (timedOut) {
+    const expCard = document.getElementById('explanationCard');
+    const note = document.createElement('div');
+    note.style.cssText = 'color:var(--danger);font-weight:700;font-size:0.85rem;margin-bottom:0.5rem;';
+    note.textContent = '⏰ Time expired!';
+    expCard.insertBefore(note, expCard.firstChild);
+  }
+}
+
+function showExplanation(q, ans) {
+  const card = document.getElementById('explanationCard');
+  card.style.display = '';
+  const letters = ['A','B','C','D','E'];
+  let html = '<div class="explanation-card"><h4>Explanation</h4>';
+
+  q.options.forEach((opt, i) => {
+    const isC = q.answer.includes(i);
+    const cls = isC ? 'correct' : 'wrong';
+    const icon = isC ? '✅' : '❌';
+    const exp = q.explanations && q.explanations[i] ? q.explanations[i] : (isC ? 'This is the correct answer.' : 'This is not the correct answer.');
+    html += `<div class="exp-item ${cls}"><span class="exp-label">${icon} ${letters[i]}. ${opt}:</span>${exp}</div>`;
+  });
+
+  html += '</div>';
+  card.innerHTML = html;
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────
+function navigate(dir) {
+  if (dir === 1 && state.current < state.questions.length - 1) {
+    state.current++;
+    selectedOptions = [];
+    renderQuestion();
+  } else if (dir === -1 && state.current > 0) {
+    state.current--;
+    selectedOptions = [];
+    renderQuestion();
+  } else if (dir === 1 && state.current === state.questions.length - 1) {
+    showResults();
+  }
+}
+
+function jumpTo(idx) {
+  state.current = idx;
+  selectedOptions = [];
+  renderQuestion();
+}
+
+function updateNavButtons() {
+  document.getElementById('prevBtn').disabled = state.current === 0;
+  const isLast = state.current === state.questions.length - 1;
+  document.getElementById('nextBtn').textContent = isLast ? 'Finish →' : 'Next →';
+}
+
+// ── MARK ─────────────────────────────────────────────────────────────────
+function toggleMark() {
+  const q = state.questions[state.current];
+  if (state.marked.has(q.id)) state.marked.delete(q.id);
+  else state.marked.add(q.id);
+  document.getElementById('markBtn').classList.toggle('active', state.marked.has(q.id));
+  document.getElementById('statMarked').textContent = state.marked.size;
+  updateQNavDot(q.id, state.answers[q.id]?.correct);
+}
+
+// ── SIDEBAR ───────────────────────────────────────────────────────────────
+function updateSidebar() {
+  const total = state.questions.length;
+  const attempted = Object.keys(state.answers).length;
+  const correct = Object.values(state.answers).filter(a => a.correct).length;
+  const wrong = attempted - correct;
+  const remaining = total - attempted;
+  const pct = total ? Math.round((attempted / total) * 100) : 0;
+
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statAttempted').textContent = attempted;
+  document.getElementById('statCorrect').textContent = correct;
+  document.getElementById('statWrong').textContent = wrong;
+  document.getElementById('statRemaining').textContent = remaining;
+  document.getElementById('statMarked').textContent = state.marked.size;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('progressFrac').textContent = `${attempted}/${total}`;
+}
+
+function buildQNav() {
+  const grid = document.getElementById('qNavGrid');
+  grid.innerHTML = '';
+  state.questions.forEach((q, i) => {
+    const dot = document.createElement('button');
+    dot.className = 'q-dot';
+    dot.textContent = i + 1;
+    dot.title = `Q${i+1}: ${q.topic}`;
+    dot.onclick = () => { jumpTo(i); if(window.innerWidth<=768){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show');} };
+    dot.id = `dot-${q.id}`;
+    grid.appendChild(dot);
+  });
+}
+
+function updateQNavHighlight() {
+  document.querySelectorAll('.q-dot').forEach((d, i) => {
+    d.classList.remove('current');
+    if (i === state.current) d.classList.add('current');
+  });
+}
+
+function updateQNavDot(qid, correct) {
+  const q = state.questions.find(q => q.id === qid);
+  const i = state.questions.indexOf(q);
+  const dot = document.getElementById(`dot-${qid}`);
+  if (!dot) return;
+  dot.classList.remove('correct','wrong','marked','current');
+  if (state.marked.has(qid)) dot.classList.add('marked');
+  else if (state.answers[qid]) dot.classList.add(correct ? 'correct' : 'wrong');
+  if (i === state.current) dot.classList.add('current');
+}
+
+// ── TIMER ─────────────────────────────────────────────────────────────────
+function clearTimer() {
+  if (state.timerInterval) { clearInterval(state.timerInterval); state.timerInterval = null; }
+}
+
+function updateTimerDisplay() {
+  const el = document.getElementById('timerDisplay');
+  const m = Math.floor(state.timeLeft / 60);
+  const s = state.timeLeft % 60;
+  el.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+  el.classList.toggle('warning', state.timeLeft <= 10);
+}
+
+// ── RESULTS ───────────────────────────────────────────────────────────────
+function showResults() {
+  clearTimer();
+  showScreen('screenResults');
+
+  const total = state.questions.length;
+  const correct = Object.values(state.answers).filter(a => a.correct).length;
+  const wrong = Object.values(state.answers).filter(a => !a.correct).length;
+  const skipped = total - Object.keys(state.answers).length;
+  const pct = total ? Math.round((correct / total) * 100) : 0;
+
+  document.getElementById('rScore').textContent = `${correct}/${total}`;
+  document.getElementById('rPct').textContent = `${pct}%`;
+  document.getElementById('rCorrect').textContent = correct;
+  document.getElementById('rWrong').textContent = wrong;
+  document.getElementById('rSkipped').textContent = skipped;
+  document.getElementById('rPctNum').textContent = pct + '%';
+
+  const msgs = ['Keep practicing! 💪', 'Good effort! 👍', 'Well done! 🌟', 'Excellent! 🎉', 'Perfect score! 🏆'];
+  document.getElementById('rMsg').textContent = msgs[Math.min(4, Math.floor(pct / 20))];
+
+  // Topic breakdown
+  const topicMap = {};
+  state.questions.forEach(q => {
+    if (!topicMap[q.topic]) topicMap[q.topic] = { total: 0, correct: 0 };
+    topicMap[q.topic].total++;
+    if (state.answers[q.id]?.correct) topicMap[q.topic].correct++;
+  });
+
+  const bd = document.getElementById('topicBreakdown');
+  bd.innerHTML = '';
+  Object.entries(topicMap).sort((a,b) => (a[1].correct/a[1].total) - (b[1].correct/b[1].total)).forEach(([topic, data]) => {
+    const p = data.total ? Math.round((data.correct / data.total) * 100) : 0;
+    const color = p >= 70 ? '#16a34a' : p >= 40 ? '#d97706' : '#dc2626';
+    const tag = p >= 70 ? '<span class="tag strong">Strong</span>' : p < 40 ? '<span class="tag weak">Needs Work</span>' : '<span class="tag mid">Average</span>';
+    bd.innerHTML += `<div class="topic-row">
+      <span class="topic-name">${topic}${tag}</span>
+      <div class="topic-bar-wrap"><div class="topic-bar" style="width:${p}%;background:${color}"></div></div>
+      <span class="topic-pct" style="color:${color}">${p}%</span>
+    </div>`;
+  });
+
+  saveHistory(correct, total, pct);
+  loadHistory();
+}
+
+// ── HISTORY ───────────────────────────────────────────────────────────────
+function saveHistory(correct, total, pct) {
+  const h = JSON.parse(localStorage.getItem('se_quiz_history') || '[]');
+  h.unshift({ date: new Date().toLocaleString(), correct, total, pct });
+  if (h.length > 10) h.pop();
+  localStorage.setItem('se_quiz_history', JSON.stringify(h));
+}
+
+function loadHistory() {
+  const h = JSON.parse(localStorage.getItem('se_quiz_history') || '[]');
+  if (!h.length) return;
+
+  const best = Math.max(...h.map(x => x.pct));
+  document.getElementById('homeHistScore').textContent = best + '%';
+
+  const wrap = document.getElementById('historyWrap');
+  const list = document.getElementById('historyList');
+  if (h.length) { wrap.style.display = ''; }
+  list.innerHTML = h.map(x => `<div class="history-item"><span>${x.date}</span><span style="font-weight:700;color:${x.pct>=70?'var(--success)':x.pct>=40?'var(--warning)':'var(--danger)'}">${x.correct}/${x.total} (${x.pct}%)</span></div>`).join('');
+
+  const hsec = document.getElementById('historySection');
+  if (h.length) hsec.innerHTML = `<div class="sidebar-title" style="margin-bottom:0.5rem">Recent Attempts</div>` +
+    h.slice(0,3).map(x => `<div class="history-item"><span>${x.date.split(',')[0]}</span><span style="font-weight:700">${x.pct}%</span></div>`).join('');
+}
+
+// ── PERSISTENCE ────────────────────────────────────────────────────────────
+function saveState() {
+  const s = { answers: state.answers, marked: [...state.marked], current: state.current, questionIds: state.questions.map(q => q.id) };
+  localStorage.setItem('se_quiz_state', JSON.stringify(s));
+}
+
+function loadSavedState() {
+  try {
+    const s = JSON.parse(localStorage.getItem('se_quiz_state'));
+    if (!s || !s.questionIds || !s.questionIds.length) return;
+    const qs = s.questionIds.map(id => QUESTIONS.find(q => q.id === id)).filter(Boolean);
+    if (!qs.length) return;
+    const resume = confirm(`Resume previous quiz? (${Object.keys(s.answers).length}/${qs.length} answered)`);
+    if (resume) {
+      state.questions = qs;
+      state.answers = s.answers || {};
+      state.marked = new Set(s.marked || []);
+      state.current = Math.min(s.current || 0, qs.length - 1);
+      updateSidebar();
+      buildQNav();
+      Object.entries(state.answers).forEach(([id, a]) => updateQNavDot(parseInt(id), a.correct));
+      showScreen('screenQuiz');
+      renderQuestion();
+    }
+  } catch(e) { console.log('No saved state'); }
+}
+
+// ── SCREEN SWITCHING ─────────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const showSidebar = id === 'screenQuiz';
+  document.getElementById('sidebarToggle').style.display = showSidebar ? '' : 'none';
+  if (!showSidebar) {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('show');
+  }
+}
+
+function showHome() {
+  clearTimer();
+  localStorage.removeItem('se_quiz_state');
+  showScreen('screenHome');
+}
+
+init();
+</script>
+</body>
+</html>

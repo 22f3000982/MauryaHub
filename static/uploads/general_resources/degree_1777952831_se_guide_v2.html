@@ -1,0 +1,2597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IIT Madras SE — Complete Study Guide</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=Fira+Code:wght@400;500&family=Lora:ital,wght@0,400;0,600;1,400&display=swap');
+
+:root {
+  --bg: #0f1117;
+  --surface: #171c28;
+  --surface2: #1e2435;
+  --surface3: #252d40;
+  --border: #2e3a50;
+  --accent: #64d9a8;
+  --accent2: #7eb8f7;
+  --accent3: #f4a261;
+  --accent4: #e07cf5;
+  --red: #f07070;
+  --text: #dde4f0;
+  --muted: #7a8aaa;
+  --sidebar-w: 290px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Lora', Georgia, serif;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ─── SIDEBAR ─── */
+#sidebar {
+  width: var(--sidebar-w);
+  min-width: var(--sidebar-w);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#sidebar-header {
+  padding: 18px 16px 14px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, #1a2236, #1e2c40);
+}
+
+#sidebar-header h1 {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1.4;
+}
+
+#sidebar-header p {
+  font-size: 0.68rem;
+  color: var(--muted);
+  margin-top: 5px;
+  font-family: 'Fira Code', monospace;
+}
+
+.section-label {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  padding: 10px 14px 4px;
+}
+
+#topic-list { overflow-y: auto; flex: 1; padding: 4px 0 10px; }
+
+.topic-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  border-left: 3px solid transparent;
+  transition: all 0.15s;
+  color: var(--muted);
+}
+
+.topic-btn:hover { background: var(--surface2); color: var(--text); }
+.topic-btn.active { background: var(--surface2); border-left-color: var(--accent); color: var(--text); }
+
+.topic-btn .rank {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.62rem;
+  color: var(--muted);
+  min-width: 16px;
+}
+
+.topic-btn .label { font-size: 0.8rem; font-family: 'Sora', sans-serif; font-weight: 400; line-height: 1.3; flex: 1; }
+.topic-btn .badge {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.6rem;
+  background: var(--surface3);
+  color: var(--accent);
+  padding: 1px 6px;
+  border-radius: 10px;
+  min-width: 24px;
+  text-align: center;
+}
+
+/* ─── MAIN ─── */
+#main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#topic-header {
+  padding: 20px 32px 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+  flex-shrink: 0;
+}
+
+.th-top { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 16px; }
+.big-emoji { font-size: 2.2rem; line-height: 1; }
+#hdr-title { font-family: 'Sora', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--text); }
+#hdr-sub { font-size: 0.78rem; color: var(--muted); margin-top: 3px; font-family: 'Fira Code', monospace; }
+
+.tabs { display: flex; gap: 4px; }
+.tab-btn {
+  padding: 8px 18px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+  border-bottom: 3px solid transparent;
+  transition: all 0.15s;
+}
+.tab-btn:hover { color: var(--text); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ─── STATS BAR ─── */
+.stats-bar {
+  display: flex;
+  gap: 20px;
+  padding: 8px 32px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  font-family: 'Fira Code', monospace;
+  font-size: 0.68rem;
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.stats-bar span { color: var(--accent); }
+
+/* ─── CONTENT ─── */
+.content-section {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 36px;
+}
+
+/* ─── THEORY ─── */
+.theory-block {
+  margin-bottom: 28px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.theory-block h3 {
+  font-family: 'Sora', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--accent2);
+  padding: 14px 18px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  letter-spacing: 0.01em;
+}
+
+.theory-body {
+  padding: 18px 20px;
+  font-size: 0.88rem;
+  line-height: 1.85;
+  color: #c8d4e8;
+}
+
+.theory-body b { color: var(--text); font-weight: 600; }
+.theory-body code {
+  font-family: 'Fira Code', monospace;
+  background: var(--surface3);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.82rem;
+  color: var(--accent3);
+}
+
+.theory-body pre {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.79rem;
+  background: #0d1020;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin: 12px 0;
+  color: var(--accent3);
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+/* ─── CONCEPT BOX ─── */
+.concept-box {
+  background: rgba(100, 217, 168, 0.06);
+  border: 1px solid rgba(100, 217, 168, 0.2);
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin: 12px 0;
+  font-size: 0.84rem;
+  line-height: 1.7;
+}
+
+.concept-box .concept-title {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.warn-box {
+  background: rgba(240, 112, 112, 0.08);
+  border: 1px solid rgba(240, 112, 112, 0.25);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 12px 0;
+  font-size: 0.83rem;
+  color: #f0a0a0;
+  line-height: 1.65;
+}
+
+.warn-box strong { color: var(--red); }
+
+.tip-box {
+  background: rgba(244, 162, 97, 0.07);
+  border: 1px solid rgba(244, 162, 97, 0.25);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 12px 0;
+  font-size: 0.83rem;
+  color: #d4a070;
+  line-height: 1.65;
+}
+
+.tip-box strong { color: var(--accent3); }
+
+/* ─── TABLES ─── */
+table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin: 12px 0; }
+th { background: var(--surface3); padding: 8px 12px; text-align: left; font-family: 'Fira Code', monospace; font-size: 0.68rem; color: var(--accent); border-bottom: 1px solid var(--border); }
+td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: #b0bcd0; line-height: 1.5; }
+tr:hover td { background: var(--surface3); }
+
+/* ─── PYQ CARDS ─── */
+.pyq-card {
+  margin-bottom: 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.pyq-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  cursor: pointer;
+  background: var(--surface2);
+  transition: background 0.15s;
+  user-select: none;
+}
+
+.pyq-header:hover { background: var(--surface3); }
+
+.pyq-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.pyq-id { font-family: 'Fira Code', monospace; font-size: 0.68rem; color: var(--accent); }
+.pyq-paper { font-family: 'Fira Code', monospace; font-size: 0.65rem; color: var(--muted); }
+.pyq-marks { font-family: 'Fira Code', monospace; font-size: 0.65rem; background: var(--surface3); padding: 1px 8px; border-radius: 10px; color: var(--accent3); }
+.pyq-type { font-family: 'Fira Code', monospace; font-size: 0.62rem; color: var(--accent2); }
+.chevron { color: var(--muted); font-size: 0.7rem; transition: transform 0.2s; }
+.chevron.open { transform: rotate(180deg); }
+
+.pyq-body { padding: 20px; display: none; }
+.pyq-body.open { display: block; }
+
+.q-text {
+  font-size: 0.87rem;
+  line-height: 1.8;
+  color: #cdd8ea;
+  margin-bottom: 16px;
+  background: var(--surface2);
+  padding: 14px 16px;
+  border-radius: 8px;
+  border-left: 3px solid var(--accent2);
+}
+
+.q-text pre {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.77rem;
+  white-space: pre-wrap;
+  color: var(--accent3);
+  margin-top: 10px;
+  background: #0a0f1c;
+  padding: 10px 12px;
+  border-radius: 6px;
+  line-height: 1.55;
+}
+
+/* ─── OPTIONS ─── */
+.options-list { list-style: none; margin-bottom: 16px; }
+.options-list li {
+  font-size: 0.84rem;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 5px;
+  line-height: 1.5;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: #a8b8cc;
+  font-family: 'Lora', serif;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+/* clickable option hover */
+.options-list li {
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.1s;
+}
+.options-list li:hover:not(.answered) {
+  background: var(--surface3);
+  border-color: var(--accent2);
+  color: var(--text);
+  transform: translateX(3px);
+}
+
+/* after answering — correct */
+.options-list li.correct-reveal {
+  background: rgba(100, 217, 168, 0.12);
+  border-color: var(--accent);
+  color: var(--accent);
+  cursor: default;
+}
+
+/* after answering — the one user clicked but it was wrong */
+.options-list li.selected-wrong {
+  background: rgba(240, 112, 112, 0.12);
+  border-color: var(--red);
+  color: var(--red);
+  cursor: default;
+}
+
+/* after answering — other wrong options just fade */
+.options-list li.wrong-reveal {
+  opacity: 0.38;
+  cursor: default;
+}
+
+/* lock all options once answered */
+.options-list.answered li { pointer-events: none; }
+
+/* ─── ANSWER TOGGLE ─── */
+.answer-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 14px;
+  transition: all 0.15s;
+}
+
+.answer-toggle-btn:hover {
+  background: rgba(100, 217, 168, 0.1);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.answer-toggle-btn.revealed {
+  background: rgba(100, 217, 168, 0.08);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ─── ANSWER SECTION ─── */
+.answer-section { display: none; }
+.answer-section.revealed { display: block; animation: fadeIn 0.25s ease; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+.answer-pill {
+  display: inline-block;
+  background: var(--accent);
+  color: #082018;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.solution-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+}
+
+.solution-box h4 {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  color: var(--accent);
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.solution-box p, .solution-box li {
+  font-size: 0.84rem;
+  line-height: 1.8;
+  color: #b0c0d8;
+}
+
+.solution-box ul { padding-left: 18px; }
+.solution-box ul li { margin-bottom: 4px; }
+
+/* ─── FORMULA BOX ─── */
+.formula-box {
+  background: #080d1a;
+  border: 1px solid var(--accent2);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin: 10px 0;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.82rem;
+  color: var(--accent2);
+  line-height: 1.6;
+}
+
+hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+/* ─── PROGRESS ─── */
+.progress-bar {
+  height: 3px;
+  background: var(--border);
+  border-radius: 2px;
+  margin: 6px 0 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+  transition: width 0.3s;
+}
+
+/* ─── SCROLLBAR ─── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ─── WELCOME ─── */
+#welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  gap: 12px;
+  color: var(--muted);
+}
+
+#welcome h2 { font-family: 'Sora', sans-serif; font-size: 1.6rem; color: var(--text); }
+#welcome p { font-size: 0.88rem; max-width: 400px; line-height: 1.7; }
+
+/* Show all answers button */
+.reveal-all-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 20px;
+  transition: all 0.15s;
+}
+.reveal-all-btn:hover { border-color: var(--accent3); color: var(--accent3); }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <div id="sidebar-header">
+    <h1>📖 IIT Madras SE<br>Complete Study Guide</h1>
+    <p>6 papers · 22 topics · ranked by frequency</p>
+    <p style="margin-top:8px; font-size:0.65rem; color:#4a5a7a; font-family:'Fira Code',monospace;">made by Saksham Gupta</p>
+  </div>
+  <div class="section-label">Topics by Exam Frequency ↓</div>
+  <div id="topic-list"></div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <div id="topic-header" style="display:none">
+    <div class="th-top">
+      <div class="big-emoji" id="hdr-emoji"></div>
+      <div>
+        <h2 id="hdr-title"></h2>
+        <div class="sub" id="hdr-sub"></div>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('theory')">📘 Concept Explanation</button>
+      <button class="tab-btn" onclick="switchTab('pyq')">📝 PYQ Practice</button>
+    </div>
+  </div>
+  <div class="stats-bar" id="stats-bar" style="display:none"></div>
+
+  <div id="welcome">
+    <div style="font-size:3rem">📖</div>
+    <h2>IIT Madras SE Study Guide</h2>
+    <p>22 topics ranked by PYQ frequency. Click any topic in the sidebar to start studying.<br><br>
+    Each topic has <b>deep concept explanations</b> + <b>PYQ practice questions</b> with hidden answers — test yourself before revealing!</p>
+  </div>
+
+  <div id="theory-section" class="content-section" style="display:none"></div>
+  <div id="pyq-section" class="content-section" style="display:none"></div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+//  TOPIC DATABASE
+// ════════════════════════════════════════════════════════════════
+const TOPICS = [
+
+// ════════════════════════════════════════════════════════════════
+// 1. TESTING TECHNIQUES
+// ════════════════════════════════════════════════════════════════
+{
+  rank:1, count:14, emoji:"🧪",
+  name:"Testing Techniques",
+  subtitle:"ECP · BVA · Branch Coverage · MCC",
+  papers:"All 6 papers",
+  theory:[
+    {
+      h:"What is Software Testing? — The Big Picture",
+      body:`Software testing is the process of <b>verifying and validating</b> that a software system behaves as intended. There are two fundamental dimensions:<br><br>
+<b>Verification</b>: Are we building the product RIGHT? (does the code match the spec?)<br>
+<b>Validation</b>: Are we building the RIGHT product? (does the spec satisfy user needs?)<br><br>
+Testing is categorized by how much knowledge the tester has about internal code:
+<table>
+<tr><th>Type</th><th>Knowledge of Code</th><th>Techniques</th><th>Focus</th></tr>
+<tr><td><b>Black-box</b></td><td>None — only inputs/outputs</td><td>ECP, BVA, Decision Tables</td><td>Functional behavior</td></tr>
+<tr><td><b>White-box</b></td><td>Full — sees source code</td><td>Branch, Path, MCC, Statement</td><td>Code structure coverage</td></tr>
+<tr><td><b>Grey-box</b></td><td>Partial — some internals known</td><td>Mix of both</td><td>Integration behavior</td></tr>
+</table>
+<div class="concept-box"><div class="concept-title">Key Insight</div>Black-box = "what does it do?" White-box = "how does it do it?" The exam almost always asks about ECP/BVA (black-box) and Branch Coverage/MCC (white-box).</div>`
+    },
+    {
+      h:"Equivalence Class Partitioning (ECP) — Most Tested Technique",
+      body:`<b>Core idea:</b> The entire input space is divided into groups (equivalence classes) where every value in the group is expected to behave the <b>same way</b>. If one value in the class works, all should work. If one fails, all should fail.<br><br>
+This means you only need <b>ONE representative per class</b> — testing more from the same class wastes time without adding coverage.<br><br>
+<b>Step-by-step process:</b><br>
+1. Read the function/spec and identify all decision conditions (inequalities, equality checks)<br>
+2. List the boundaries these conditions create<br>
+3. Enumerate all classes (including invalid classes like ≤ 0)<br>
+4. Pick ONE value from each class<br><br>
+<b>Worked Example — getDiscount(price):</b>
+<pre>if price <= 0:      → "Invalid input", discount = 0
+elif price < 2000:  → discount = price × 0.1
+else:               → discount = price × 0.2</pre>
+Three distinct behaviors → Three equivalence classes:<br>
+• Class 1: price ≤ 0 → representative: <code>0</code> or <code>-5</code><br>
+• Class 2: 0 < price < 2000 → representative: <code>1800</code><br>
+• Class 3: price ≥ 2000 → representative: <code>3800</code><br><br>
+Valid ECP set: <code>{0, 1800, 3800}</code>
+
+<div class="warn-box"><strong>⚠️ Exam Trap:</strong> The option {-10, 0, 1200} looks like it has 3 values so it must be valid, right? WRONG! Both -10 and 0 fall in Class 1 (price ≤ 0). That's two values from the same class — redundant and not a valid ECP set. Similarly, {100, 1500, 2500} has two values from Class 2.</div>
+
+<div class="tip-box"><strong>💡 Quick Check:</strong> For each value in the proposed set, ask "which class does it belong to?" If two values point to the same class, the set is invalid.</div>`
+    },
+    {
+      h:"Boundary Value Analysis (BVA) — Testing at the Edges",
+      body:`<b>Core idea:</b> Most bugs occur at or near the boundaries of input ranges — programmers tend to use wrong comparisons (< instead of ≤, etc.). BVA deliberately tests these danger zones.<br><br>
+For a valid partition <b>[a, b]</b>, BVA tests the following values:<br>
+• <code>a − 1</code>: just below the minimum (invalid/boundary)<br>
+• <code>a</code>: exactly at minimum<br>
+• <code>a + 1</code>: just inside the minimum<br>
+• <code>(a + b) / 2</code>: a nominal middle value<br>
+• <code>b − 1</code>: just inside the maximum<br>
+• <code>b</code>: exactly at maximum<br>
+• <code>b + 1</code>: just above the maximum (invalid/boundary)<br><br>
+<b>Example:</b> Valid partition is <b>58 ≤ weight ≤ 78</b><br>
+BVA values: <code>{57, 58, 59, 67, 77, 78, 79}</code>
+
+<div class="warn-box"><strong>⚠️ Exam Trap:</strong> A set like {58, 67, 78} is ECP (one from each region: below, inside, above) but NOT BVA — it's missing the boundary-adjacent values 57, 59, 77, 79. BVA requires the "just outside" values!</div>
+
+<b>BVA vs ECP comparison:</b>
+<table>
+<tr><th>Aspect</th><th>ECP</th><th>BVA</th></tr>
+<tr><td>Focus</td><td>Anywhere inside the class</td><td>Exactly at/around boundaries</td></tr>
+<tr><td>Values per partition</td><td>1 representative</td><td>Up to 3 values per boundary</td></tr>
+<tr><td>Catches</td><td>Wrong classification logic</td><td>Off-by-one errors, wrong inequality</td></tr>
+</table>`
+    },
+    {
+      h:"Branch Coverage (Decision Coverage) — White-box",
+      body:`<b>Core idea:</b> Every <b>branch</b> (TRUE and FALSE outcome) of every decision point must be executed at least once. A decision point is any <code>if</code>, <code>elif</code>, <code>else</code>, <code>while</code>, <code>for</code>, or logical condition.<br><br>
+<b>Why branch coverage matters:</b> Statement coverage can reach 100% without ever testing the FALSE branch of an if-statement. Branch coverage is stricter — it forces both paths.<br><br>
+<b>Step-by-step process:</b><br>
+1. Draw a flow graph: circle = decision, arrow = branch<br>
+2. Count all branches (each IF creates at least 2 branches: TRUE + FALSE)<br>
+3. Design test cases so each branch is hit at least once<br><br>
+<b>Example — isLeapYear(year):</b>
+<pre>if year % 4 == 0:    → Branch T1: divisible by 4
+    if year % 100 == 0:  → Branch T2: divisible by 100
+        if year % 400 == 0:  → T3: leap year (e.g. 2000)
+        else: not leap (e.g. 1900)
+    else: leap year (e.g. 2024)
+else: not leap (e.g. 2023)</pre>
+To cover ALL branches, you need: a non-multiple-of-4, a multiple-of-4-but-not-100, a multiple-of-100-but-not-400, and a multiple-of-400.
+
+<div class="warn-box"><strong>⚠️ Exam Trap:</strong> Test set {2200, 657}: 2200 is divisible by 4 but ALSO by 100 and NOT by 400 → non-leap. 657 is not divisible by 4 → non-leap. BOTH produce non-leap results! The "TRUE → leap year" branch is NEVER executed. This is an INVALID branch coverage set.</div>`
+    },
+    {
+      h:"Multiple Condition Coverage (MCC) — Strictest Technique",
+      body:`<b>Core idea:</b> Every individual boolean sub-condition must be tested in all possible TRUE/FALSE combinations. For a compound condition <code>(A OR B)</code>, we need (T,T), (T,F), (F,T), (F,F) to be covered by the test suite.<br><br>
+<b>MCC is strictly stronger than Branch Coverage.</b> If MCC is satisfied, Branch Coverage is automatically satisfied — but not vice versa.<br><br>
+<b>Example — dayStatus(day):</b>
+<pre>Outer: if day <= 0 OR day > 7:   → invalid
+       else:
+           Inner: if day < 6:    → weekday
+                  else:          → weekend</pre>
+Outer condition has two sub-conditions: C1 = (day ≤ 0), C2 = (day > 7)<br>
+MCC requires all combinations for C1 and C2:
+<table>
+<tr><th>C1 (day≤0)</th><th>C2 (day>7)</th><th>Test value</th><th>Outcome</th></tr>
+<tr><td>TRUE</td><td>FALSE</td><td>day = 0</td><td>Invalid</td></tr>
+<tr><td>FALSE</td><td>TRUE</td><td>day = 8</td><td>Invalid</td></tr>
+<tr><td>FALSE</td><td>FALSE → inner T</td><td>day = 5</td><td>Weekday</td></tr>
+<tr><td>FALSE</td><td>FALSE → inner F</td><td>day = 7</td><td>Weekend</td></tr>
+</table>
+MCC set = <code>{0, 8, 5, 7}</code><br><br>
+<div class="tip-box"><strong>💡 Note:</strong> (C1=T, C2=T) means day≤0 AND day>7 simultaneously — impossible, so this combination is excluded. MCC only requires feasible combinations.</div>`
+    }
+  ],
+  pyqs:[
+    {
+      id:"T-01", paper:"Apr 2023, Dec 2023, Sep 2024", marks:"4-5", type:"MCQ/MSQ",
+      q:`<b>getDiscount(price)</b>:<br>if price ≤ 0 → "Invalid", discount=0<br>elif price &lt; 2000 → discount = price × 0.1<br>else → discount = price × 0.2<br><br>
+Which set of test cases is VALID for black-box testing using the <b>equivalence class technique</b>?`,
+      options:[
+        {t:"A. {price=0, price=2000}", c:false},
+        {t:"B. {price=−10, price=0, price=1200}", c:false},
+        {t:"C. {price=0, price=1800, price=3800}", c:true},
+        {t:"D. {price=0, price=1800}", c:false},
+      ],
+      ans:"C",
+      sol:`<b>Equivalence classes:</b> Class 1: price ≤ 0 | Class 2: 0 &lt; price &lt; 2000 | Class 3: price ≥ 2000<br><br>
+• <b>A: {0, 2000}</b> — only 2 values for 3 classes; missing a value in class 2 ✗<br>
+• <b>B: {-10, 0, 1200}</b> — -10 AND 0 are BOTH in Class 1 (price ≤ 0). Redundant! ✗<br>
+• <b>C: {0, 1800, 3800}</b> — 0 ∈ Class 1, 1800 ∈ Class 2, 3800 ∈ Class 3. One from each class ✓<br>
+• <b>D: {0, 1800}</b> — only 2 classes covered; missing Class 3 ✗`
+    },
+    {
+      id:"T-02", paper:"Apr 2023, Sep 2023", marks:"4", type:"MCQ",
+      q:`<b>dayStatus(day)</b>:<br>if day ≤ 0 or day > 7: print("Invalid day")<br>else: if day &lt; 6: print("weekday") else: print("weekend")<br><br>
+Identify the MINIMUM set of test cases for <b>branch coverage</b>.`,
+      options:[
+        {t:"A. {0, 5}", c:false},
+        {t:"B. {0, 5, 7}", c:true},
+        {t:"C. {1, 5, 6, 9}", c:false},
+        {t:"D. {0, 5, 6}", c:true},
+      ],
+      ans:"B or D",
+      sol:`<b>Branches to cover:</b><br>
+1. Outer TRUE (invalid): any day ≤ 0 or > 7 → e.g., day=0 or day=9<br>
+2. Outer FALSE + Inner TRUE (weekday): day in [1..5] → e.g., day=5<br>
+3. Outer FALSE + Inner FALSE (weekend): day in [6,7] → e.g., day=7 or day=6<br><br>
+• B: {0=invalid✓, 5=weekday✓, 7=weekend✓} — all 3 branches ✓<br>
+• D: {0=invalid✓, 5=weekday✓, 6=weekend✓} — all 3 branches ✓<br>
+• A: {0, 5} — missing weekend branch ✗`
+    },
+    {
+      id:"T-03", paper:"Apr 2023 ET1 - Q20", marks:"5", type:"MCQ",
+      q:`<b>dayStatus(day)</b> (same as above).<br>Identify a valid set of test cases for <b>Multiple Condition Coverage (MCC)</b>.`,
+      options:[
+        {t:"A. {0, 5}", c:false},
+        {t:"B. {0, 8, 5, 7}", c:true},
+        {t:"C. {0, 5, 7}", c:false},
+        {t:"D. {5, 6, 9}", c:false},
+      ],
+      ans:"B — {0, 8, 5, 7}",
+      sol:`Outer condition: C1 = (day ≤ 0), C2 = (day > 7). Need all feasible T/F combos:<br>
+• C1=T, C2=F: day=0 → covers (T, F) ✓<br>
+• C1=F, C2=T: day=8 → covers (F, T) ✓<br>
+• C1=F, C2=F and inner T: day=5 → weekday ✓<br>
+• C1=F, C2=F and inner F: day=7 → weekend ✓<br><br>
+• C: {0, 5, 7} — covers (T,F) and (F,F) only; missing (F,T) i.e., day>7 case ✗<br>
+• D: {5, 6, 9} — missing C1=T case ✗`
+    },
+    {
+      id:"T-04", paper:"Sep 2024 FN - Q25", marks:"4", type:"MSQ",
+      q:`<b>fact(n)</b>:<pre>f = 1
+if n < 0: return -1
+else:
+    if n==0 or n==1: f = 1
+    else:
+        for i in range(2, n): f *= i
+    return f</pre>
+Identify valid set(s) for <b>branch coverage</b>.`,
+      options:[
+        {t:"A. {−5, 5}", c:false},
+        {t:"B. {−5, 0, 2, 5}", c:true},
+        {t:"C. {−5, 2, 5, 10}", c:false},
+        {t:"D. {−5, 0, 1, 2, 5}", c:true},
+      ],
+      ans:"B and D",
+      sol:`Branches needed:<br>
+1. n &lt; 0: n=−5 ✓<br>
+2. n ≥ 0 AND (n==0 or n==1) TRUE: n=0 or n=1 ✓<br>
+3. n ≥ 0 AND (n==0 or n==1) FALSE → for-loop: n≥2 e.g. n=2 or n=5 ✓<br><br>
+• B: {−5, 0, 2, 5} — covers all 3 branches ✓<br>
+• D: {−5, 0, 1, 2, 5} — also covers all 3 branches ✓<br>
+• A: {−5, 5} — 5 goes to for-loop but misses the n==0/1 branch ✗<br>
+• C: {−5, 2, 5, 10} — all go to for-loop; n==0 or n==1 branch missed ✗`
+    },
+    {
+      id:"T-05", paper:"Apr 2025 SW Testing - Q16", marks:"4", type:"MSQ",
+      q:`Partition: <b>58 ≤ candidate_weight ≤ 78</b><br><br>Identify ALL valid sets using <b>Boundary Value Analysis (BVA)</b>.`,
+      options:[
+        {t:"A. {58, 67, 78}", c:false},
+        {t:"B. {58, 59, 68, 77, 78}", c:false},
+        {t:"C. {57, 58, 67, 78, 79}", c:true},
+        {t:"D. {57, 58, 59, 65, 77, 78, 79}", c:true},
+      ],
+      ans:"C and D",
+      sol:`BVA for [58, 78] must include values AT and OUTSIDE boundaries:<br>
+• 57 = min−1 (just below valid range) ← REQUIRED<br>
+• 58 = min (lower boundary) ← REQUIRED<br>
+• 59 = min+1 (just inside)<br>
+• 78 = max (upper boundary) ← REQUIRED<br>
+• 79 = max+1 (just above valid range) ← REQUIRED<br><br>
+• C: {57✓, 58✓, 67(mid), 78✓, 79✓} — has all key boundary values ✓<br>
+• D: {57✓, 58✓, 59, 65, 77, 78✓, 79✓} — complete robust BVA ✓<br>
+• A: {58, 67, 78} — looks like ECP not BVA; missing 57 and 79 ✗<br>
+• B: missing 57 and 79 (outside boundary values) ✗`
+    },
+  ]
+},
+
+// ════════════════════════════════════════════════════════════════
+// 2. DEPLOYMENT & HOSTING
+// ════════════════════════════════════════════════════════════════
+{
+  rank:2, count:12, emoji:"🚀",
+  name:"Deployment & Hosting",
+  subtitle:"Strategies · Environments · IaaS/PaaS/Bare Metal",
+  papers:"All 5 SE papers",
+  theory:[
+    {
+      h:"Deployment Strategies — How New Versions Go Live",
+      body:`When a new version of software is ready, teams must decide <b>how</b> to transition users from old to new. Each strategy has different risk and complexity trade-offs.<br><br>
+<b>Blue/Green Deployment:</b><br>
+Two identical production environments exist simultaneously — "Blue" (current live) and "Green" (new version). The team deploys the new version to Green, tests it thoroughly, and then <b>switches all traffic at once</b> from Blue to Green. If something goes wrong, traffic is instantly switched back to Blue.<br>
+→ Exam keywords: <i>"new environment created without affecting current," "users routed after testing"</i><br><br>
+<b>Canary Deployment:</b><br>
+The new version is rolled out <b>incrementally</b> — first to 1-5% of users (the "canaries"), monitored for errors, then gradually expanded to 100%. Multiple versions run simultaneously during rollout.<br>
+→ Exam keywords: <i>"small subset of users first," "incremental rollout," "drawback: maintaining multiple versions"</i><br><br>
+<b>Versioned Deployment:</b><br>
+Multiple versions of the application are maintained in production <b>indefinitely</b>. Users can actively choose which version they want to use (e.g., Gmail's "switch to old Gmail").<br>
+→ Exam keywords: <i>"users choose which version to use," "multiple production versions maintained"</i>
+
+<div class="concept-box"><div class="concept-title">Memory Aid</div>
+Blue/Green = flip a switch (all at once)<br>
+Canary = test with a few, expand gradually<br>
+Versioned = users have a menu of versions</div>`
+    },
+    {
+      h:"Deployment Environments — From Dev to Production",
+      body:`Software moves through environments as it matures, with each stage serving a specific validation purpose:<br><br>
+<table>
+<tr><th>Environment</th><th>Who Uses It</th><th>Purpose</th><th>Key Characteristic</th></tr>
+<tr><td><b>Development</b></td><td>Individual developer</td><td>Write and test individual code changes</td><td>Has IDE, build tools, local DB; very different from production</td></tr>
+<tr><td><b>Testing</b></td><td>QA team</td><td>Integration testing, system testing, regression testing</td><td>Dedicated test team; automated test suites run here</td></tr>
+<tr><td><b>Staging</b></td><td>Business/Senior devs</td><td>Final pre-release validation</td><td>Exact mirror of production; performance and stress tests run here</td></tr>
+<tr><td><b>Production</b></td><td>Real end users</td><td>Live system that serves customers</td><td>Also called "live environment"; any bug here affects customers</td></tr>
+</table>
+
+<div class="tip-box"><strong>💡 Exam Tip:</strong> "Staging mirrors production" is the most commonly tested fact. Staging exists so you can do performance testing in a production-like environment WITHOUT risking real users.</div>`
+    },
+    {
+      h:"Hosting Options — Where Does the Server Run?",
+      body:`Organizations have several options for where to physically run their servers, each representing a different level of abstraction and control:<br><br>
+<b>Bare Metal Servers:</b><br>
+The company <b>physically purchases and owns the entire server hardware</b>. No virtualization — you get the raw machine. Full control over every aspect (CPU allocation, OS choice, etc.), but highest cost, highest maintenance responsibility, and slowest to scale.<br>
+→ Exam keyword: <i>"company purchased all required hardware"</i><br><br>
+<b>Infrastructure-as-a-Service (IaaS):</b><br>
+A cloud provider slices physical hardware into <b>Virtual Machines (VMs)</b>. You rent a VM with specified CPU/RAM/storage. The cloud manages the physical hardware; YOU manage the OS, middleware, and application. Examples: AWS EC2, Azure VMs.<br>
+→ Exam keyword: <i>"server divided into 8 VMs," "no additional software layer" (i.e., no pre-installed OS/runtime)</i><br><br>
+<b>Platform-as-a-Service (PaaS):</b><br>
+Cloud provider offers a <b>complete platform</b>: hardware + OS + runtime + middleware. You ONLY deploy your application code. Examples: <b>Heroku, Google App Engine</b>. Much faster to deploy, less control.<br>
+→ Exam keyword: <i>"Heroku," "Google App Engine"</i><br><br>
+<b>Software-as-a-Service (SaaS):</b><br>
+The entire application is delivered over the internet. No deployment required — just use it. Examples: Gmail, Salesforce, Google Docs.
+
+<div class="concept-box"><div class="concept-title">Abstraction Ladder (bottom to top)</div>
+Bare Metal → IaaS (VMs) → PaaS (platform) → SaaS (full app)<br>
+As you go up: less control, less responsibility, faster deployment</div>`
+    },
+  ],
+  pyqs:[
+    {
+      id:"D-01", paper:"Sep 2023 ET1 - Q19", marks:"3", type:"MCQ",
+      q:`A new production environment is created for the new version without affecting the current one. After sufficient testing, users are <b>routed from current environment to the new one</b>. Which deployment strategy is this?`,
+      options:[
+        {t:"A. Blue/Green deployment", c:true},
+        {t:"B. Canary deployment", c:false},
+        {t:"C. Versioned deployment", c:false},
+        {t:"D. None of these", c:false},
+      ],
+      ans:"A — Blue/Green Deployment",
+      sol:`Key indicators: <b>"new production environment created," "without affecting current," "all users routed at once after testing."</b><br><br>
+Blue = current live environment. Green = new version environment. After testing Green, ALL traffic switches Blue→Green in one action. Easy rollback by switching back.`
+    },
+    {
+      id:"D-02", paper:"Apr 2024 FN - Q3", marks:"4", type:"MSQ",
+      q:`Which statements are TRUE about <b>canary deployment</b>?`,
+      options:[
+        {t:"A. Users are allowed to choose between software versions", c:false},
+        {t:"B. Changes are incrementally rolled out to a small subset of users", c:true},
+        {t:"C. New production env created without affecting current; users routed after testing", c:false},
+        {t:"D. A drawback is maintaining multiple software versions simultaneously", c:true},
+      ],
+      ans:"B and D",
+      sol:`<b>B: TRUE</b> — Canary deploys to ~5% users first, monitors, then expands incrementally. Named after "canary in a coal mine" — the small group detects problems before full rollout.<br><br>
+<b>D: TRUE</b> — During rollout, both old and new versions serve users simultaneously → added maintenance complexity.<br><br>
+A = Versioned deployment | C = Blue/Green deployment`
+    },
+    {
+      id:"D-03", paper:"Apr 2023 ET1 - Q9", marks:"3", type:"MCQ",
+      q:`Which deployment strategy <b>maintains multiple instances of the production environment</b> and allows users to <b>choose which version to use</b>?`,
+      options:[
+        {t:"A. Blue/Green deployment", c:false},
+        {t:"B. Canary deployment", c:false},
+        {t:"C. Versioned deployment", c:true},
+        {t:"D. Rolling deployment", c:false},
+      ],
+      ans:"C — Versioned Deployment",
+      sol:`<b>Versioned deployment</b> maintains multiple production environments/versions long-term and <b>users actively choose their version</b>. This is the most expensive to maintain but gives users maximum flexibility (common in APIs where breaking changes need gradual migration).`
+    },
+    {
+      id:"D-04", paper:"Sep 2024 FN - Q8", marks:"3", type:"MCQ",
+      q:`<b>Heroku and Google App Engine</b> are examples of:`,
+      options:[
+        {t:"A. Bare metal server", c:false},
+        {t:"B. Infrastructure-as-a-Service (IaaS)", c:false},
+        {t:"C. Platform-as-a-Service (PaaS)", c:true},
+        {t:"D. Software-as-a-Service (SaaS)", c:false},
+      ],
+      ans:"C — PaaS",
+      sol:`Heroku and Google App Engine are the canonical PaaS examples in IIT exams. They provide a complete runtime platform (OS, container, runtime, scaling). Developers push code — the platform handles everything else. No VM management required.`
+    },
+    {
+      id:"D-05", paper:"Apr 2024 FN - Q4", marks:"4", type:"MCQ",
+      q:`An online startup rents a server from a provider. The provider has split the physical server into 8 virtual machines with <b>no additional software layers</b> pre-installed. Which hosting model?`,
+      options:[
+        {t:"A. Bare metal", c:false},
+        {t:"B. IaaS", c:true},
+        {t:"C. PaaS", c:false},
+        {t:"D. SaaS", c:false},
+      ],
+      ans:"B — IaaS",
+      sol:`<b>Key indicators:</b> "virtual machines" + "no additional software layers" (no pre-installed OS/runtime) = IaaS.<br><br>
+IaaS gives you raw VMs. YOU install the OS, runtime, and everything else. Compare with PaaS where the platform is already set up. Bare metal would mean no virtualization — the startup would own/rent an entire physical machine.`
+    },
+  ]
+},
+
+// ════════════════════════════════════════════════════════════════
+// 3. UI/UX DESIGN
+// ════════════════════════════════════════════════════════════════
+{
+  rank:3, count:10, emoji:"🎨",
+  name:"UI/UX Design & Prototyping",
+  subtitle:"Nielsen's Heuristics · Usability Goals · Prototype Types",
+  papers:"Apr 2023, Sep 2023, Apr 2024, Sep 2024",
+  theory:[
+    {
+      h:"Nielsen's 10 Usability Heuristics — Complete Reference",
+      body:`Jakob Nielsen's 10 heuristics are broad principles for evaluating UI design. They're used in <b>heuristic evaluation</b> — where experts review a UI against these rules to find usability problems without user testing.<br><br>
+<table>
+<tr><th>#</th><th>Heuristic</th><th>Meaning</th><th>Example / Violation</th></tr>
+<tr><td>1</td><td><b>Visibility of System Status</b></td><td>Keep users informed about what's happening</td><td>✅ Progress bar | ❌ No loading indicator on slow page</td></tr>
+<tr><td>2</td><td><b>Match with Real World</b></td><td>Use familiar language and metaphors</td><td>✅ Shopping cart icon | ❌ Technical error codes to users</td></tr>
+<tr><td>3</td><td><b>User Control & Freedom</b></td><td>Allow undo/redo; easy exits from any state</td><td>✅ Ctrl+Z, Cancel button | ❌ No way to go back</td></tr>
+<tr><td>4</td><td><b>Consistency & Standards</b></td><td>Same words/controls always mean the same thing</td><td>✅ Same button style throughout | ❌ "Submit" and "Send" for same action</td></tr>
+<tr><td>5</td><td><b>Error Prevention</b></td><td>Design to prevent errors before they happen</td><td>✅ Disable invalid options | ❌ Allow invalid date entry</td></tr>
+<tr><td>6</td><td><b>Recognition over Recall</b></td><td>Show options; don't make users remember things</td><td>✅ Dropdown menus | ❌ Animal icons for buttons (no meaning)</td></tr>
+<tr><td>7</td><td><b>Flexibility & Efficiency</b></td><td>Shortcuts for expert users; novices use full paths</td><td>✅ Keyboard shortcuts | ❌ No accelerators for power users</td></tr>
+<tr><td>8</td><td><b>Aesthetic & Minimalist Design</b></td><td>Show only relevant information; no clutter</td><td>✅ Clean dashboard | ❌ 30 fields on one screen</td></tr>
+<tr><td>9</td><td><b>Help Users Recognize & Recover from Errors</b></td><td>Plain-language errors + corrective advice</td><td>✅ "Password must be 8+ chars" | ❌ "Error: 401"</td></tr>
+<tr><td>10</td><td><b>Help & Documentation</b></td><td>Provide easily searchable documentation</td><td>✅ Context-sensitive help | ❌ No documentation</td></tr>
+</table>
+
+<div class="warn-box"><strong>⚠️ Frequently Confused Pairs:</strong><br>
+• Heuristic 3 (Freedom) = undo/redo, escape from current state<br>
+• Heuristic 5 (Error Prevention) = stop errors from happening<br>
+• Heuristic 9 (Error Recovery) = help user AFTER an error occurred<br>
+• Heuristic 6 (Recognition) = making things recognizable, not requiring memorization</div>`
+    },
+    {
+      h:"Usability Goals — The 5 Core Goals",
+      body:`Usability goals measure HOW WELL users can use the system to accomplish their tasks. These are objective, measurable criteria (unlike user experience goals which are subjective).<br><br>
+<table>
+<tr><th>Goal</th><th>Question it Answers</th><th>Typical Exam Scenario</th></tr>
+<tr><td><b>Effectiveness</b></td><td>Can users achieve their goals? (accuracy)</td><td>Success rate on completing tasks</td></tr>
+<tr><td><b>Efficiency</b></td><td>How fast/cheaply can goals be achieved?</td><td>Time to complete a task, clicks required</td></tr>
+<tr><td><b>Safety to Use</b></td><td>Protected from dangerous/irreversible actions?</td><td>"Recover accidentally deleted files from trash"</td></tr>
+<tr><td><b>Learnability</b></td><td>How easy is it to learn for first-time users?</td><td>"Must watch demo videos before using" = poor learnability</td></tr>
+<tr><td><b>Memorability</b></td><td>After a break, can users remember how to use it?</td><td>Infrequent users who return periodically</td></tr>
+</table>
+
+<b>User Experience (UX) Goals</b> (subjective, emotional — NOT tested the same way):<br>
+Satisfying, Motivating, Engaging, Fun, Aesthetically Pleasing, Rewarding, Creative<br><br>
+<div class="tip-box"><strong>💡 Exam Distinction:</strong> Usability goals are about FUNCTIONALITY (can they do it?). UX goals are about EMOTION (how do they feel about it?). The exam usually asks about usability goals, not UX goals.</div>`
+    },
+    {
+      h:"Prototype Types — From Sketch to Simulation",
+      body:`Prototyping lets teams validate UI ideas before spending resources on full development. Four types, in order of fidelity (detail level):<br><br>
+<b>1. Storyboards</b><br>
+A series of <b>hand-drawn comic-strip-like panels</b> that narrate the user journey through the application. Captures the user's story and workflow, not the exact UI details. Very low fidelity, very fast.<br><br>
+<b>2. Paper Prototypes</b><br>
+Hand-drawn interface screens on <b>separate pieces of paper</b>, each representing a different screen or state. A facilitator manually "swaps" papers during user testing to simulate navigation. Zero cost, quick iteration.<br>
+→ Key: "hand-drawn on multiple pieces of paper" = Paper Prototype<br><br>
+<b>3. Digital Mock-ups (Wireframes)</b><br>
+Created using digital tools like <b>Photoshop, Figma, PowerPoint, Balsamiq</b>. Higher visual fidelity than paper but still static — no interactivity. Good for stakeholder presentations.<br><br>
+<b>4. Interactive Prototypes</b><br>
+A <b>working web or app prototype</b> with placeholder/dummy data. Simulates real user interactions. Highest fidelity before development. Created with tools like Figma (with click-through), InVision, or actual code.
+
+<div class="warn-box"><strong>⚠️ Exam Trap:</strong> "Hand-drawn on multiple pieces of paper" = Paper Prototype (NOT storyboard — storyboards are comic-strip narratives, not individual screen drawings)</div>`
+    },
+  ],
+  pyqs:[
+    {
+      id:"U-01", paper:"Apr 2023 ET1 - Q4", marks:"3", type:"MCQ",
+      q:`Which UI heuristic allows the user to <b>quickly correct mistakes and backtrack on choices made</b>?`,
+      options:[
+        {t:"A. Use familiar language and metaphors", c:false},
+        {t:"B. Clean and functional design", c:false},
+        {t:"C. User Control and Freedom", c:true},
+        {t:"D. Recognition over recall", c:false},
+      ],
+      ans:"C — User Control and Freedom",
+      sol:`"Correct mistakes and backtrack" = <b>User Control & Freedom</b> (Heuristic 3). This covers undo, redo, cancel buttons, and "emergency exits" from unwanted states.<br><br>
+Don't confuse with: Error Prevention (heuristic 5 — stopping mistakes before they happen) or Error Recovery (heuristic 9 — helping AFTER an error via helpful messages).`
+    },
+    {
+      id:"U-02", paper:"Apr 2023 ET1 - Q5", marks:"3", type:"MCQ",
+      q:`Which technique creates <b>digital mock-ups</b>?`,
+      options:[
+        {t:"A. Using hand-drawn comics showing user journey", c:false},
+        {t:"B. Hand-drawn interface on multiple pieces of paper", c:false},
+        {t:"C. Using software like Photoshop or PowerPoint", c:true},
+        {t:"D. Using web applications with fake/placeholder data", c:false},
+      ],
+      ans:"C — Software like Photoshop/PowerPoint",
+      sol:`<b>Digital mock-ups</b> = designed using digital software (Photoshop, Figma, PowerPoint). Higher fidelity than paper, but static — not interactive.<br><br>
+A = Storyboards (hand-drawn comics of journey) | B = Paper Prototype (separate paper screens) | D = Interactive Prototype (working web app with dummy data)`
+    },
+    {
+      id:"U-03", paper:"Apr 2023 ET1 - Q17", marks:"4", type:"MCQ",
+      q:`App allows recovering accidentally deleted files from a separate trash folder. Which <b>usability goal</b> does this achieve?`,
+      options:[
+        {t:"A. Efficiency", c:false},
+        {t:"B. Effectiveness", c:false},
+        {t:"C. Safe to use", c:true},
+        {t:"D. Learnability", c:false},
+        {t:"E. Memorability", c:false},
+      ],
+      ans:"C — Safe to Use",
+      sol:`<b>Safe to use</b>: Protects users from dangerous/irreversible situations AND provides recovery mechanisms when accidents happen. A trash/recycle bin that allows recovery of accidentally deleted files is the textbook example.<br><br>
+Efficiency = speed | Effectiveness = completion rate | Learnability = ease of learning first time | Memorability = recall after a break`
+    },
+    {
+      id:"U-04", paper:"Sep 2024 FN - Q13", marks:"4", type:"MCQ",
+      q:`Designing a payroll system UI — all button/link icons use <b>animal pictures</b>. Which heuristic is VIOLATED?`,
+      options:[
+        {t:"A. Flexibility and efficiency of use", c:false},
+        {t:"B. Recognition over recall", c:true},
+        {t:"C. Aesthetic and minimalist design", c:false},
+        {t:"D. User control and freedom", c:false},
+      ],
+      ans:"B — Recognition over Recall",
+      sol:`<b>Recognition over Recall</b>: Icons/controls should be immediately recognizable — users should RECOGNIZE their function without having to MEMORIZE what each animal represents. Animal images have no intuitive connection to payroll actions → users must memorize which animal = which function → violates recognition over recall.`
+    },
+    {
+      id:"U-05", paper:"Apr 2024 FN - Q18", marks:"4", type:"MCQ",
+      q:`Banking app: user enters account number for transfer. App prompts to <b>re-enter for confirmation</b>. If mismatched, shows error icon and advice to correct. Which heuristic?`,
+      options:[
+        {t:"A. Error prevention", c:false},
+        {t:"B. Visibility of system status", c:false},
+        {t:"C. Help users recognize and recover from errors", c:true},
+        {t:"D. Help and documentation", c:false},
+      ],
+      ans:"C — Help Users Recognize & Recover from Errors",
+      sol:`After the mismatch error occurs, the app:<br>
+1. Shows error icon → helps user RECOGNIZE an error happened<br>
+2. Provides advice → helps user RECOVER by correcting the number<br><br>
+This is heuristic 9 — error recovery. Note: <b>Error Prevention</b> would be proactively disabling submit until both entries match (stopping the error before it happens). Here the mismatch already happened and we're supporting recovery.`
+    },
+    {
+      id:"U-06", paper:"Apr 2024 FN - Q19", marks:"4", type:"MCQ",
+      q:`Employees find the web app "very difficult to use" and must "watch demo videos before they can actually use it." Which usability goal is NOT satisfied?`,
+      options:[
+        {t:"A. Effectiveness", c:false},
+        {t:"B. Efficiency", c:false},
+        {t:"C. Safe to use", c:false},
+        {t:"D. Learnability", c:true},
+        {t:"E. Memorability", c:false},
+      ],
+      ans:"D — Learnability",
+      sol:`<b>Learnability</b>: How easily can first-time users accomplish basic tasks? If users must watch extensive demo videos before they can even operate the system, the system fails on learnability.<br><br>
+The key phrase: "difficult to use" for first-timers → learning barrier → Learnability issue. If it were experienced users who forgot how to use it → Memorability issue.`
+    },
+  ]
+},
+
+// ════════════════════════════════════════════════════════════════
+// 4. COUPLING & COHESION
+// ════════════════════════════════════════════════════════════════
+{
+  rank:4, count:7, emoji:"🔗",
+  name:"Coupling & Cohesion",
+  subtitle:"Module Design Quality Metrics",
+  papers:"All 5 SE papers",
+  theory:[
+    {
+      h:"What are Coupling and Cohesion? — The Core of Module Design",
+      body:`These two concepts describe the quality of software module design. They always go together as a pair:<br><br>
+<b>Cohesion</b>: How strongly related are the responsibilities WITHIN a single module? (Internal focus)<br>
+<b>Coupling</b>: How dependent are different modules on each other? (External focus)<br><br>
+<div class="concept-box"><div class="concept-title">The Golden Rule of Good Design</div>
+<b>HIGH Cohesion + LOW Coupling = Good Software Design</b><br><br>
+Each module should do ONE thing well (high cohesion) and know as little as possible about other modules (low coupling). This makes software easier to understand, test, modify, and reuse.</div>`
+    },
+    {
+      h:"Types of Cohesion — From Worst to Best",
+      body:`<table>
+<tr><th>Type</th><th>Strength</th><th>Description</th><th>Example</th></tr>
+<tr><td><b>Coincidental</b></td><td>Weakest ❌</td><td>Unrelated functions grouped by chance</td><td>A "utilities" module with unrelated helper functions</td></tr>
+<tr><td><b>Logical</b></td><td>Weak ❌</td><td>Related by category but different data/behavior</td><td>All I/O operations in one module</td></tr>
+<tr><td><b>Temporal</b></td><td>Moderate ❌</td><td>Functions executed at the same time</td><td>System startup initialization module</td></tr>
+<tr><td><b>Procedural</b></td><td>Moderate</td><td>Functions follow specific execution sequence</td><td>Read → Validate → Process pipeline</td></tr>
+<tr><td><b>Communicational</b></td><td>Good ✅</td><td>Functions work on same data/object</td><td>All operations on a Customer record</td></tr>
+<tr><td><b>Sequential</b></td><td>Good ✅</td><td>Output of one function is input to next</td><td>Data transformation pipeline</td></tr>
+<tr><td><b>Functional</b></td><td>Best ✅✅</td><td>Every element contributes to one specific task</td><td>calculatePayroll() does only payroll calculation</td></tr>
+</table>`
+    },
+    {
+      h:"Types of Coupling — From Worst to Best",
+      body:`<table>
+<tr><th>Type</th><th>Strength</th><th>Description</th><th>Example</th></tr>
+<tr><td><b>Content</b></td><td>Worst ❌❌</td><td>Module directly modifies internals of another</td><td>Module A edits Module B's local variables directly</td></tr>
+<tr><td><b>Common</b></td><td>Very bad ❌</td><td>Multiple modules share global data</td><td>Global variable accessed and modified by many modules</td></tr>
+<tr><td><b>External</b></td><td>Bad ❌</td><td>Modules share external data format/protocol</td><td>Both modules read the same file format</td></tr>
+<tr><td><b>Control</b></td><td>Moderate</td><td>One module controls flow of another via flag</td><td>Passing a boolean flag to change behavior</td></tr>
+<tr><td><b>Stamp/Data Structure</b></td><td>Moderate</td><td>Modules share a composite data structure</td><td>Passing entire Customer object when only name is needed</td></tr>
+<tr><td><b>Data</b></td><td>Best ✅✅</td><td>Modules share only simple data through parameters</td><td>calculateTax(income) — just passes a number</td></tr>
+</table>
+
+<div class="tip-box"><strong>💡 Exam Focus:</strong> The exam rarely tests all 7 types. It mostly asks about: <b>high vs low cohesion/coupling concepts</b>, what changes when you modify coupling, and identifying violations of good design principles.</div>`
+    },
+  ],
+  pyqs:[
+    {
+      id:"C-01", paper:"Apr 2023 ET1 - Q14", marks:"3", type:"MCQ",
+      q:`Which of the following best describes <b>high cohesion</b>?`,
+      options:[
+        {t:"A. A module that depends heavily on many other modules", c:false},
+        {t:"B. A module where all elements contribute to a single well-defined task", c:true},
+        {t:"C. A module that shares global variables with many other modules", c:false},
+        {t:"D. A module that accepts many parameters from calling modules", c:false},
+      ],
+      ans:"B",
+      sol:`<b>High cohesion</b> = all elements inside a module work together toward one clearly defined purpose. A payroll module that ONLY calculates payroll has high cohesion. A "miscellaneous utilities" module has low (coincidental) cohesion because its parts are unrelated.`
+    },
+    {
+      id:"C-02", paper:"Dec 2023 FN - Q14", marks:"4", type:"MCQ",
+      q:`A software module reads data from a global variable shared by 10 other modules. What type of coupling is this?`,
+      options:[
+        {t:"A. Content coupling", c:false},
+        {t:"B. Common coupling", c:true},
+        {t:"C. Control coupling", c:false},
+        {t:"D. Data coupling", c:false},
+      ],
+      ans:"B — Common Coupling",
+      sol:`<b>Common coupling</b> = multiple modules access and modify a shared global variable/data store. This is bad because any module can unexpectedly modify the global state, making bugs hard to trace.<br><br>
+Content coupling = one module directly modifies another's internals (worse) | Data coupling = modules share only simple parameters (best).`
+    },
+    {
+      id:"C-03", paper:"Apr 2024 FN", marks:"4", type:"MCQ",
+      q:`Good software design strives for:`,
+      options:[
+        {t:"A. High coupling and high cohesion", c:false},
+        {t:"B. Low coupling and low cohesion", c:false},
+        {t:"C. High coupling and low cohesion", c:false},
+        {t:"D. Low coupling and high cohesion", c:true},
+      ],
+      ans:"D — Low coupling, High cohesion",
+      sol:`<b>The golden rule:</b> LOW coupling (modules are independent of each other) + HIGH cohesion (each module does one thing well). This combination produces maintainable, testable, reusable code.<br><br>
+Think of it as: independent departments (low coupling) where each department is specialized (high cohesion).`
+    },
+  ]
+},
+
+// ════════════════════════════════════════════════════════════════
+// 5. SOLID PRINCIPLES
+// ════════════════════════════════════════════════════════════════
+{
+  rank:5, count:4, emoji:"🧱",
+  name:"SOLID Principles",
+  subtitle:"Object-Oriented Design Rules",
+  papers:"All SE papers",
+  theory:[
+    {
+      h:"The 5 SOLID Principles — Complete Guide",
+      body:`SOLID is an acronym for five object-oriented design principles that make software more maintainable, flexible, and scalable.<br><br>
+<b>S — Single Responsibility Principle (SRP)</b><br>
+A class should have <b>only one reason to change</b>. Each class should do exactly one thing.<br>
+<i>Violation:</i> UserManager class that handles user authentication, database operations, AND email sending — three separate responsibilities.<br><br>
+<b>O — Open/Closed Principle (OCP) ← MOST TESTED</b><br>
+Classes should be <b>open for extension, but closed for modification</b>. Add new behavior by creating new classes (extending), NOT by editing existing working code.<br>
+<i>Violation:</i> Adding a new payment method by editing the existing PaymentProcessor class with a new if-else branch.<br>
+<i>Correct:</i> Create a new PaypalPayment class that extends/implements the Payment interface — existing code untouched.<br><br>
+<b>L — Liskov Substitution Principle (LSP)</b><br>
+Subclasses must be <b>substitutable for their parent class</b> without breaking the program.<br>
+<i>Violation:</i> Square extends Rectangle, but Square.setWidth() also changes height — breaks Rectangle's behavior contract.<br><br>
+<b>I — Interface Segregation Principle (ISP)</b><br>
+Clients should not be forced to depend on <b>interfaces they don't use</b>. Prefer many small, specific interfaces over one large general interface.<br>
+<i>Violation:</i> IWorker interface with work() + eat() + sleep() — a Robot class that implements IWorker is forced to implement eat() and sleep() which don't apply.<br><br>
+<b>D — Dependency Inversion Principle (DIP)</b><br>
+High-level modules should not depend on low-level modules — both should depend on <b>abstractions (interfaces)</b>.<br>
+<i>Violation:</i> OrderProcessor directly instantiates a MySQLDatabase object — tightly coupled to a specific DB.<br>
+<i>Correct:</i> OrderProcessor depends on IDatabase interface; MySQL/Postgres implement the interface.
+
+<div class="warn-box"><strong>⚠️ Exam Pattern:</strong> Nearly ALL SOLID questions in IIT Madras papers are about the <b>Open/Closed Principle</b>. The scenario is always: "class was modified to add new functionality" = OCP violation. Remember: EXTEND, don't MODIFY.</div>`
+    },
+  ],
+  pyqs:[
+    {
+      id:"S-01", paper:"Dec 2023 FN - Q20", marks:"4", type:"MCQ",
+      q:`A PaymentProcessor class has methods for Credit Card, Debit Card, and PayPal payments. When a new payment method (UPI) needs to be added, the developer <b>edits the existing class</b> and adds a new if-else block. Which principle is violated?`,
+      options:[
+        {t:"A. Single Responsibility Principle", c:false},
+        {t:"B. Open/Closed Principle", c:true},
+        {t:"C. Liskov Substitution Principle", c:false},
+        {t:"D. Interface Segregation Principle", c:false},
+      ],
+      ans:"B — Open/Closed Principle",
+      sol:`<b>Open/Closed Principle:</b> Classes should be CLOSED for modification (don't edit working code) and OPEN for extension (create new classes).<br><br>
+The correct approach: Create a <code>UPIPayment</code> class that extends/implements a <code>Payment</code> interface. The existing PaymentProcessor class remains untouched. Editing the existing class = OCP violation.`
+    },
+    {
+      id:"S-02", paper:"Apr 2024 FN", marks:"4", type:"MCQ",
+      q:`A <code>Square</code> class extends <code>Rectangle</code>. When setWidth() is called on a Square, it also changes the height (to keep it square). This breaks programs that use Rectangle objects. Which principle is violated?`,
+      options:[
+        {t:"A. Single Responsibility Principle", c:false},
+        {t:"B. Open/Closed Principle", c:false},
+        {t:"C. Liskov Substitution Principle", c:true},
+        {t:"D. Dependency Inversion Principle", c:false},
+      ],
+      ans:"C — Liskov Substitution Principle",
+      sol:`<b>LSP:</b> A subclass must behave in a way that is consistent with its parent class. If code expects a Rectangle and we pass a Square, setWidth() should change only width — but Square's override changes both dimensions, breaking the expected contract. <b>Square cannot safely substitute for Rectangle</b> → LSP violation.`
+    },
+    {
+      id:"S-03", paper:"Sep 2024 FN", marks:"3", type:"MCQ",
+      q:`Which SOLID principle states that a class should have <b>only one reason to change</b>?`,
+      options:[
+        {t:"A. Open/Closed Principle", c:false},
+        {t:"B. Single Responsibility Principle", c:true},
+        {t:"C. Liskov Substitution Principle", c:false},
+        {t:"D. Interface Segregation Principle", c:false},
+      ],
+      ans:"B — Single Responsibility Principle",
+      sol:`<b>SRP:</b> "One reason to change" = one responsibility. If a class changes because of a UI requirement AND a business logic requirement AND a database requirement, it has three responsibilities and should be split into three classes.`
+    },
+  ]
+},
+
+// ════════════════════════════════════════════════════════════════
+// 6. DESIGN PATTERNS
+// ════════════════════════════════════════════════════════════════
+{
+  rank:6, count:5, emoji:"🏗️",
+  name:"Design Patterns",
+  subtitle:"Builder · Adapter · Facade · Iterator · Strategy",
+  papers:"All SE papers",
+  theory:[
+    {
+      h:"What are Design Patterns?",
+      body:`Design patterns are <b>reusable solutions to commonly occurring software design problems</b>. They're not code — they're templates or blueprints that describe how to solve a problem in a flexible, reusable way.<br><br>
+Three categories:
+<table>
+<tr><th>Category</th><th>Purpose</th><th>Patterns</th></tr>
+<tr><td><b>Creational</b></td><td>How objects are created</td><td>Singleton, Factory, Builder, Prototype</td></tr>
+<tr><td><b>Structural</b></td><td>How objects are composed</td><td>Adapter, Facade, Decorator, Proxy</td></tr>
+<tr><td><b>Behavioral</b></td><td>How objects communicate</td><td>Strategy, Iterator, Observer, Command</td></tr>
+</table>`
+    },
+    {
+      h:"The 5 Key Patterns — With Full Exam Examples",
+      body:`<b>1. Builder Pattern</b> (Creational)<br>
+Separates the <b>construction of a complex object from its representation</b>. Allows building objects step-by-step.<br>
+Exam signature: A class with multiple setXxx() setter methods and a final make() / build() method that returns the complete object.<br>
+<pre>class PackageMaker:
+    def setDestination(self, dest): ...
+    def setWeight(self, w): ...
+    def setFragile(self, f): ...
+    def make(self): return Package(...)  # Builder pattern!</pre><br>
+
+<b>2. Adapter Pattern</b> (Structural)<br>
+Converts the interface of a class into another interface that clients expect. Like a power plug adapter.<br>
+Exam signature: A class that <b>wraps another class</b> to convert its interface — typically for format conversion (e.g., XML to JSON).<br><br>
+
+<b>3. Facade Pattern</b> (Structural)<br>
+Provides a <b>simplified interface</b> to a complex subsystem. Hides complexity behind one clean class.<br>
+Exam signature: One class like <code>OrderProcessor</code> that internally calls <code>Inventory.check()</code>, <code>Payment.charge()</code>, <code>Shipping.ship()</code> — the client only calls <code>OrderProcessor.processOrder()</code>.<br><br>
+
+<b>4. Iterator Pattern</b> (Behavioral)<br>
+Provides a way to <b>access elements of a collection sequentially</b> without exposing the underlying structure.<br>
+Exam signature: Iteration logic is separated into its OWN class (not inside the collection class). Client uses Iterator object to traverse.<br><br>
+
+<b>5. Strategy Pattern</b> (Behavioral)<br>
+Defines a family of algorithms, encapsulates each, and makes them <b>interchangeable at runtime</b>.<br>
+Exam signature: An interface (e.g., <code>Payable</code>) with multiple interchangeable implementations (CreditCardPayment, PaypalPayment) — swap payment strategy without changing calling code.
+
+<div class="tip-box"><strong>💡 Quick Identification Guide:</strong><br>
+setters + build/make() → <b>Builder</b><br>
+wraps object to convert interface → <b>Adapter</b><br>
+one class wraps many subsystem calls → <b>Facade</b><br>
+iteration separated to its own class → <b>Iterator</b><br>
+interface with interchangeable algo classes → <b>Strategy</b></div>`
+    },
+  ],
+  pyqs:[
+    {
+      id:"DP-01", paper:"Apr 2023 ET1 - Q25", marks:"4", type:"MCQ",
+      q:`<pre>class PackageMaker:
+    def setDestination(self, d): self.destination = d; return self
+    def setWeight(self, w): self.weight = w; return self
+    def setFragile(self, f): self.fragile = f; return self
+    def make(self): return Package(self.destination, self.weight, self.fragile)</pre>
+What design pattern is used?`,
+      options:[
+        {t:"A. Factory", c:false},
+        {t:"B. Builder", c:true},
+        {t:"C. Singleton", c:false},
+        {t:"D. Facade", c:false},
+      ],
+      ans:"B — Builder Pattern",
+      sol:`Classic <b>Builder Pattern</b> indicators: multiple setter methods that configure the object (setDestination, setWeight, setFragile) + a final <code>make()</code> method that constructs and returns the complete object. This separates object construction from representation.`
+    },
+    {
+      id:"DP-02", paper:"Dec 2023 FN - Q24", marks:"4", type:"MCQ",
+      q:`A class <code>OrderProcessor</code> is created that internally calls <code>Inventory.check()</code>, <code>Payment.charge()</code>, and <code>Shipping.ship()</code>. Client code only calls <code>OrderProcessor.processOrder()</code>. What pattern?`,
+      options:[
+        {t:"A. Adapter", c:false},
+        {t:"B. Strategy", c:false},
+        {t:"C. Facade", c:true},
+        {t:"D. Iterator", c:false},
+      ],
+      ans:"C — Facade Pattern",
+      sol:`<b>Facade Pattern:</b> OrderProcessor provides a simple unified interface (<code>processOrder()</code>) that hides the complexity of coordinating multiple subsystems (Inventory, Payment, Shipping). The client doesn't need to know about any of these internal components — the Facade handles all the complexity.`
+    },
+    {
+      id:"DP-03", paper:"Apr 2024 FN - Q24", marks:"4", type:"MCQ",
+      q:`Interface <code>Payable</code> has method <code>pay(amount)</code>. Classes <code>CreditCardPayment</code> and <code>PaypalPayment</code> implement <code>Payable</code>. The calling code can swap between payment methods at runtime. What pattern?`,
+      options:[
+        {t:"A. Facade", c:false},
+        {t:"B. Builder", c:false},
+        {t:"C. Iterator", c:false},
+        {t:"D. Strategy", c:true},
+      ],
+      ans:"D — Strategy Pattern",
+      sol:`<b>Strategy Pattern:</b> Defines a family of algorithms (payment methods) behind a common interface (<code>Payable</code>), making them interchangeable. The calling code doesn't need to change when you swap CreditCard for PayPal — you just provide a different strategy object. This is the hallmark of the Strategy pattern.`
+    },
+  ]
+},
+
+// ════════════════════════════════════════════════════════════════
+// 7. SOFTWARE METRICS & CYCLOMATIC COMPLEXITY
+// ════════════════════════════════════════════════════════════════
+{
+  rank:7, count:5, emoji:"📊",
+  name:"Metrics & Cyclomatic Complexity",
+  subtitle:"CC · Linearly Independent Paths · McCabe",
+  papers:"Apr 2024, Sep 2024, Apr 2025",
+  theory:[
+    {
+      h:"Cyclomatic Complexity (CC) — McCabe's Metric",
+      body:`Cyclomatic Complexity measures the <b>number of linearly independent paths</b> through a program's source code. It's a measure of code complexity — higher CC = more complex = harder to test and maintain.<br><br>
+<b>Formula 1 — From flow graph:</b><br>
+<div class="formula-box">CC = E − N + 2P<br>where E = number of edges, N = number of nodes, P = number of connected components (usually 1)</div><br>
+<b>Formula 2 — Quick counting method (for exams):</b><br>
+<div class="formula-box">CC = Number of decision points + 1<br>Decision points = if, elif, else-if, for, while, case/switch conditions, logical AND/OR in conditions</div>
+
+<b>What counts as a decision point?</b><br>
+• <code>if</code> statement → +1<br>
+• <code>elif</code> / <code>else if</code> → +1<br>
+• <code>for</code> loop → +1<br>
+• <code>while</code> loop → +1<br>
+• <code>and</code> / <code>or</code> in a condition → +1 each<br>
+• <code>else</code> → does NOT add (it's the default path)<br><br>
+
+<b>Example — sort(arr):</b>
+<pre>def sort(arr):
+    for i in range(len(arr)):         # +1
+        for j in range(i+1, len(arr)):# +1
+            if arr[j] < arr[i]:       # +1
+                arr[i], arr[j] = arr[j], arr[i]</pre>
+CC = 3 decisions + 1 = <b>4</b><br><br>
+<b>Interpretation:</b>
+<table>
+<tr><th>CC Value</th><th>Risk Level</th><th>Meaning</th></tr>
+<tr><td>1–10</td><td>Low ✅</td><td>Simple, easy to test</td></tr>
+<tr><td>11–20</td><td>Moderate ⚠️</td><td>Moderately complex</td></tr>
+<tr><td>21–50</td><td>High ❌</td><td>Complex, difficult to test</td></tr>
+<tr><td>50+</td><td>Very High ❌❌</td><td>Untestable, must refactor</td></tr>
+</table>
+
+<div class="tip-box"><strong>💡 Key Relationship:</strong> Cyclomatic Complexity = Minimum number of test cases for branch coverage = Number of linearly independent paths. These three are equal!</div>`
+    },
+  ],
+  pyqs:[
+    {
+      id:"M-01", paper:"Apr 2024 FN - Q10", marks:"4", type:"MCQ",
+      q:`<pre>def sort(arr):
+    for i in range(len(arr)):
+        for j in range(i+1, len(arr)):
+            if arr[j] < arr[i]:
+                arr[i], arr[j] = arr[j], arr[i]</pre>
+What is the <b>cyclomatic complexity</b> of this function?`,
+      options:[
+        {t:"A. 3", c:false},
+        {t:"B. 4", c:true},
+        {t:"C. 5", c:false},
+        {t:"D. 2", c:false},
+      ],
+      ans:"B — 4",
+      sol:`Counting decision points:<br>
+1. <code>for i in range(len(arr))</code> → +1<br>
+2. <code>for j in range(i+1, len(arr))</code> → +1<br>
+3. <code>if arr[j] &lt; arr[i]</code> → +1<br><br>
+CC = 3 decision points + 1 = <b>4</b><br><br>
+Also: 4 linearly independent paths = minimum 4 test cases for full branch coverage.`
+    },
+    {
+      id:"M-02", paper:"Sep 2024 FN - Q21", marks:"4", type:"MCQ",
+      q:`<pre>def ssort(arr):
+    n = len(arr)
+    for i in range(n-1):
+        min_idx = i
+        for j in range(i+1, n):
+            if arr[j] < arr[min_idx]:
+                min_idx = j
+        arr[i], arr[min_idx] = arr[min_idx], arr[i]</pre>
+What is the cyclomatic complexity? How many <b>linearly independent paths</b>?`,
+      options:[
+        {t:"A. CC=3, paths=3", c:false},
+        {t:"B. CC=4, paths=4", c:true},
+        {t:"C. CC=5, paths=5", c:false},
+        {t:"D. CC=2, paths=2", c:false},
+      ],
+      ans:"B — CC=4, paths=4",
+      sol:`Decision points in ssort:<br>
+1. <code>for i in range(n-1)</code> → +1<br>
+2. <code>for j in range(i+1, n)</code> → +1<br>
+3. <code>if arr[j] &lt; arr[min_idx]</code> → +1<br>
+CC = 3 + 1 = <b>4</b>. The number of linearly independent paths always equals cyclomatic complexity = <b>4</b>.`
+    },
+  ]
+},
+
+// ════════════════════════════════════════════════════════════════
+// 8. DEBUGGING TECHNIQUES
+// ════════════════════════════════════════════════════════════════
+{
+  rank:8, count:6, emoji:"🔍",
+  name:"Debugging Techniques",
+  subtitle:"Backtracking · Print/Logging · Blackbox · Forward/Backward",
+  papers:"All SE papers",
+  theory:[
+    {
+      h:"Debugging Strategies — Complete Reference",
+      body:`Debugging is the process of finding and fixing bugs. Different strategies suit different situations:<br><br>
+<b>Backtracking (Backward Analysis):</b><br>
+Start from where the bug <b>manifested</b> (the error output) and work BACKWARD through the code to find where the wrong value was introduced.<br>
+→ Keyword: "traced the execution backwards from the error"<br><br>
+<b>Forward Analysis:</b><br>
+Start from the beginning of code and follow the <b>data flow FORWARD</b>, checking values at each step until the point where the value becomes wrong.<br>
+→ Keyword: "follows data flow ahead," "traced forward from input"<br><br>
+<b>Print/Logging Debugging:</b><br>
+Insert <code>print()</code> or <code>log()</code> statements at various points to display intermediate variable values. Simple, universally applicable.<br>
+→ Keyword: "print statements," "added log messages," "console.log"<br><br>
+<b>Blackbox Debugging:</b><br>
+Debug by treating the code as a black box — consult documentation, API references, or run the code with different inputs to understand behavior WITHOUT reading source code.<br>
+→ Keyword: "consults documentation," "reads API docs," "checks examples without reading code"<br><br>
+<b>Cause Elimination (Binary Search / Divide & Conquer):</b><br>
+Systematically eliminate possible causes by dividing the code in half — test if the first half causes the bug, then narrow down.<br><br>
+<b>Rubber Duck Debugging:</b><br>
+Explain the code line-by-line to someone (or an object). The act of explaining often reveals the bug.<br><br>
+<div class="tip-box"><strong>💡 Exam Pattern:</strong> The exam gives a scenario and asks "which debugging technique?" The key discriminator is usually:<br>
+• "print statements" → Print Debugging<br>
+• "reads documentation/API examples" → Blackbox<br>
+• "follows data flow forward" → Forward Analysis<br>
+• "traces backwards from error" → Backtracking</div>`
+    },
+  ],
+  pyqs:[
+    {
+      id:"DB-01", paper:"Apr 2023 ET1 - Q16", marks:"3", type:"MCQ",
+      q:`Developer finds a bug in a module. They insert <b>print statements</b> at various places to check the values of variables during execution. Which debugging technique?`,
+      options:[
+        {t:"A. Backtracking", c:false},
+        {t:"B. Cause elimination", c:false},
+        {t:"C. Print debugging", c:true},
+        {t:"D. Blackbox debugging", c:false},
+      ],
+      ans:"C — Print Debugging",
+      sol:`Adding <code>print()</code> or logging statements to inspect variable values at runtime = <b>Print/Logging Debugging</b>. It's the simplest and most widely used technique. Modern equivalent is using structured logging frameworks.`
+    },
+    {
+      id:"DB-02", paper:"Sep 2023 ET1 - Q22", marks:"3", type:"MCQ",
+      q:`Developer doesn't read source code of a library. Instead, they <b>consult the documentation and read usage examples</b> to understand the API's behavior. Which technique?`,
+      options:[
+        {t:"A. Print debugging", c:false},
+        {t:"B. Backtracking", c:false},
+        {t:"C. Blackbox debugging", c:true},
+        {t:"D. Forward analysis", c:false},
+      ],
+      ans:"C — Blackbox Debugging",
+      sol:`<b>Blackbox debugging</b>: Treating a module as a black box — not reading its internal source code. Instead, understanding behavior through documentation, API references, and examples. The developer knows WHAT it does but not HOW internally.`
+    },
+    {
+      id:"DB-03", paper:"Apr 2024 FN - Q13", marks:"4", type:"MCQ",
+      q:`Developer starts from the <b>error output</b> and <b>works backwards</b> through the code execution to find where the incorrect value was introduced. Which technique?`,
+      options:[
+        {t:"A. Forward analysis", c:false},
+        {t:"B. Print debugging", c:false},
+        {t:"C. Backtracking", c:true},
+        {t:"D. Blackbox debugging", c:false},
+      ],
+      ans:"C — Backtracking",
+      sol:`<b>Backtracking (Backward Analysis)</b>: Start from where the symptom appears (wrong output, error message) and trace backwards through code execution to find where the bad value was introduced. Effective for short programs where the failure point is visible.`
+    },
+  ]
+},
+
+// ════════════════════════════════════════════════════════════════
+// 9. RISK MANAGEMENT
+// ════════════════════════════════════════════════════════════════
+{
+  rank:9, count:5, emoji:"⚠️",
+  name:"Risk Management",
+  subtitle:"Risk Exposure · Identification · Mitigation",
+  papers:"All SE papers",
+  theory:[
+    {
+      h:"Risk Management in Software Projects",
+      body:`Risk management involves identifying, analyzing, and responding to project risks proactively.<br><br>
+<b>Risk Exposure (RE) — The Key Formula:</b><br>
+<div class="formula-box">Risk Exposure = Probability of Occurrence × Impact (Loss) if it occurs<br>RE = P × I</div>
+<br>
+<b>Risk Prioritization:</b> Always address the risk with the <b>highest Risk Exposure first</b>. It's not just the most probable risk or the highest impact risk — it's the one with the highest P × I product.<br><br>
+
+<b>Example:</b>
+<table>
+<tr><th>Risk</th><th>Probability (P)</th><th>Impact (I)</th><th>RE = P×I</th></tr>
+<tr><td>Schedule slippage</td><td>0.3</td><td>4 (days)</td><td><b>1.2</b> ← handle first</td></tr>
+<tr><td>Personnel shortfall</td><td>0.5</td><td>2 (days)</td><td>1.0</td></tr>
+<tr><td>Technology risk</td><td>0.2</td><td>3 (days)</td><td>0.6</td></tr>
+</table>
+Even though Personnel shortfall has higher probability (0.5 > 0.3), Schedule slippage has higher RE (1.2 > 1.0) so it gets priority.
+
+<div class="tip-box"><strong>💡 Risk Response Strategies:</strong><br>
+• <b>Avoidance</b>: Change plan to eliminate the risk entirely<br>
+• <b>Mitigation</b>: Reduce probability or impact<br>
+• <b>Transfer</b>: Shift risk to another party (insurance, outsourcing)<br>
+• <b>Acceptance</b>: Acknowledge risk and accept consequences if it occurs</div>`
+    },
+  ],
+  pyqs:[
+    {
+      id:"R-01", paper:"Apr 2023 ET1 - Q24", marks:"4", type:"MCQ",
+      q:`Project risks:<br>• Schedule slippage: P=0.3, impact=4 person-days<br>• Personnel shortfall: P=0.5, impact=2 person-days<br>• Technology risk: P=0.2, impact=3 person-days<br><br>
+Which risk should be addressed FIRST?`,
+      options:[
+        {t:"A. Personnel shortfall (highest probability)", c:false},
+        {t:"B. Schedule slippage (highest risk exposure)", c:true},
+        {t:"C. Technology risk (balanced)", c:false},
+        {t:"D. All equally", c:false},
+      ],
+      ans:"B — Schedule Slippage",
+      sol:`Calculate Risk Exposure for each:<br>
+• Schedule slippage: 0.3 × 4 = <b>1.2</b> ← highest<br>
+• Personnel shortfall: 0.5 × 2 = 1.0<br>
+• Technology risk: 0.2 × 3 = 0.6<br><br>
+Although personnel shortfall has the highest probability (0.5), schedule slippage has the highest RISK EXPOSURE (1.2). Always prioritize by RE, not just probability or impact alone.`
+    },
+  ]
+},
+
+// ════════════════════════════════════════════════════════════════
+// 10. AGILE & SCRUM
+// ════════════════════════════════════════════════════════════════
+{
+  rank:10, count:3, emoji:"🏃",
+  name:"Agile & Scrum",
+  subtitle:"Sprints · Ceremonies · Roles",
+  papers:"Apr 2023, Apr 2024, Sep 2024",
+  theory:[
+    {
+      h:"Agile Methodology — Core Philosophy",
+      body:`Agile is an iterative approach to software development that emphasizes flexibility, collaboration, and delivering working software in short cycles (iterations/sprints).<br><br>
+<b>The 4 Agile Values (Manifesto):</b><br>
+1. <b>Individuals and interactions</b> over processes and tools<br>
+2. <b>Working software</b> over comprehensive documentation<br>
+3. <b>Customer collaboration</b> over contract negotiation<br>
+4. <b>Responding to change</b> over following a plan<br><br>
+Agile ≠ no planning. It means planning in short cycles and adapting constantly.`
+    },
+    {
+      h:"Scrum Framework — Roles, Events, Artifacts",
+      body:`Scrum is the most popular Agile framework. It organizes work into fixed-length iterations called <b>Sprints</b> (typically 2-4 weeks).<br><br>
+<b>Three Roles:</b><br>
+• <b>Product Owner (PO):</b> Owns the product vision. Manages and prioritizes the Product Backlog. Represents stakeholders.<br>
+• <b>Scrum Master (SM):</b> Facilitates the Scrum process. Removes impediments. Does NOT assign tasks — the team self-organizes.<br>
+• <b>Development Team:</b> Self-organizing, cross-functional. 3-9 members. Determines HOW to do the work.<br><br>
+<b>Five Events (Ceremonies):</b>
+<table>
+<tr><th>Event</th><th>When</th><th>Purpose</th><th>Duration (2-week sprint)</th></tr>
+<tr><td><b>Sprint Planning</b></td><td>Start of sprint</td><td>Select backlog items; plan the sprint</td><td>Max 4 hours</td></tr>
+<tr><td><b>Daily Scrum</b></td><td>Every day</td><td>What did I do? What will I do? Blockers?</td><td>15 minutes</td></tr>
+<tr><td><b>Sprint Review</b></td><td>End of sprint</td><td>Demo working software to stakeholders</td><td>Max 2 hours</td></tr>
+<tr><td><b>Sprint Retrospective</b></td><td>After review</td><td>Inspect process; what to improve?</td><td>Max 1.5 hours</td></tr>
+<tr><td><b>Backlog Refinement</b></td><td>Mid-sprint</td><td>Clarify/estimate future backlog items</td><td>Ongoing</td></tr>
+</table>
+
+<b>Three Artifacts:</b><br>
+• <b>Product Backlog:</b> Ordered list of everything needed in the product. Owned by Product Owner.<br>
+• <b>Sprint Backlog:</b> Items selected for THIS sprint + plan to deliver them.<br>
+• <b>Increment:</b> The sum of all completed Product Backlog items — must be potentially releasable.`
+    },
+  ],
+  pyqs:[
+    {
+      id:"AG-01", paper:"Apr 2023 ET1 - Q11", marks:"3", type:"MCQ",
+      q:`In Scrum, who is responsible for <b>removing impediments</b> and ensuring the team follows the Scrum process?`,
+      options:[
+        {t:"A. Product Owner", c:false},
+        {t:"B. Project Manager", c:false},
+        {t:"C. Scrum Master", c:true},
+        {t:"D. Development Team Lead", c:false},
+      ],
+      ans:"C — Scrum Master",
+      sol:`<b>Scrum Master</b>: Servant-leader role. Removes impediments blocking the team, facilitates Scrum ceremonies, coaches the team on Scrum practices. NOT a traditional project manager — does NOT assign work or make product decisions.`
+    },
+    {
+      id:"AG-02", paper:"Sep 2024 FN - Q6", marks:"4", type:"MCQ",
+      q:`In a Sprint Retrospective, the team identifies that the Daily Scrum meetings were too long. This is an example of inspecting and adapting the:`,
+      options:[
+        {t:"A. Product", c:false},
+        {t:"B. Sprint Backlog", c:false},
+        {t:"C. Process", c:true},
+        {t:"D. Team composition", c:false},
+      ],
+      ans:"C — Process",
+      sol:`<b>Sprint Retrospective</b> focuses on the PROCESS — how the team works. The team inspects its practices and identifies improvements for the next sprint. The Sprint Review (different ceremony) inspects the PRODUCT. Improving meeting efficiency = improving process.`
+    },
+  ]
+},
+
+// ════════════════════════════════════════════════════════════════
+// 11. COCOMO MODEL
+// ════════════════════════════════════════════════════════════════
+{
+  rank:11, count:3, emoji:"🧮",
+  name:"COCOMO Model",
+  subtitle:"Cost Estimation · Organic · Semi-detached · Embedded",
+  papers:"Apr 2023, Apr 2024, Sep 2024",
+  theory:[
+    {
+      h:"COCOMO — Constructive Cost Model",
+      body:`COCOMO (Constructive Cost Model) by Barry Boehm is an algorithmic model for estimating software development effort in person-months based on project size.<br><br>
+<b>Basic COCOMO Formula:</b><br>
+<div class="formula-box">Effort (person-months) = a × (KLOC)^b<br>Time (months) = c × (Effort)^d<br><br>where KLOC = thousands of lines of code</div>
+
+<b>Three Project Modes:</b>
+<table>
+<tr><th>Mode</th><th>Characteristics</th><th>a</th><th>b</th><th>c</th><th>d</th></tr>
+<tr><td><b>Organic</b></td><td>Small team, well-understood domain, experienced team, flexible requirements</td><td>2.4</td><td>1.05</td><td>2.5</td><td>0.38</td></tr>
+<tr><td><b>Semi-detached</b></td><td>Mix of experienced/inexperienced, moderate team size, mix of rigid/flexible requirements</td><td>3.0</td><td>1.12</td><td>2.5</td><td>0.35</td></tr>
+<tr><td><b>Embedded</b></td><td>Tight constraints (hardware, OS), large team, little flexibility</td><td>3.6</td><td>1.20</td><td>2.5</td><td>0.32</td></tr>
+</table>
+
+<b>Worked Example — 120 KLOC semi-detached:</b><br>
+Effort = 3.0 × (120)^1.12 = 3.0 × 213.15 ≈ <b>639.45 person-months</b><br><br>
+Time = 2.5 × (639.45)^0.35 ≈ 2.5 × 12.04 ≈ <b>30.1 months</b><br><br>
+<div class="tip-box"><strong>💡 Exam Tip:</strong> You rarely need to calculate. More often the exam asks "which mode?" based on team/project description:<br>
+• Small experienced team, well-understood = <b>Organic</b><br>
+• Mix of experienced/inexperienced, moderate constraints = <b>Semi-detached</b><br>
+• Strict hardware/OS constraints, embedded systems = <b>Embedded</b></div>`
+    },
+  ],
+  pyqs:[
+    {
+      id:"CO-01", paper:"Apr 2023 ET1", marks:"4", type:"MCQ",
+      q:`A 120 KLOC project has a <b>mix of experienced and inexperienced developers</b>, moderate team size, and moderate schedule constraints. Which COCOMO mode applies? Estimate effort.`,
+      options:[
+        {t:"A. Organic; Effort = 2.4 × 120^1.05", c:false},
+        {t:"B. Semi-detached; Effort ≈ 639 person-months", c:true},
+        {t:"C. Embedded; Effort = 3.6 × 120^1.20", c:false},
+        {t:"D. Organic; Effort ≈ 400 person-months", c:false},
+      ],
+      ans:"B — Semi-detached; ≈ 639 person-months",
+      sol:`"Mix of experienced/inexperienced" + "moderate constraints" = <b>Semi-detached</b> (a=3.0, b=1.12).<br><br>
+Effort = 3.0 × (120)^1.12<br>
+(120)^1.12 ≈ 213.15<br>
+Effort = 3.0 × 213.15 ≈ <b>639.45 person-months</b>`
+    },
+  ]
+},
+
+// ════════════════════════════════════════════════════════════════
+// 12. MUTATION TESTING
+// ════════════════════════════════════════════════════════════════
+{
+  rank:12, count:5, emoji:"🧬",
+  name:"Mutation Testing",
+  subtitle:"Fault Seeding · Mutation Score · Operators",
+  papers:"Apr 2025 (Software Testing paper)",
+  theory:[
+    {
+      h:"Mutation Testing — Evaluating Test Suite Quality",
+      body:`Mutation testing answers the question: <b>"How good is my test suite at catching bugs?"</b> Instead of testing the software itself, you test the TESTS.<br><br>
+<b>Process:</b><br>
+1. Take the original program<br>
+2. Create <b>mutants</b> — slightly modified versions with artificial faults (one small change each)<br>
+3. Run the existing test suite against each mutant<br>
+4. If a test FAILS on a mutant → the mutant is <b>killed</b> (good! test caught the bug)<br>
+5. If ALL tests PASS on a mutant → the mutant <b>survived</b> (bad! tests didn't catch this fault)<br><br>
+<b>Mutation Score Formula:</b><br>
+<div class="formula-box">Mutation Score = (Killed Mutants / Total Mutants) × 100%</div>
+Higher score = better test suite. Aim for ≥ 90%.<br><br>
+<b>Mutation Operators (types of mutations):</b>
+<table>
+<tr><th>Operator</th><th>What it Changes</th><th>Example</th></tr>
+<tr><td>AOR</td><td>Arithmetic operator replacement</td><td><code>+</code> → <code>-</code>, <code>*</code> → <code>/</code></td></tr>
+<tr><td>ROR</td><td>Relational operator replacement</td><td><code>&lt;</code> → <code>&lt;=</code>, <code>==</code> → <code>!=</code></td></tr>
+<tr><td>COR</td><td>Conditional operator replacement</td><td><code>and</code> → <code>or</code></td></tr>
+<tr><td>SVR</td><td>Scalar variable replacement</td><td>Replace variable with another same-type variable</td></tr>
+<tr><td>SBR</td><td>Statement block removal</td><td>Remove an entire block</td></tr>
+</table>
+
+<div class="concept-box"><div class="concept-title">Key Terminology</div>
+<b>Equivalent Mutant:</b> A mutant that behaves IDENTICALLY to the original for ALL possible inputs. These cannot be killed by any test — they're not counted in mutation score.<br><br>
+<b>Stillborn Mutant:</b> A mutant that doesn't compile/run due to syntax errors — excluded from analysis.</div>`
+    },
+  ],
+  pyqs:[
+    {
+      id:"MT-01", paper:"Apr 2025 SW Testing - Q5", marks:"4", type:"MCQ",
+      q:`A test suite is run against 50 mutants. 42 mutants are killed. What is the <b>mutation score</b>?`,
+      options:[
+        {t:"A. 42%", c:false},
+        {t:"B. 84%", c:true},
+        {t:"C. 50%", c:false},
+        {t:"D. 92%", c:false},
+      ],
+      ans:"B — 84%",
+      sol:`Mutation Score = (Killed / Total) × 100% = (42 / 50) × 100% = <b>84%</b><br><br>
+This means 84% of injected faults were caught by the test suite. The remaining 8 surviving mutants represent gaps in test coverage — you should write additional tests that kill those mutants.`
+    },
+    {
+      id:"MT-02", paper:"Apr 2025 SW Testing - Q9", marks:"4", type:"MCQ",
+      q:`A mutant is created by replacing <code>x &lt; y</code> with <code>x &lt;= y</code>. This mutant passes ALL test cases in the test suite. What does this indicate?`,
+      options:[
+        {t:"A. The mutant is equivalent to the original", c:false},
+        {t:"B. The test suite has a gap — it cannot distinguish between &lt; and &lt;=", c:true},
+        {t:"C. The test suite is complete", c:false},
+        {t:"D. The mutation is invalid", c:false},
+      ],
+      ans:"B — Test suite has a gap",
+      sol:`When a mutant survives (passes all tests), it reveals a <b>gap in the test suite</b>: no test case checks the boundary where x equals y. A test with x=y would fail on the mutant (x &lt;= y = true) but pass on original (x &lt; y = false), thereby killing the mutant.<br><br>
+Note: If the mutant TRULY behaves identically for ALL possible inputs (not just test inputs), it would be an equivalent mutant. But boundary mutations like &lt; vs &lt;= are almost never equivalent.`
+    },
+  ]
+},
+
+// ════════════════════════════════════════════════════════════════
+// 13. INTEGRATION TESTING
+// ════════════════════════════════════════════════════════════════
+{
+  rank:13, count:3, emoji:"🔌",
+  name:"Integration Testing",
+  subtitle:"Drivers · Stubs · Big Bang · Top-Down · Bottom-Up",
+  papers:"2023 papers",
+  theory:[
+    {
+      h:"Integration Testing Strategies",
+      body:`Integration testing verifies that individual modules work correctly when combined. Different strategies differ in ORDER of integration:<br><br>
+<b>Big Bang Integration:</b><br>
+ALL modules are integrated at once and tested together. Fast to start but hard to isolate faults. No drivers or stubs needed.<br><br>
+<b>Top-Down Integration:</b><br>
+Start with the <b>top-level (main) module</b>, then integrate and test downward level by level.<br>
+• Need <b>Stubs</b>: dummy lower-level modules that replace real modules not yet integrated<br>
+• Does NOT need Drivers<br><br>
+<b>Bottom-Up Integration:</b><br>
+Start with the <b>lowest-level modules</b>, integrate and test upward level by level.<br>
+• Need <b>Drivers</b>: dummy calling programs that exercise lower modules before upper modules exist<br>
+• Does NOT need Stubs<br><br>
+<b>Mixed/Sandwich Integration:</b><br>
+Simultaneously does top-down and bottom-up. Meets in the middle.<br>
+• Needs BOTH Drivers AND Stubs<br><br>
+<table>
+<tr><th>Strategy</th><th>Needs Drivers?</th><th>Needs Stubs?</th></tr>
+<tr><td>Big Bang</td><td>No</td><td>No</td></tr>
+<tr><td>Top-Down</td><td>No</td><td>Yes</td></tr>
+<tr><td>Bottom-Up</td><td>Yes</td><td>No</td></tr>
+<tr><td>Mixed/Sandwich</td><td>Yes</td><td>Yes</td></tr>
+</table>
+
+<div class="concept-box"><div class="concept-title">Memory Aid</div>
+<b>Driver</b> = drives (calls) the module under test from above<br>
+<b>Stub</b> = stands in for a module called from below<br><br>
+Top-Down goes DOWN → needs Stubs below it<br>
+Bottom-Up goes UP → needs Drivers above it</div>`
+    },
+  ],
+  pyqs:[
+    {
+      id:"IT-01", paper:"Apr 2023 ET1 - Q23", marks:"4", type:"MCQ",
+      q:`Which integration testing approach requires <b>both drivers AND stubs</b>?`,
+      options:[
+        {t:"A. Big Bang integration", c:false},
+        {t:"B. Top-Down integration", c:false},
+        {t:"C. Bottom-Up integration", c:false},
+        {t:"D. Mixed/Sandwich integration", c:true},
+      ],
+      ans:"D — Mixed/Sandwich Integration",
+      sol:`Mixed integration proceeds from both top and bottom simultaneously:<br>
+• Needs <b>Drivers</b> (for bottom-up part — dummy callers for low-level modules)<br>
+• Needs <b>Stubs</b> (for top-down part — dummy implementations for modules not yet integrated)<br><br>
+Big Bang = neither | Top-Down = stubs only | Bottom-Up = drivers only | Mixed = both`
+    },
+    {
+      id:"IT-02", paper:"Dec 2023 FN", marks:"3", type:"MCQ",
+      q:`Which integration strategy starts testing from the <b>highest-level modules</b> and uses <b>stubs</b> to simulate lower-level modules?`,
+      options:[
+        {t:"A. Bottom-up integration", c:false},
+        {t:"B. Top-down integration", c:true},
+        {t:"C. Big bang integration", c:false},
+        {t:"D. Mixed integration", c:false},
+      ],
+      ans:"B — Top-Down Integration",
+      sol:`Top-Down: Start with the main/top module. Lower modules aren't ready yet, so use <b>Stubs</b> — simplified dummy versions that return hardcoded responses. As real lower modules are developed, stubs are replaced one by one.`
+    },
+  ]
+},
+
+// ════════════════════════════════════════════════════════════════
+// 14. WEB PERFORMANCE
+// ════════════════════════════════════════════════════════════════
+{
+  rank:14, count:5, emoji:"⚡",
+  name:"Web Performance Optimization",
+  subtitle:"Loading · Caching · CDN · Monitoring",
+  papers:"All SE papers",
+  theory:[
+    {
+      h:"Web Performance Techniques — Complete Reference",
+      body:`Web performance optimization aims to make web applications load faster and feel more responsive.<br><br>
+<b>Quick Loading & Rendering Techniques (most tested):</b><br>
+• <b>Minification:</b> Remove whitespace, comments, shorten variable names in JS/CSS. Reduces file size.<br>
+• <b>Compression (Brotli/Gzip):</b> Server compresses responses before sending to browser. Brotli is newer and better than Gzip.<br>
+• <b>Lazy Loading:</b> Only load images/components when they're about to enter the viewport.<br>
+• <b>CSS/JS Bundling:</b> Combine multiple files into one to reduce HTTP requests.<br>
+• <b>Critical CSS:</b> Inline only the CSS needed for above-the-fold content; defer the rest.<br><br>
+<b>Caching Strategies:</b><br>
+• <b>Browser Cache:</b> Store static assets locally so repeat visits don't re-download.<br>
+• <b>Service Workers:</b> Background scripts that intercept requests and serve from cache offline.<br>
+• <b>CDN (Content Delivery Network):</b> Serve static assets from servers geographically close to users.<br><br>
+<b>Outside the HTTP Request Cycle:</b><br>
+• <b>Task Queues (message queues):</b> Move slow/background work (email sending, report generation) OUT of the HTTP request cycle. User gets instant response; processing happens asynchronously.<br>
+• Examples: Celery, RabbitMQ, Redis Queue<br><br>
+<b>Monitoring:</b><br>
+• Tracks performance metrics (load time, Core Web Vitals) AND user behavior (pages visited, click heatmaps)<br>
+• Tools: Google Analytics, New Relic, Datadog
+
+<div class="tip-box"><strong>💡 Exam Pattern:</strong> "Brotli/Gzip/minification" → Quick Loading & Rendering. "Small subset of users" + incremental → Canary deployment. "Task queue" → outside HTTP cycle.</div>`
+    },
+  ],
+  pyqs:[
+    {
+      id:"WP-01", paper:"Apr 2023 ET1", marks:"3", type:"MCQ",
+      q:`Using <b>Brotli compression and minification</b> on JavaScript files primarily addresses which performance goal?`,
+      options:[
+        {t:"A. Reducing server load", c:false},
+        {t:"B. Quick loading and rendering", c:true},
+        {t:"C. Database optimization", c:false},
+        {t:"D. Security hardening", c:false},
+      ],
+      ans:"B — Quick Loading and Rendering",
+      sol:`Brotli/Gzip compression reduces file transfer size. Minification removes whitespace/comments. Both reduce the bytes that need to travel from server to browser, directly improving page <b>load speed and rendering time</b>.`
+    },
+    {
+      id:"WP-02", paper:"Dec 2023 FN", marks:"4", type:"MCQ",
+      q:`An e-commerce site uses <b>task queues</b> to process order confirmations and send emails. These operations happen asynchronously after the HTTP response is sent. What does this achieve?`,
+      options:[
+        {t:"A. Better database performance", c:false},
+        {t:"B. Moves slow operations outside the HTTP request cycle", c:true},
+        {t:"C. Improves CSS rendering", c:false},
+        {t:"D. Enables CDN caching", c:false},
+      ],
+      ans:"B — Outside the HTTP Request Cycle",
+      sol:`Task queues (like Celery, RabbitMQ) allow slow operations to be processed <b>asynchronously</b> — outside the HTTP request-response cycle. The user gets an immediate response ("Order placed!") while the queue handles email sending, inventory updates, and report generation in the background.`
+    },
+  ]
+},
+
+// ════════════════════════════════════════════════════════════════
+// 15. USER STORIES
+// ════════════════════════════════════════════════════════════════
+{
+  rank:15, count:4, emoji:"📝",
+  name:"User Stories (INVEST & SMART)",
+  subtitle:"Requirements · Acceptance Criteria · Story Points",
+  papers:"All SE papers",
+  theory:[
+    {
+      h:"User Stories — Agile Requirements",
+      body:`A user story is a short, informal description of a software feature from the perspective of the end user.<br><br>
+<b>Standard Format:</b><br>
+<div class="formula-box">As a [type of user], I want [some goal] so that [some reason/benefit].</div>
+
+<b>INVEST Criteria — Good User Story Checklist:</b><br>
+• <b>I — Independent:</b> Can be developed without depending on other stories<br>
+• <b>N — Negotiable:</b> Details can be negotiated between team and stakeholders<br>
+• <b>V — Valuable:</b> Delivers value to the end user<br>
+• <b>E — Estimable:</b> Team can estimate effort required<br>
+• <b>S — Small:</b> Can be completed within one sprint<br>
+• <b>T — Testable:</b> Has clear acceptance criteria<br><br>
+
+<b>Acceptance Criteria (SMART):</b><br>
+• <b>Specific:</b> Clear, unambiguous<br>
+• <b>Measurable:</b> Can verify completion<br>
+• <b>Achievable:</b> Realistic to implement<br>
+• <b>Relevant:</b> Aligns with user story goal<br>
+• <b>Time-bound:</b> Has a clear completion condition<br><br>
+
+<b>Example User Story + Acceptance Criteria:</b><br>
+Story: "As a registered user, I want to reset my password so that I can regain access when I forget it."<br>
+AC: "Given I am on the login page, when I click 'Forgot Password' and enter my email, then I receive a reset link within 2 minutes."`
+    },
+  ],
+  pyqs:[
+    {
+      id:"US-01", paper:"Apr 2023 ET1", marks:"3", type:"MCQ",
+      q:`Which of the following is a well-formed user story?`,
+      options:[
+        {t:"A. The system should send emails to users", c:false},
+        {t:"B. As an admin, I want to send bulk emails so that I can notify all users of updates", c:true},
+        {t:"C. Email functionality should be implemented", c:false},
+        {t:"D. Users need email", c:false},
+      ],
+      ans:"B",
+      sol:`Option B follows the standard format: <b>"As a [user], I want [goal] so that [reason]."</b><br>
+• Identifies WHO (admin), WHAT (send bulk emails), WHY (notify users of updates)<br>
+• Options A, C, D are system requirements or vague descriptions — not user stories.`
+    },
+    {
+      id:"US-02", paper:"Apr 2024 FN", marks:"4", type:"MSQ",
+      q:`Which of the following are characteristics of a good user story according to the INVEST criteria?`,
+      options:[
+        {t:"A. Should be testable with clear acceptance criteria", c:true},
+        {t:"B. Must be implemented in a fixed sequence", c:false},
+        {t:"C. Should be small enough to complete in one sprint", c:true},
+        {t:"D. Should deliver value to users", c:true},
+      ],
+      ans:"A, C, and D",
+      sol:`<b>A:</b> Testable (T in INVEST) ✓<br>
+<b>C:</b> Small (S in INVEST) ✓<br>
+<b>D:</b> Valuable (V in INVEST) ✓<br>
+<b>B:</b> WRONG — Independent (I in INVEST) means stories should NOT have fixed dependencies/sequence. Stories should be developable in any order.`
+    },
+  ]
+},
+
+// ════════════════════════════════════════════════════════════════
+// 16. ADVANCED TESTING (Apr 2025)
+// ════════════════════════════════════════════════════════════════
+{
+  rank:16, count:6, emoji:"🔬",
+  name:"Advanced Testing Techniques",
+  subtitle:"Prime Paths · Data Flow · Logic Coverage · MCDC",
+  papers:"Apr 2025 Software Testing paper only",
+  theory:[
+    {
+      h:"Coverage Criteria Hierarchy",
+      body:`Coverage criteria are ordered from weakest to strongest. A stronger criterion SUBSUMES (implies) a weaker one:<br><br>
+<div class="formula-box">Statement → Branch → Condition → MCDC → Prime Path → All-Paths (strongest)</div>
+<br>
+<b>Statement Coverage:</b> Each executable statement executed at least once.<br><br>
+<b>Branch Coverage (Decision):</b> Each TRUE/FALSE outcome of decisions executed.<br><br>
+<b>Condition Coverage:</b> Each individual boolean sub-condition is both TRUE and FALSE at least once. (Doesn't guarantee branch coverage!)<br><br>
+<b>Modified Condition/Decision Coverage (MCDC):</b><br>
+Each condition independently affects the outcome. For each condition, there must be two test cases where:<br>
+1. That condition changes (T→F or F→T)<br>
+2. All other conditions remain constant<br>
+3. The overall decision outcome changes<br>
+Required by aviation safety standard DO-178B. More efficient than full MCC.<br><br>
+<b>Prime Path Coverage:</b><br>
+A <b>prime path</b> is a simple path (no repeated nodes) that is not a subpath of any other simple path. Prime paths give the most thorough structural coverage short of all-paths.`
+    },
+    {
+      h:"Data Flow Testing",
+      body:`Data flow testing focuses on the LIFECYCLE of variables — where they're defined and where they're used.<br><br>
+<b>Definitions and Uses:</b><br>
+• <b>def(v)</b>: A point where variable v is assigned a value<br>
+• <b>use(v)</b>: A point where variable v is read<br>
+  - <b>c-use (computation use):</b> v appears in a computation (e.g., y = v + 1)<br>
+  - <b>p-use (predicate use):</b> v appears in a condition (e.g., if v &gt; 0)<br><br>
+<b>def-use pair (du-pair):</b> A path from a def of v to a use of v with no intervening def of v (an uninterrupted definition-to-use path).<br><br>
+<b>Data Flow Coverage Criteria:</b><br>
+• <b>All-defs:</b> Every definition reaches at least one use<br>
+• <b>All-uses:</b> Every def-use pair is covered (every definition reaches every use)<br>
+• <b>All-du-paths:</b> Every path between every def-use pair is covered (strongest)<br><br>
+<div class="formula-box">All-defs ⊂ All-uses ⊂ All-du-paths</div>`
+    },
+    {
+      h:"Logic Coverage & Predicate Testing",
+      body:`Logic coverage criteria test the logical structure of predicates (boolean expressions).<br><br>
+<b>Predicate Coverage:</b> Predicate is TRUE at least once, FALSE at least once. (= Branch coverage)<br><br>
+<b>Clause Coverage:</b> Each clause (atomic boolean sub-expression) is TRUE at least once and FALSE at least once.<br><br>
+<b>Combinatorial Coverage:</b> All possible T/F combinations of all clauses tested. For n clauses → 2^n test cases. (= MCC/Multiple Condition Coverage)<br><br>
+<b>MCDC (Modified Condition/Decision Coverage):</b><br>
+Most important for safety-critical systems. Each clause independently affects the predicate. Requires only n+1 tests for n clauses (vs 2^n for combinatorial).<br><br>
+<b>Example for (A AND B):</b>
+<table>
+<tr><th>Test</th><th>A</th><th>B</th><th>Result</th><th>What it shows</th></tr>
+<tr><td>1</td><td>T</td><td>T</td><td>T</td><td>Base case</td></tr>
+<tr><td>2</td><td>F</td><td>T</td><td>F</td><td>A independently changes outcome (T1 vs T2)</td></tr>
+<tr><td>3</td><td>T</td><td>F</td><td>F</td><td>B independently changes outcome (T1 vs T3)</td></tr>
+</table>
+3 tests for MCDC vs 4 for full combinatorial.`
+    },
+  ],
+  pyqs:[
+    {
+      id:"AT-01", paper:"Apr 2025 SW Testing - Q3", marks:"4", type:"MCQ",
+      q:`Which coverage criterion requires that each <b>individual condition independently affects the overall decision outcome</b>?`,
+      options:[
+        {t:"A. Branch Coverage", c:false},
+        {t:"B. Multiple Condition Coverage (MCC)", c:false},
+        {t:"C. Modified Condition/Decision Coverage (MCDC)", c:true},
+        {t:"D. Statement Coverage", c:false},
+      ],
+      ans:"C — MCDC",
+      sol:`<b>MCDC</b>: Each condition must be shown to independently change the decision outcome. For n conditions, MCDC requires n+1 test cases — much more efficient than MCC's 2^n.<br><br>
+This is mandated by aviation safety standard DO-178B for airborne software. It strikes the best balance between thoroughness and practicality.`
+    },
+    {
+      id:"AT-02", paper:"Apr 2025 SW Testing - Q11", marks:"4", type:"MCQ",
+      q:`In data flow testing, a <b>p-use</b> of a variable means:`,
+      options:[
+        {t:"A. The variable is printed to output", c:false},
+        {t:"B. The variable appears in a predicate/condition (e.g., if x > 0)", c:true},
+        {t:"C. The variable is passed as a parameter", c:false},
+        {t:"D. The variable is defined/assigned", c:false},
+      ],
+      ans:"B — Predicate use",
+      sol:`<b>p-use (predicate use)</b>: Variable appears in a boolean condition/predicate — its value determines which branch executes. Contrast with <b>c-use (computation use)</b>: variable appears in an arithmetic expression where its value affects a computation result.`
+    },
+  ]
+},
+
+// ════════════════════════════════════════════════════════════════
+// 17. CLASS DIAGRAMS & OOP
+// ════════════════════════════════════════════════════════════════
+{
+  rank:17, count:5, emoji:"🏛️",
+  name:"Class Diagrams & OOP Relationships",
+  subtitle:"Inheritance · Aggregation · Composition · Association",
+  papers:"All SE papers",
+  theory:[
+    {
+      h:"UML Class Diagram Relationships",
+      body:`UML class diagrams show how classes relate to each other. Understanding the four key relationship types is essential:<br><br>
+<b>Inheritance (Generalization)</b> — "is-a"<br>
+A subclass <b>inherits</b> properties and methods from a superclass. Arrow points from child to parent with a hollow triangle arrowhead.<br>
+Example: <code>Dog extends Animal</code> — Dog IS-A Animal<br><br>
+<b>Association</b> — "uses-a" / "knows-a"<br>
+A general relationship between two classes — one class uses another but neither owns it. Plain arrow line.<br>
+Example: Teacher and Student have an association<br><br>
+<b>Aggregation</b> — "has-a" (weak ownership)<br>
+A "whole-part" relationship where the part can EXIST INDEPENDENTLY of the whole. Diamond (hollow) on the whole side.<br>
+Example: University has Departments, but Departments can exist without the University<br><br>
+<b>Composition</b> — "has-a" (strong ownership)<br>
+A "whole-part" relationship where the part CANNOT EXIST without the whole. Diamond (filled/solid) on the whole side. If the whole is destroyed, parts are destroyed too.<br>
+Example: House has Rooms. A Room cannot exist without its House.
+
+<table>
+<tr><th>Relationship</th><th>Keyword</th><th>Ownership</th><th>UML Symbol</th></tr>
+<tr><td>Inheritance</td><td>is-a</td><td>—</td><td>Hollow triangle arrow</td></tr>
+<tr><td>Association</td><td>uses-a</td><td>None</td><td>Plain arrow/line</td></tr>
+<tr><td>Aggregation</td><td>has-a (weak)</td><td>Partial (part survives)</td><td>Hollow diamond</td></tr>
+<tr><td>Composition</td><td>has-a (strong)</td><td>Full (part dies with whole)</td><td>Filled diamond</td></tr>
+</table>`
+    },
+  ],
+  pyqs:[
+    {
+      id:"OOP-01", paper:"Apr 2023 ET1 - Q13", marks:"4", type:"MCQ",
+      q:`A <b>Room</b> cannot exist independently of the <b>House</b> it belongs to. If the House is deleted, the Room is also deleted. What UML relationship is this?`,
+      options:[
+        {t:"A. Aggregation", c:false},
+        {t:"B. Composition", c:true},
+        {t:"C. Association", c:false},
+        {t:"D. Inheritance", c:false},
+      ],
+      ans:"B — Composition",
+      sol:`<b>Composition</b>: Strong "whole-part" relationship. The part (Room) CANNOT exist independently — its lifecycle is completely controlled by the whole (House). If House is destroyed, Room is destroyed. Represented by a FILLED diamond in UML.<br><br>
+Contrast with Aggregation: if it were a University-Department relationship where departments can survive the university, that would be Aggregation (hollow diamond).`
+    },
+    {
+      id:"OOP-02", paper:"Dec 2023 FN", marks:"4", type:"MCQ",
+      q:`A <b>University</b> has many <b>Departments</b>. If the University closes, the Departments can still exist as independent entities (they reorganize or merge elsewhere). What relationship?`,
+      options:[
+        {t:"A. Composition", c:false},
+        {t:"B. Inheritance", c:false},
+        {t:"C. Aggregation", c:true},
+        {t:"D. Association", c:false},
+      ],
+      ans:"C — Aggregation",
+      sol:`<b>Aggregation</b>: Weak "whole-part" relationship. The part (Department) can EXIST INDEPENDENTLY of the whole (University). Represented by a HOLLOW diamond on the University side. The key test: "Can the part survive without the whole?" YES = Aggregation, NO = Composition.`
+    },
+  ]
+},
+
+// ════════════════════════════════════════════════════════════════
+// 18. GIT & VERSION CONTROL
+// ════════════════════════════════════════════════════════════════
+{
+  rank:18, count:3, emoji:"🌿",
+  name:"Git & Version Control",
+  subtitle:"Branching · Merging · Workflows",
+  papers:"2023 papers",
+  theory:[
+    {
+      h:"Git Fundamentals — Complete Reference",
+      body:`Git is a <b>distributed version control system</b> (DVCS) — every developer has a complete copy of the repository history.<br><br>
+<b>Core Git Commands:</b>
+<table>
+<tr><th>Command</th><th>Action</th></tr>
+<tr><td><code>git init</code></td><td>Initialize a new repository</td></tr>
+<tr><td><code>git clone [url]</code></td><td>Copy a remote repository locally</td></tr>
+<tr><td><code>git add [file]</code></td><td>Stage changes for commit</td></tr>
+<tr><td><code>git commit -m "msg"</code></td><td>Save staged changes with a message</td></tr>
+<tr><td><code>git push</code></td><td>Upload commits to remote repo</td></tr>
+<tr><td><code>git pull</code></td><td>Download and merge remote changes</td></tr>
+<tr><td><code>git branch [name]</code></td><td>Create a new branch</td></tr>
+<tr><td><code>git checkout [branch]</code></td><td>Switch to a branch</td></tr>
+<tr><td><code>git merge [branch]</code></td><td>Merge a branch into current branch</td></tr>
+<tr><td><code>git rebase [branch]</code></td><td>Re-apply commits on top of another base</td></tr>
+</table>
+
+<b>Branching Strategies:</b><br>
+• <b>Feature Branching:</b> Each new feature gets its own branch. Merge to main when complete.<br>
+• <b>Git Flow:</b> Formal workflow with main, develop, feature, release, and hotfix branches.<br>
+• <b>Trunk-Based Development:</b> All developers commit to main/trunk frequently; short-lived feature branches only.<br><br>
+<b>Merge vs Rebase:</b><br>
+• Merge: Creates a merge commit; preserves full history<br>
+• Rebase: Rewrites history by moving commits; creates cleaner linear history`
+    },
+  ],
+  pyqs:[
+    {
+      id:"GIT-01", paper:"Apr 2023 ET1", marks:"3", type:"MCQ",
+      q:`Which Git command is used to <b>download changes from a remote repository and integrate</b> them into the current local branch?`,
+      options:[
+        {t:"A. git fetch", c:false},
+        {t:"B. git push", c:false},
+        {t:"C. git pull", c:true},
+        {t:"D. git clone", c:false},
+      ],
+      ans:"C — git pull",
+      sol:`<b>git pull</b> = git fetch + git merge. It downloads changes from the remote repository AND merges them into your current local branch in one step.<br><br>
+<b>git fetch</b> downloads changes but does NOT merge — you stay on your current commit.<br>
+<b>git push</b> sends your local commits UP to remote (opposite direction).<br>
+<b>git clone</b> downloads an entire repository for the first time.`
+    },
+  ]
+},
+
+// ════════════════════════════════════════════════════════════════
+// 19. SOFTWARE TEAMS & ROLES
+// ════════════════════════════════════════════════════════════════
+{
+  rank:19, count:7, emoji:"👥",
+  name:"Software Teams & Roles",
+  subtitle:"Team Structures · Roles · Responsibilities",
+  papers:"All SE papers",
+  theory:[
+    {
+      h:"Software Team Structures",
+      body:`<b>Chief Programmer Team (Egoless Programming):</b><br>
+One highly skilled chief programmer leads. All code is owned collectively — any team member can change any code. Reduces ego attachment to code.<br><br>
+<b>Democratic Team:</b><br>
+All members have equal say. Good for creative projects but can lead to slow decision-making. Code is reviewed by all.<br><br>
+<b>Hierarchical Teams:</b><br>
+Traditional manager-subordinate structure. Clear chain of command. Works for large, distributed teams.<br><br>
+<b>Agile Teams:</b><br>
+Self-organizing, cross-functional. Roles: Product Owner, Scrum Master, Development Team (see Agile & Scrum topic).`
+    },
+    {
+      h:"Key Software Roles",
+      body:`<table>
+<tr><th>Role</th><th>Responsibilities</th></tr>
+<tr><td><b>Software Architect</b></td><td>Defines overall system structure, technology choices, design patterns, architectural decisions</td></tr>
+<tr><td><b>Project Manager</b></td><td>Planning, scheduling, resource allocation, risk management, stakeholder communication</td></tr>
+<tr><td><b>Business Analyst</b></td><td>Elicit and document requirements; bridge between business and technical team</td></tr>
+<tr><td><b>QA Engineer</b></td><td>Design and execute tests; ensure quality standards; write test plans</td></tr>
+<tr><td><b>DevOps Engineer</b></td><td>CI/CD pipelines, deployment automation, infrastructure, monitoring</td></tr>
+<tr><td><b>UX Designer</b></td><td>User research, wireframes, prototypes, usability testing</td></tr>
+<tr><td><b>Technical Writer</b></td><td>API docs, user manuals, release notes</td></tr>
+</table>`
+    },
+  ],
+  pyqs:[
+    {
+      id:"TM-01", paper:"Apr 2023 ET1", marks:"3", type:"MCQ",
+      q:`Which role is responsible for <b>eliciting, analyzing, and documenting software requirements</b>, acting as a bridge between stakeholders and the development team?`,
+      options:[
+        {t:"A. Software Architect", c:false},
+        {t:"B. Project Manager", c:false},
+        {t:"C. Business Analyst", c:true},
+        {t:"D. QA Engineer", c:false},
+      ],
+      ans:"C — Business Analyst",
+      sol:`<b>Business Analyst</b>: The requirement expert. Conducts interviews, workshops, and observations to elicit requirements from stakeholders. Translates business needs into functional specifications the development team can implement.`
+    },
+  ]
+},
+
+// ════════════════════════════════════════════════════════════════
+// 20. CONTINUOUS INTEGRATION
+// ════════════════════════════════════════════════════════════════
+{
+  rank:20, count:4, emoji:"🔄",
+  name:"Continuous Integration & DevOps",
+  subtitle:"CI/CD · Pipeline · Automated Testing",
+  papers:"Apr 2023, Dec 2023",
+  theory:[
+    {
+      h:"CI/CD Pipeline — Full Explanation",
+      body:`<b>Continuous Integration (CI):</b><br>
+Developers frequently merge code changes into a shared repository (multiple times per day). Each merge triggers an <b>automated build + automated tests</b>. If tests fail, the team is immediately notified. Goal: catch integration problems early.<br><br>
+<b>Continuous Delivery (CD):</b><br>
+Extends CI — every change that passes CI is automatically deployed to a <b>staging/pre-production</b> environment. The software is always in a deployable state. Final production deployment may still require manual approval.<br><br>
+<b>Continuous Deployment:</b><br>
+Extends CD further — every change that passes all automated tests is <b>automatically deployed to production</b> without human approval. Maximum automation.<br><br>
+<b>Typical CI/CD Pipeline stages:</b>
+<pre>Code commit → Source control → Build → Unit tests → 
+Integration tests → Staging deploy → Acceptance tests → 
+Production deploy</pre>
+
+<b>Key Tools:</b><br>
+• CI servers: Jenkins, GitHub Actions, GitLab CI, CircleCI<br>
+• Container: Docker (ensures consistent environments)<br>
+• Orchestration: Kubernetes (manages containers at scale)<br>
+• Monitoring: Prometheus, Grafana, Datadog`
+    },
+  ],
+  pyqs:[
+    {
+      id:"CI-01", paper:"Apr 2023 ET1 - Q21", marks:"4", type:"MCQ",
+      q:`In Continuous Integration, what happens automatically when a developer commits code to the shared repository?`,
+      options:[
+        {t:"A. Code is deployed directly to production", c:false},
+        {t:"B. The code is built and automated tests are run", c:true},
+        {t:"C. A manual code review is triggered", c:false},
+        {t:"D. The deployment pipeline pauses for approval", c:false},
+      ],
+      ans:"B — Build + Automated Tests",
+      sol:`<b>Continuous Integration</b>: Every commit to the shared repository triggers an automated pipeline: (1) fetch latest code, (2) build the project, (3) run automated tests. If build or tests fail → team is notified immediately. This ensures the main branch is always in a working state and integration problems are caught early.`
+    },
+    {
+      id:"CI-02", paper:"Dec 2023 FN", marks:"4", type:"MCQ",
+      q:`What is the difference between <b>Continuous Delivery</b> and <b>Continuous Deployment</b>?`,
+      options:[
+        {t:"A. They are the same thing", c:false},
+        {t:"B. Continuous Delivery deploys to staging automatically; Continuous Deployment deploys to production automatically without manual approval", c:true},
+        {t:"C. Continuous Deployment only runs tests; Continuous Delivery deploys", c:false},
+        {t:"D. Continuous Delivery requires Docker; Continuous Deployment does not", c:false},
+      ],
+      ans:"B",
+      sol:`<b>Continuous Delivery:</b> Auto-deploys to staging. Production release requires manual approval (business decision).<br>
+<b>Continuous Deployment:</b> Auto-deploys ALL the way to production — zero human intervention if tests pass.<br><br>
+Most companies practice Continuous Delivery (not Deployment) because they want human sign-off before customer-facing releases.`
+    },
+  ]
+},
+
+// ════════════════════════════════════════════════════════════════
+// 21. REQUIREMENT GATHERING
+// ════════════════════════════════════════════════════════════════
+{
+  rank:21, count:3, emoji:"📋",
+  name:"Requirement Gathering Techniques",
+  subtitle:"Interviews · Workshops · Prototyping · Observation",
+  papers:"Multiple papers",
+  theory:[
+    {
+      h:"Requirements — Types and Gathering Techniques",
+      body:`<b>Types of Requirements:</b><br>
+• <b>Functional Requirements:</b> What the system DOES — specific behaviors, features, functions<br>
+• <b>Non-Functional Requirements (NFR):</b> HOW the system performs — performance, security, scalability, reliability<br>
+• <b>Business Requirements:</b> High-level organizational goals<br>
+• <b>User Requirements:</b> What users need to accomplish<br><br>
+<b>Elicitation Techniques:</b>
+<table>
+<tr><th>Technique</th><th>Best For</th><th>Limitation</th></tr>
+<tr><td><b>Interviews</b></td><td>Detailed individual requirements; exploring attitudes</td><td>Time-consuming; may not capture group dynamics</td></tr>
+<tr><td><b>Workshops (JAD)</b></td><td>Group consensus; resolving conflicts</td><td>Requires skilled facilitator; group bias</td></tr>
+<tr><td><b>Observation (Ethnography)</b></td><td>Understanding actual work practices</td><td>Observer effect; time-intensive</td></tr>
+<tr><td><b>Questionnaires/Surveys</b></td><td>Large user groups; quantitative data</td><td>Can't explore unexpected answers</td></tr>
+<tr><td><b>Prototyping</b></td><td>Clarifying vague requirements; early feedback</td><td>Users may fixate on prototype details</td></tr>
+<tr><td><b>Document Analysis</b></td><td>Existing system requirements; regulations</td><td>Documents may be outdated</td></tr>
+</table>`
+    },
+  ],
+  pyqs:[
+    {
+      id:"RQ-01", paper:"Apr 2023 ET1", marks:"3", type:"MCQ",
+      q:`A BA visits the customer's workplace and <b>observes how users actually perform their tasks</b> without interrupting them. Which requirement gathering technique?`,
+      options:[
+        {t:"A. Interview", c:false},
+        {t:"B. Workshop", c:false},
+        {t:"C. Observation (Ethnography)", c:true},
+        {t:"D. Questionnaire", c:false},
+      ],
+      ans:"C — Observation/Ethnography",
+      sol:`<b>Observation</b>: Watching users in their natural work environment to understand actual practices (which often differ from what users SAY they do in interviews). Valuable for discovering implicit requirements and workarounds. Also called ethnographic study.`
+    },
+  ]
+},
+
+// ════════════════════════════════════════════════════════════════
+// 22. SDLC & SOFTWARE ARCHITECTURE
+// ════════════════════════════════════════════════════════════════
+{
+  rank:22, count:5, emoji:"🏢",
+  name:"SDLC & Software Architecture",
+  subtitle:"Waterfall · Spiral · Layered · Microservices",
+  papers:"Multiple papers",
+  theory:[
+    {
+      h:"SDLC Models",
+      body:`<b>Waterfall Model:</b><br>
+Sequential, linear phases: Requirements → Design → Implementation → Testing → Deployment → Maintenance. Each phase completes before the next begins. Works well when requirements are clear and stable. Hard to accommodate changes.<br><br>
+<b>V-Model:</b><br>
+Extension of Waterfall. Each development phase has a corresponding testing phase on the right side of the "V". Emphasizes testing at each level.<br><br>
+<b>Spiral Model:</b><br>
+Risk-driven. Each iteration has four quadrants: Plan → Risk Analysis → Engineering → Evaluation. Good for large, complex, high-risk projects. Each loop adds functionality.<br><br>
+<b>Agile/Scrum:</b> Iterative, incremental. See Agile topic.<br><br>
+<b>Prototype Model:</b> Build a quick prototype, get feedback, refine. Good when requirements are unclear.`
+    },
+    {
+      h:"Software Architecture Patterns",
+      body:`<b>Layered (N-tier) Architecture:</b><br>
+Software organized in horizontal layers. Each layer serves the layer above and is served by the layer below.<br>
+Typical layers: Presentation → Business Logic → Data Access → Database<br><br>
+<b>Microservices Architecture:</b><br>
+Application is a collection of small, independent services that communicate via APIs. Each service has its own database. Highly scalable, independently deployable.<br><br>
+<b>Monolithic Architecture:</b><br>
+Entire application as one deployable unit. Simple to develop initially, but becomes hard to scale and maintain as it grows.<br><br>
+<b>Event-Driven Architecture:</b><br>
+Components communicate via events. Highly decoupled. Good for real-time systems and IoT.<br><br>
+<b>Model-View-Controller (MVC):</b><br>
+Separates application into: Model (data/business logic), View (UI), Controller (handles input, updates model/view). Most web frameworks use MVC or variants.`
+    },
+  ],
+  pyqs:[
+    {
+      id:"SDLC-01", paper:"Apr 2023 ET1", marks:"3", type:"MCQ",
+      q:`Which SDLC model uses a <b>risk analysis</b> at the start of each iteration and is best suited for <b>large, complex, high-risk</b> projects?`,
+      options:[
+        {t:"A. Waterfall", c:false},
+        {t:"B. V-Model", c:false},
+        {t:"C. Spiral", c:true},
+        {t:"D. Prototype", c:false},
+      ],
+      ans:"C — Spiral Model",
+      sol:`The <b>Spiral Model</b> is risk-driven. Each iteration (spiral loop) includes: (1) Planning, (2) Risk Analysis and reduction, (3) Engineering (build/code), (4) Customer evaluation. The explicit risk analysis phase in every loop makes it ideal for large, high-risk projects.`
+    },
+    {
+      id:"SDLC-02", paper:"Sep 2024 FN", marks:"4", type:"MCQ",
+      q:`An application is split into small independent services, each with its own database, deployed separately and communicating via REST APIs. What architecture pattern?`,
+      options:[
+        {t:"A. Monolithic", c:false},
+        {t:"B. Layered/N-tier", c:false},
+        {t:"C. Microservices", c:true},
+        {t:"D. MVC", c:false},
+      ],
+      ans:"C — Microservices",
+      sol:`<b>Microservices</b>: Independent services, each responsible for a specific business capability (e.g., User Service, Order Service, Payment Service). Each service: has its own database, deploys independently, communicates via APIs (REST/gRPC/message queues). Contrast with Monolithic: one big deployable unit where all components share a database.`
+    },
+  ]
+},
+
+]; // END TOPICS
+
+// ════════════════════════════════════════════════════════════════
+//  UI LOGIC
+// ════════════════════════════════════════════════════════════════
+let currentTopic = null;
+let currentTab = 'theory';
+
+// Build sidebar
+const list = document.getElementById('topic-list');
+TOPICS.forEach((t, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'topic-btn';
+  btn.id = `btn-${i}`;
+  const heat = t.count >= 10 ? '#f07070' : t.count >= 6 ? '#f4a261' : '#64d9a8';
+  btn.innerHTML = `
+    <span class="rank" style="color:${heat}">${t.rank}</span>
+    <span class="label">${t.name}</span>
+    <span class="badge" style="color:${heat}">${t.count}</span>
+  `;
+  btn.onclick = () => loadTopic(i);
+  list.appendChild(btn);
+});
+
+function loadTopic(idx) {
+  const t = TOPICS[idx];
+  currentTopic = idx;
+  currentTab = 'theory';
+
+  // Sidebar
+  document.querySelectorAll('.topic-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`btn-${idx}`).classList.add('active');
+
+  // Header
+  document.getElementById('welcome').style.display = 'none';
+  document.getElementById('topic-header').style.display = '';
+  document.getElementById('stats-bar').style.display = '';
+  document.getElementById('hdr-emoji').textContent = t.emoji;
+  document.getElementById('hdr-title').textContent = t.name;
+  document.getElementById('hdr-sub').textContent = `${t.subtitle} · ${t.papers}`;
+
+  // Stats
+  document.getElementById('stats-bar').innerHTML = `
+    <span>Rank <span>#${t.rank}</span></span>
+    <span>Frequency <span>${t.count} questions</span></span>
+    <span>Papers <span>${t.papers}</span></span>
+    <span>Theory blocks <span>${t.theory.length}</span></span>
+    <span>PYQs <span>${t.pyqs.length}</span></span>
+  `;
+
+  // Render theory
+  const theoryEl = document.getElementById('theory-section');
+  theoryEl.innerHTML = t.theory.map(block => `
+    <div class="theory-block">
+      <h3>${block.h}</h3>
+      <div class="theory-body">${block.body}</div>
+    </div>
+  `).join('');
+
+  // Render PYQs
+  const pyqEl = document.getElementById('pyq-section');
+  pyqEl.innerHTML = `
+    <div style="margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+      <div style="font-family:'Fira Code',monospace; font-size:0.7rem; color:var(--muted)">
+        ${t.pyqs.length} questions · click any option to check your answer instantly
+      </div>
+      <button class="reveal-all-btn" onclick="toggleAllAnswers(this)">👁 Reveal All</button>
+    </div>
+    ${t.pyqs.map((q, qi) => renderPYQ(q, qi)).join('')}
+  `;
+
+  // Tab state
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-btn')[0].classList.add('active');
+  theoryEl.style.display = 'block';
+  pyqEl.style.display = 'none';
+
+  theoryEl.scrollTop = 0;
+  pyqEl.scrollTop = 0;
+}
+
+function renderPYQ(q, qi) {
+  const opts = q.options.map((o, oi) =>
+    `<li id="opt-${qi}-${oi}" data-correct="${o.c}" onclick="selectOption(${qi}, ${oi})">${o.t}</li>`
+  ).join('');
+
+  return `
+    <div class="pyq-card" id="pyq-${qi}">
+      <div class="pyq-header" onclick="togglePYQ(${qi})">
+        <div class="pyq-meta">
+          <span class="pyq-id">Q${qi+1} · ${q.id}</span>
+          <span class="pyq-paper">${q.paper}</span>
+          <span class="pyq-marks">${q.marks} marks</span>
+          <span class="pyq-type">${q.type}</span>
+        </div>
+        <span class="chevron" id="chev-${qi}">▼</span>
+      </div>
+      <div class="pyq-body" id="pyqbody-${qi}">
+        <div style="font-size:0.7rem;font-family:'Fira Code',monospace;color:var(--muted);margin-bottom:10px;">👆 Click an option to check your answer</div>
+        <div class="q-text">${q.q}</div>
+        <ul class="options-list" id="optlist-${qi}">${opts}</ul>
+        <div class="answer-section" id="anssec-${qi}">
+          <div class="answer-pill">✓ Answer: ${q.ans}</div>
+          <div class="solution-box">
+            <h4>💡 Explanation</h4>
+            <p>${q.sol}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function selectOption(qi, oi) {
+  const optList = document.getElementById(`optlist-${qi}`);
+  const sec = document.getElementById(`anssec-${qi}`);
+
+  // Already answered
+  if (optList.classList.contains('answered')) return;
+  optList.classList.add('answered');
+
+  const clicked = document.getElementById(`opt-${qi}-${oi}`);
+  const isCorrect = clicked.dataset.correct === 'true';
+
+  // Style the clicked option
+  if (isCorrect) {
+    clicked.classList.add('correct-reveal');
+  } else {
+    clicked.classList.add('selected-wrong');
+    // Also show which was correct
+    optList.querySelectorAll('li').forEach(li => {
+      if (li.dataset.correct === 'true') li.classList.add('correct-reveal');
+    });
+  }
+
+  // Fade remaining unselected wrong options
+  optList.querySelectorAll('li').forEach(li => {
+    if (!li.classList.contains('correct-reveal') && !li.classList.contains('selected-wrong')) {
+      li.classList.add('wrong-reveal');
+    }
+  });
+
+  // Reveal solution
+  sec.classList.add('revealed');
+}
+
+function escQ(s) {
+  return (s||'').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+}
+
+function togglePYQ(qi) {
+  const body = document.getElementById(`pyqbody-${qi}`);
+  const chev = document.getElementById(`chev-${qi}`);
+  const open = body.classList.toggle('open');
+  chev.classList.toggle('open', open);
+}
+
+function toggleAnswer(qi, ans, sol) {
+  const sec = document.getElementById(`anssec-${qi}`);
+  const btn = document.getElementById(`ansbtn-${qi}`);
+  const optList = document.getElementById(`optlist-${qi}`);
+  const revealed = sec.classList.toggle('revealed');
+
+  if (revealed) {
+    btn.textContent = '🙈 Hide Answer';
+    btn.classList.add('revealed');
+    // Highlight options
+    optList.querySelectorAll('li').forEach(li => {
+      if (li.dataset.correct === 'true') li.classList.add('correct-reveal');
+      else li.classList.add('wrong-reveal');
+    });
+  } else {
+    btn.textContent = '👁 Show Answer';
+    btn.classList.remove('revealed');
+    optList.querySelectorAll('li').forEach(li => {
+      li.classList.remove('correct-reveal', 'wrong-reveal');
+    });
+  }
+}
+
+function toggleAllAnswers(btn) {
+  const allOptLists = document.querySelectorAll('.options-list');
+  const allRevealed = [...allOptLists].every(ol => ol.classList.contains('answered'));
+
+  allOptLists.forEach((ol, qi) => {
+    const sec = document.getElementById(`anssec-${qi}`);
+    const body = document.getElementById(`pyqbody-${qi}`);
+    const chev = document.getElementById(`chev-${qi}`);
+    if (!sec) return;
+
+    if (!allRevealed) {
+      // Open card
+      if (!body.classList.contains('open')) {
+        body.classList.add('open');
+        if (chev) chev.classList.add('open');
+      }
+      // Mark answered + show correct
+      ol.classList.add('answered');
+      ol.querySelectorAll('li').forEach(li => {
+        li.classList.remove('selected-wrong', 'wrong-reveal', 'correct-reveal');
+        if (li.dataset.correct === 'true') li.classList.add('correct-reveal');
+        else li.classList.add('wrong-reveal');
+      });
+      sec.classList.add('revealed');
+    } else {
+      // Reset everything
+      ol.classList.remove('answered');
+      ol.querySelectorAll('li').forEach(li => {
+        li.classList.remove('correct-reveal', 'selected-wrong', 'wrong-reveal');
+      });
+      sec.classList.remove('revealed');
+    }
+  });
+
+  btn.textContent = allRevealed ? '👁 Reveal All' : '🔄 Reset All';
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  const theoryEl = document.getElementById('theory-section');
+  const pyqEl = document.getElementById('pyq-section');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  if (tab === 'theory') {
+    document.querySelectorAll('.tab-btn')[0].classList.add('active');
+    theoryEl.style.display = 'block';
+    pyqEl.style.display = 'none';
+  } else {
+    document.querySelectorAll('.tab-btn')[1].classList.add('active');
+    theoryEl.style.display = 'none';
+    pyqEl.style.display = 'block';
+  }
+}
+
+// Load first topic by default
+loadTopic(0);
+</script>
+</body>
+</html>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add General Resource</title>
+    <title>Edit General Resource</title>
     <link rel="icon" href="data:,">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -116,33 +116,32 @@
 </head>
 <body>
     <div class="panel">
-        <h1>Add General Resource</h1>
-        <p>You can add either a direct URL (Drive/PDF link) or upload a PDF/HTML file.</p>
+        <h1>Edit General Resource</h1>
+        <p>Update the title, link, program, or replace the file.</p>
 
         <form method="post" enctype="multipart/form-data">
             <label for="title">Title</label>
-            <input id="title" name="title" type="text" required>
+            <input id="title" name="title" type="text" value="{{ resource.title }}" required>
 
             <label for="program_type">Program Type</label>
             <select id="program_type" name="program_type" required>
-                <option value="">Select Type</option>
-                <option value="diploma">Diploma</option>
-                <option value="degree">Degree</option>
+                <option value="diploma" {% if resource.program_type == 'diploma' %}selected{% endif %}>Diploma</option>
+                <option value="degree" {% if resource.program_type == 'degree' %}selected{% endif %}>Degree</option>
             </select>
 
             <label for="resource_link">Direct Link (optional if uploading a file)</label>
-            <input id="resource_link" name="resource_link" type="text" placeholder="https://drive.google.com/... or direct PDF/HTML URL">
+            <input id="resource_link" name="resource_link" type="text" value="{{ resource.resource_link }}" placeholder="https://drive.google.com/... or direct PDF/HTML URL">
 
             <label for="tags">Tags (comma separated)</label>
-            <input id="tags" name="tags" type="text" placeholder="mlf, statistics, week-1">
+            <input id="tags" name="tags" type="text" value="{{ resource.tags }}" placeholder="mlf, statistics, week-1">
 
-            <label for="resource_pdf">Upload PDF/HTML (optional if link provided)</label>
+            <label for="resource_pdf">Replace PDF/HTML (optional)</label>
             <input id="resource_pdf" name="resource_pdf" type="file" accept=".pdf,application/pdf,.html,.htm,text/html">
 
             <div class="hint">At least one field is required: either direct link or PDF/HTML file.</div>
 
             <div class="actions">
-                <button class="btn btn-primary" type="submit">Save Resource</button>
+                <button class="btn btn-primary" type="submit">Save Changes</button>
                 <a class="btn btn-secondary" href="{{ url_for('general_resources_page') }}">Back to Resources</a>
             </div>
         </form>

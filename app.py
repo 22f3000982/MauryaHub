@@ -18,7 +18,7 @@ app.secret_key = 'your_secret_key'
 # Upload configuration
 UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-RESOURCE_ALLOWED_EXTENSIONS = {'pdf'}
+RESOURCE_ALLOWED_EXTENSIONS = {'pdf', 'html', 'htm'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Create upload folder if it doesn't exist
@@ -142,6 +142,18 @@ def ensure_url_scheme(url):
     if not url.startswith('http://') and not url.startswith('https://'):
         return 'https://' + url
     return url
+
+def normalize_tags(raw_tags):
+    if not raw_tags:
+        return ''
+    seen = set()
+    normalized = []
+    for tag in raw_tags.split(','):
+        cleaned = tag.strip().lower()
+        if cleaned and cleaned not in seen:
+            seen.add(cleaned)
+            normalized.append(cleaned)
+    return ', '.join(normalized)
 
 def log_view_event(content_table, content_id, course_id=None):
     """Store real view event records for analytics (no estimated values)."""
@@ -540,11 +552,14 @@ def init_db():
                 title TEXT NOT NULL,
                 resource_link TEXT NOT NULL,
                 program_type TEXT NOT NULL,
+                tags TEXT,
                 watch_count INTEGER DEFAULT 0,
                 sort_order INTEGER DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         ''')
+
+        cur.execute('ALTER TABLE general_resources ADD COLUMN IF NOT EXISTS tags TEXT')
 
         # Create 'feedback' table for landing page testimonials
         cur.execute('''
@@ -819,13 +834,14 @@ def general_resources_page():
             'resources.html',
             diploma_resources=[],
             degree_resources=[],
-            admin_mode=session.get('admin_mode', False)
+            admin_mode=session.get('admin_mode', False),
+            all_tags=[]
         )
 
     try:
         cur = conn.cursor()
         cur.execute('''
-            SELECT id, title, resource_link, program_type, watch_count
+            SELECT id, title, resource_link, program_type, watch_count, tags
             FROM general_resources
             WHERE program_type = %s
             ORDER BY sort_order, id
@@ -833,7 +849,7 @@ def general_resources_page():
         diploma_resources = cur.fetchall()
 
         cur.execute('''
-            SELECT id, title, resource_link, program_type, watch_count
+            SELECT id, title, resource_link, program_type, watch_count, tags
             FROM general_resources
             WHERE program_type = %s
             ORDER BY sort_order, id
@@ -847,11 +863,21 @@ def general_resources_page():
     finally:
         conn.close()
 
+    tag_set = set()
+    for resource in diploma_resources + degree_resources:
+        tags_value = resource[5]
+        if tags_value:
+            for tag in tags_value.split(','):
+                cleaned = tag.strip().lower()
+                if cleaned:
+                    tag_set.add(cleaned)
+
     return render_template(
         'resources.html',
         diploma_resources=diploma_resources,
         degree_resources=degree_resources,
-        admin_mode=session.get('admin_mode', False)
+        admin_mode=session.get('admin_mode', False),
+        all_tags=sorted(tag_set)
     )
 
 @app.route('/admin/resources/add', methods=['GET', 'POST'])
@@ -863,6 +889,7 @@ def admin_add_general_resource():
         title = request.form.get('title', '').strip()
         program_type = request.form.get('program_type', '').strip().lower()
         resource_link = request.form.get('resource_link', '').strip()
+        raw_tags = request.form.get('tags', '').strip()
         pdf_file = request.files.get('resource_pdf')
 
         if not title or program_type not in ['diploma', 'degree']:
@@ -873,7 +900,7 @@ def admin_add_general_resource():
 
         if pdf_file and pdf_file.filename:
             if not allowed_resource_file(pdf_file.filename):
-                flash('Only PDF uploads are allowed.', 'error')
+                flash('Only PDF or HTML uploads are allowed.', 'error')
                 return redirect(url_for('admin_add_general_resource'))
 
             safe_name = secure_filename(pdf_file.filename)
@@ -883,10 +910,15 @@ def admin_add_general_resource():
             pdf_file.save(os.path.join(resources_dir, stored_name))
             final_link = url_for('static', filename=f'uploads/general_resources/{stored_name}')
         elif resource_link:
-            final_link = ensure_url_scheme(resource_link)
+            if resource_link.startswith('/'):
+                final_link = resource_link
+            else:
+                final_link = ensure_url_scheme(resource_link)
         else:
-            flash('Please add either a direct link or a PDF file.', 'error')
+            flash('Please add either a direct link or a PDF/HTML file.', 'error')
             return redirect(url_for('admin_add_general_resource'))
+
+        tags_value = normalize_tags(raw_tags)
 
         conn = get_db_connection()
         if not conn:
@@ -895,14 +927,29 @@ def admin_add_general_resource():
 
         try:
             cur = conn.cursor()
+            cur.execute(
+                '''
+                SELECT id FROM general_resources
+                WHERE program_type=%s
+                  AND (LOWER(title)=LOWER(%s) OR resource_link=%s)
+                LIMIT 1
+                ''',
+                (program_type, title, final_link)
+            )
+            if cur.fetchone():
+                flash('Duplicate resource detected (same title or link).', 'error')
+                cur.close()
+                conn.close()
+                return redirect(url_for('admin_add_general_resource'))
+
             cur.execute('SELECT COALESCE(MAX(sort_order), -1) FROM general_resources WHERE program_type=%s', (program_type,))
             next_order = cur.fetchone()[0] + 1
             cur.execute(
                 '''
-                INSERT INTO general_resources (title, resource_link, program_type, sort_order)
-                VALUES (%s, %s, %s, %s)
+                INSERT INTO general_resources (title, resource_link, program_type, tags, sort_order)
+                VALUES (%s, %s, %s, %s, %s)
                 ''',
-                (title, final_link, program_type, next_order)
+                (title, final_link, program_type, tags_value, next_order)
             )
             conn.commit()
             cur.close()
@@ -917,6 +964,191 @@ def admin_add_general_resource():
         return redirect(url_for('general_resources_page'))
 
     return render_template('admin_add_general_resource.html')
+
+@app.route('/admin/resources/edit/<int:resource_id>', methods=['GET', 'POST'])
+def admin_edit_general_resource(resource_id):
+    if not session.get('admin_mode'):
+        return redirect(url_for('general_resources_page'))
+
+    conn = get_db_connection()
+    if not conn:
+        flash('Database connection failed', 'error')
+        return redirect(url_for('general_resources_page'))
+
+    try:
+        cur = conn.cursor()
+        cur.execute('SELECT title, resource_link, program_type, tags FROM general_resources WHERE id=%s', (resource_id,))
+        resource = cur.fetchone()
+
+        if resource is None:
+            flash('Resource not found.', 'error')
+            cur.close()
+            return redirect(url_for('general_resources_page'))
+
+        existing_title, existing_link, existing_program, existing_tags = resource
+
+        if request.method == 'POST':
+            title = request.form.get('title', '').strip()
+            program_type = request.form.get('program_type', '').strip().lower()
+            resource_link = request.form.get('resource_link', '').strip()
+            raw_tags = request.form.get('tags', '').strip()
+            pdf_file = request.files.get('resource_pdf')
+
+            if not title or program_type not in ['diploma', 'degree']:
+                flash('Please provide a valid title and program type.', 'error')
+                return redirect(url_for('admin_edit_general_resource', resource_id=resource_id))
+
+            final_link = existing_link
+            tags_value = normalize_tags(raw_tags)
+
+            if pdf_file and pdf_file.filename:
+                if not allowed_resource_file(pdf_file.filename):
+                    flash('Only PDF or HTML uploads are allowed.', 'error')
+                    return redirect(url_for('admin_edit_general_resource', resource_id=resource_id))
+
+                safe_name = secure_filename(pdf_file.filename)
+                stored_name = f"{program_type}_{int(datetime.utcnow().timestamp())}_{safe_name}"
+                resources_dir = os.path.join(app.config['UPLOAD_FOLDER'], 'general_resources')
+                os.makedirs(resources_dir, exist_ok=True)
+                pdf_file.save(os.path.join(resources_dir, stored_name))
+                final_link = url_for('static', filename=f'uploads/general_resources/{stored_name}')
+            elif resource_link:
+                if resource_link.startswith('/'):
+                    final_link = resource_link
+                else:
+                    final_link = ensure_url_scheme(resource_link)
+            else:
+                flash('Please add either a direct link or a PDF/HTML file.', 'error')
+                return redirect(url_for('admin_edit_general_resource', resource_id=resource_id))
+
+            cur.execute(
+                '''
+                SELECT id FROM general_resources
+                WHERE program_type=%s
+                  AND id<>%s
+                  AND (LOWER(title)=LOWER(%s) OR resource_link=%s)
+                LIMIT 1
+                ''',
+                (program_type, resource_id, title, final_link)
+            )
+            if cur.fetchone():
+                flash('Duplicate resource detected (same title or link).', 'error')
+                return redirect(url_for('admin_edit_general_resource', resource_id=resource_id))
+
+            new_sort_order = None
+            if program_type != existing_program:
+                cur.execute('SELECT COALESCE(MAX(sort_order), -1) FROM general_resources WHERE program_type=%s', (program_type,))
+                new_sort_order = cur.fetchone()[0] + 1
+
+            if new_sort_order is None:
+                cur.execute(
+                    '''
+                    UPDATE general_resources
+                    SET title=%s, resource_link=%s, program_type=%s, tags=%s
+                    WHERE id=%s
+                    ''',
+                    (title, final_link, program_type, tags_value, resource_id)
+                )
+            else:
+                cur.execute(
+                    '''
+                    UPDATE general_resources
+                    SET title=%s, resource_link=%s, program_type=%s, tags=%s, sort_order=%s
+                    WHERE id=%s
+                    ''',
+                    (title, final_link, program_type, tags_value, new_sort_order, resource_id)
+                )
+
+            conn.commit()
+
+            static_prefix = '/static/uploads/general_resources/'
+            if existing_link and existing_link != final_link and existing_link.startswith(static_prefix):
+                file_name = existing_link.replace(static_prefix, '', 1)
+                file_path = os.path.join(os.path.dirname(__file__), 'static', 'uploads', 'general_resources', file_name)
+                if os.path.exists(file_path):
+                    os.remove(file_path)
+
+            backup_db()
+            flash('General resource updated successfully!', 'success')
+            return redirect(url_for('general_resources_page'))
+
+        resource_data = {
+            'title': existing_title,
+            'resource_link': existing_link,
+            'program_type': existing_program,
+            'tags': existing_tags or ''
+        }
+        return render_template('admin_edit_general_resource.html', resource=resource_data, resource_id=resource_id)
+    except Exception as e:
+        conn.rollback()
+        flash(f'Failed to update resource: {e}', 'error')
+        return redirect(url_for('general_resources_page'))
+    finally:
+        conn.close()
+
+@app.route('/admin/resources/move/<int:resource_id>/<string:direction>', methods=['POST'])
+def admin_move_general_resource(resource_id, direction):
+    if not session.get('admin_mode'):
+        return redirect(url_for('general_resources_page'))
+
+    if direction not in ['up', 'down']:
+        flash('Invalid move direction.', 'error')
+        return redirect(url_for('general_resources_page'))
+
+    conn = get_db_connection()
+    if not conn:
+        flash('Database connection failed', 'error')
+        return redirect(url_for('general_resources_page'))
+
+    try:
+        cur = conn.cursor()
+        cur.execute('SELECT program_type FROM general_resources WHERE id=%s', (resource_id,))
+        row = cur.fetchone()
+
+        if row is None:
+            flash('Resource not found.', 'error')
+            cur.close()
+            return redirect(url_for('general_resources_page'))
+
+        program_type = row[0]
+        cur.execute(
+            '''
+            SELECT id FROM general_resources
+            WHERE program_type=%s
+            ORDER BY sort_order, id
+            ''',
+            (program_type,)
+        )
+        items = [item[0] for item in cur.fetchall()]
+
+        if resource_id not in items:
+            flash('Resource not found.', 'error')
+            cur.close()
+            return redirect(url_for('general_resources_page'))
+
+        current_pos = items.index(resource_id)
+        if direction == 'up' and current_pos > 0:
+            new_pos = current_pos - 1
+        elif direction == 'down' and current_pos < len(items) - 1:
+            new_pos = current_pos + 1
+        else:
+            cur.close()
+            return redirect(url_for('general_resources_page'))
+
+        items[current_pos], items[new_pos] = items[new_pos], items[current_pos]
+        for idx, item_id in enumerate(items):
+            cur.execute('UPDATE general_resources SET sort_order=%s WHERE id=%s', (idx, item_id))
+
+        conn.commit()
+        cur.close()
+        backup_db()
+        return redirect(url_for('general_resources_page'))
+    except Exception as e:
+        conn.rollback()
+        flash(f'Failed to move resource: {e}', 'error')
+        return redirect(url_for('general_resources_page'))
+    finally:
+        conn.close()
 
 @app.route('/admin/resources/delete/<int:resource_id>', methods=['POST'])
 def admin_delete_general_resource(resource_id):

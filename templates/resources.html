@@ -7,353 +7,874 @@
     <link rel="icon" href="data:,">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-1: #0a0414;
-            --bg-2: #14092a;
-            --bg-3: #090312;
-            --panel: rgba(30, 16, 50, 0.82);
-            --panel-strong: rgba(40, 19, 66, 0.92);
-            --panel-soft: rgba(55, 27, 90, 0.5);
-            --text-main: #eef1ff;
-            --text-muted: #a99bc9;
-            --border-soft: rgba(192, 132, 252, 0.24);
-            --accent-1: #a855f7;
-            --accent-2: #22d3ee;
-            --accent-3: #f472b6;
-            --danger: #ef4444;
-            --danger-soft: #fecaca;
-        }
+/* ═══════════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════════ */
+:root {
+    --bg:          #f8fafc;
+    --surface:     #ffffff;
+    --surface-2:   #f1f5f9;
+    --surface-3:   #eef2ff;
+    --card:        #ffffff;
+    --hover:       #f1f5f9;
+    --border:      #e2e8f0;
+    --border-md:   #cbd5f5;
+    --text:        #0f172a;
+    --text-muted:  #475569;
+    --text-dim:    #94a3b8;
+    --accent:      #6366f1;
+    --accent-2:    #3b82f6;
+    --accent-soft: rgba(99,102,241,0.12);
+    --accent-weak: rgba(99,102,241,0.08);
+    --danger:      #ef4444;
+    --danger-soft: rgba(239,68,68,0.12);
+    --success:     #16a34a;
+    --success-soft: rgba(22,163,74,0.12);
+    --r-sm: 8px; --r: 12px; --r-lg: 18px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+}
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+/* ── LAYOUT ─────────────────────────────────── */
+.page { max-width: 1400px; margin: 0 auto; padding: 18px 20px 64px; width: min(96vw, 1400px); }
 
-        body {
-            font-family: 'Manrope', sans-serif;
-            background:
-                radial-gradient(circle at 12% 10%, rgba(168, 85, 247, 0.24), transparent 30rem),
-                radial-gradient(circle at 88% 14%, rgba(34, 211, 238, 0.16), transparent 26rem),
-                radial-gradient(circle at 72% 88%, rgba(244, 114, 182, 0.14), transparent 30rem),
-                linear-gradient(180deg, var(--bg-2) 0%, var(--bg-1) 48%, var(--bg-3) 100%);
-            color: var(--text-main);
-            min-height: 100vh;
-            position: relative;
-        }
+/* ── TOP NAV ─────────────────────────────────── */
+.top-nav {
+    display: flex; gap: 5px; flex-wrap: wrap;
+    padding: 6px 8px; border-radius: var(--r);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    backdrop-filter: blur(8px);
+    margin-bottom: 12px;
+    box-shadow: 0 8px 18px rgba(15,23,42,0.08);
+}
+.top-nav a {
+    text-decoration: none; color: var(--text-muted);
+    padding: 5px 10px; border-radius: 999px;
+    font-size: 0.8rem; font-weight: 600;
+    border: 1px solid transparent;
+    transition: color .16s, border-color .16s, background .16s;
+}
+.top-nav a:hover { color: var(--text); border-color: var(--border); background: var(--surface-2); }
 
-        body::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            background-image: radial-gradient(rgba(255, 255, 255, 0.16) 0.8px, transparent 1px);
-            background-size: 3px 3px;
-            opacity: 0.16;
-        }
+/* ── PAGE HEADER ─────────────────────────────── */
+.page-header {
+    display: flex; align-items: center;
+    justify-content: space-between; gap: 12px;
+    padding: 13px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    margin-bottom: 12px;
+    box-shadow: 0 12px 24px rgba(15,23,42,0.08);
+}
+.page-header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(1.6rem, 3vw, 2rem);
+    color: var(--text); letter-spacing: -0.01em; line-height: 1.2;
+}
+.page-header p { color: var(--text-muted); font-size: 0.78rem; margin-top: 2px; }
+.btn-add {
+    white-space: nowrap; background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #ffffff;
+    border: none; border-radius: var(--r-sm); padding: 7px 13px;
+    font-size: 0.78rem; font-weight: 700; font-family: 'Inter', sans-serif;
+    cursor: pointer; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 5px;
+    transition: opacity .16s, box-shadow .16s, transform .16s; flex-shrink: 0;
+}
+.btn-add:hover { opacity: .92; transform: translateY(-1px); box-shadow: 0 12px 22px rgba(59,130,246,0.25); }
 
-        .container {
-            max-width: 1140px;
-            margin: 0 auto;
-            padding: 30px 16px 44px;
-            position: relative;
-            z-index: 1;
-        }
+/* ── TABS ────────────────────────────────────── */
+.tab-strip {
+    display: flex; gap: 3px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 4px; margin-bottom: 0;
+    box-shadow: 0 10px 24px rgba(15,23,42,0.08);
+}
+.tab-btn {
+    flex: 1; background: transparent; border: none;
+    color: var(--text-muted); font-family: 'Inter', sans-serif;
+    font-size: 0.82rem; font-weight: 600; padding: 7px 10px;
+    border-radius: 6px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    transition: color .16s, background .16s;
+}
+.tab-btn.active {
+    background: var(--surface-3);
+    color: #1e1b4b;
+    box-shadow: inset 0 0 0 1px rgba(99,102,241,0.25);
+}
+.tab-btn:hover:not(.active) { color: var(--text); background: var(--surface-2); }
+.tab-badge {
+    font-size: 0.7rem; font-weight: 700;
+    padding: 1px 6px; border-radius: 999px;
+    background: var(--surface-2); color: var(--text-muted); border: 1px solid var(--border);
+}
+.tab-btn.active .tab-badge {
+    background: var(--accent-soft); color: var(--accent);
+    border-color: rgba(99,102,241,0.3);
+}
 
-        .top-nav {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 20px;
-        }
+/* ── STICKY FILTER ZONE ──────────────────────── */
+.filter-zone {
+    position: sticky; top: 0; z-index: 20;
+    background: var(--bg); padding: 8px 0 6px;
+}
+.filter-zone::before {
+    content: ''; position: absolute; top: -16px; left: 0; right: 0; height: 16px;
+    background: linear-gradient(to bottom, transparent, var(--bg)); pointer-events: none;
+}
+.filter-bar {
+    display: flex; gap: 10px; flex-wrap: wrap;
+    padding: 10px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--r-lg);
+    box-shadow: 0 12px 22px rgba(15,23,42,0.08); align-items: center;
+    justify-content: center;
+}
+.search-wrap {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r-sm); padding: 6px 10px;
+    flex: 1 1 520px; max-width: 640px;
+}
+.search-wrap svg { width: 15px; height: 15px; color: var(--text-dim); }
+.filter-input, .filter-select {
+    background: transparent; border: 1px solid var(--border-md);
+    color: var(--text); border-radius: var(--r-sm); padding: 5px 9px;
+    font-size: 0.8rem; font-family: 'Inter', sans-serif; outline: none;
+    transition: border-color .16s, box-shadow .16s; min-width: 0;
+}
+.filter-input { flex: 1 1 auto; border: none; padding: 0; }
+.filter-select { flex: 0 1 148px; background: var(--surface-2); }
+.filter-input::placeholder { color: var(--text-dim); }
+.filter-input:focus, .filter-select:focus {
+    border-color: rgba(99,102,241,0.5);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.search-wrap:focus-within {
+    border-color: rgba(99,102,241,0.5);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.filter-select option { background: var(--surface-2); }
+.result-pill {
+    font-size: 0.74rem; font-weight: 600; color: var(--text-muted);
+    padding: 3px 9px; background: var(--surface-2);
+    border: 1px solid var(--border); border-radius: 999px; white-space: nowrap; flex-shrink: 0;
+}
+.active-filter {
+    font-size: 0.74rem; font-weight: 600; color: var(--text-dim);
+    padding: 3px 10px; border-radius: 999px; border: 1px dashed var(--border);
+    background: var(--surface-2); white-space: nowrap;
+}
 
-        .top-nav a {
-            text-decoration: none;
-            color: #d9cef3;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid var(--border-soft);
-            border-radius: 999px;
-            padding: 9px 15px;
-            font-size: 0.88rem;
-            font-weight: 700;
-            letter-spacing: 0.01em;
-            transition: all 0.22s ease;
-        }
+/* ── TAB PANELS ──────────────────────────────── */
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
 
-        .top-nav a:hover {
-            color: #ffffff;
-            border-color: rgba(34, 211, 238, 0.75);
-            background: linear-gradient(90deg, rgba(40, 19, 66, 0.8), rgba(20, 54, 84, 0.5));
-            box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.18);
-        }
+/* ── RESOURCE ROWS ───────────────────────────── */
+.resource-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
 
-        .header {
-            margin: 8px 0 22px;
-            padding: 18px 18px 16px;
-            border-radius: 16px;
-            background: linear-gradient(120deg, rgba(42, 20, 70, 0.78), rgba(21, 63, 92, 0.4));
-            border: 1px solid rgba(139, 92, 246, 0.36);
-            box-shadow: 0 18px 32px rgba(6, 2, 13, 0.42);
-        }
+.resource-item {
+    display: grid;
+    /* [num] [reorder] [body] [views] [actions] */
+    grid-template-columns: 24px auto 1fr auto auto;
+    align-items: center; gap: 0 8px;
+    padding: 16px 18px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--r);
+    transition: transform .2s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
+    min-height: 64px;
+    box-shadow: 0 10px 20px rgba(15,23,42,0.08);
+}
+.resource-item:hover {
+    border-color: var(--border-md);
+    background: var(--hover);
+    transform: translateY(-3px);
+    box-shadow: 0 16px 28px rgba(15,23,42,0.12);
+}
 
-        .header h1 {
-            font-family: 'Sora', sans-serif;
-            font-size: clamp(1.8rem, 4.2vw, 2.6rem);
-            margin-bottom: 8px;
-            letter-spacing: -0.02em;
-            background: linear-gradient(90deg, #e9d5ff, #c4b5fd 42%, #67e8f9 78%, #f9a8d4 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
+.row-num {
+    font-size: 0.7rem; font-weight: 600; color: var(--text-dim);
+    text-align: center; font-variant-numeric: tabular-nums;
+    line-height: 1; user-select: none;
+}
+.reorder-col { display: flex; flex-direction: column; gap: 2px; }
+.reorder-col form { margin: 0; }
+.reorder-btn {
+    background: var(--surface-3); color: var(--text-dim);
+    border: 1px solid var(--border); width: 18px; height: 14px;
+    font-size: 7px; border-radius: 3px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; padding: 0;
+    transition: background .13s, color .13s;
+}
+.reorder-btn:hover { background: var(--accent-soft); color: var(--accent); border-color: rgba(79,70,229,0.3); }
+.no-reorder { display: inline-block; width: 18px; }
 
-        .header p {
-            color: var(--text-muted);
-            font-size: 0.96rem;
-        }
+.resource-body { min-width: 0; }
+.resource-title-row { display: flex; align-items: center; gap: 8px; }
+.resource-icon {
+    width: 26px; height: 26px; border-radius: 8px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--surface-3); border: 1px solid #c7d2fe;
+    color: var(--accent); flex-shrink: 0;
+}
+.resource-icon svg { width: 14px; height: 14px; }
+.badge-popular {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 0.7rem; font-weight: 600; color: #15803d;
+    padding: 2px 6px; border-radius: 999px;
+    background: #dcfce7; border: 1px solid #bbf7d0;
+}
+.badge-popular svg { width: 12px; height: 12px; }
+.resource-title {
+    font-weight: 600; font-size: 1.05rem; color: var(--text);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.35;
+}
+.tag-row { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 3px; }
+.tag-chip {
+    font-size: 0.7rem; font-weight: 600; color: var(--text-muted);
+    padding: 2px 7px; border-radius: 999px;
+    background: var(--surface-3); border: 1px solid #c7d2fe; white-space: nowrap;
+}
 
-        .admin-actions {
-            margin-bottom: 20px;
-        }
+.view-count {
+    font-size: 0.78rem; color: var(--text-muted); font-weight: 600;
+    white-space: nowrap; text-align: right; line-height: 1.2;
+}
+.view-count span { font-size: 0.63rem; display: block; text-transform: uppercase; letter-spacing: 0.05em; }
+.view-count .eye { display: inline-flex; align-items: center; gap: 4px; justify-content: flex-end; }
+.view-count .eye svg { width: 14px; height: 14px; color: var(--text-dim); }
 
-        .btn {
-            border: none;
-            background: linear-gradient(135deg, var(--accent-1), var(--accent-3) 52%, var(--accent-2));
-            color: #fff;
-            border-radius: 12px;
-            padding: 10px 16px;
-            text-decoration: none;
-            font-weight: 800;
-            cursor: pointer;
-            display: inline-block;
-            box-shadow: 0 10px 24px rgba(168, 85, 247, 0.32);
-            transition: transform 0.2s ease, box-shadow 0.22s ease;
-        }
+.actions-col { display: flex; align-items: center; gap: 3px; }
+.actions-col form { margin: 0; }
 
-        .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 14px 28px rgba(236, 72, 153, 0.34);
-        }
+.act {
+    display: inline-flex; align-items: center;
+    padding: 6px 10px; border-radius: 6px;
+    font-size: 0.78rem; font-weight: 600; font-family: 'Inter', sans-serif;
+    cursor: pointer; text-decoration: none; border: 1px solid transparent;
+    white-space: nowrap; transition: background .13s, border-color .13s, color .13s; line-height: 1.5;
+    gap: 6px;
+}
+.act svg { width: 14px; height: 14px; }
+.act-open    { color: #f8fafc;  background: linear-gradient(135deg, var(--accent), var(--accent-2));  border-color: transparent; }
+.act-open:hover  { filter: brightness(1.05); box-shadow: 0 10px 18px rgba(99,102,241,0.25); }
+.act-preview { color: var(--text);   background: var(--surface-2);    border-color: var(--border); }
+.act-preview:hover  { background: var(--surface-3); border-color: var(--border); }
+.act-edit    { color: var(--accent); background: transparent;  border-color: rgba(99,102,241,0.4); }
+.act-edit:hover  { background: var(--accent-weak); border-color: rgba(99,102,241,0.6); }
+.act-delete  { color: #fca5a5;       background: transparent;  border-color: rgba(239,68,68,0.35); }
+.act-delete:hover  { background: var(--danger-soft); border-color: rgba(239,68,68,0.6); }
 
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 18px;
-        }
+/* ── PAGINATION BAR ──────────────────────────── */
+.pagination {
+    display: flex; align-items: center;
+    justify-content: space-between; gap: 8px;
+    padding: 10px 12px; margin-top: 8px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r); flex-wrap: wrap;
+    box-shadow: 0 10px 20px rgba(15,23,42,0.08);
+}
+.page-controls { display: flex; align-items: center; gap: 3px; flex-wrap: wrap; }
+.pg-btn {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text-muted); font-family: 'Inter', sans-serif;
+    font-size: 0.76rem; font-weight: 600; padding: 4px 9px;
+    border-radius: 999px; cursor: pointer;
+    transition: background .14s, color .14s, border-color .14s;
+    min-width: 30px; text-align: center;
+}
+.pg-btn:hover:not(:disabled):not(.active) { background: var(--surface-2); color: var(--text); }
+.pg-btn.active { background: var(--surface-3); color: #1e1b4b; border-color: #c7d2fe; cursor: default; }
+.pg-btn:disabled { opacity: .32; cursor: not-allowed; }
+.pg-btn.arrow { font-size: 0.88rem; padding: 4px 8px; }
+.pg-ellipsis { color: var(--text-dim); font-size: 0.76rem; padding: 0 2px; user-select: none; }
 
-        .card {
-            background: linear-gradient(180deg, var(--panel-strong), var(--panel));
-            border: 1px solid var(--border-soft);
-            border-radius: 16px;
-            padding: 18px;
-            box-shadow: 0 14px 28px rgba(5, 2, 12, 0.46);
-            transition: transform 0.24s ease, border-color 0.24s ease, box-shadow 0.24s ease;
-        }
+.page-meta { display: flex; align-items: center; gap: 8px; }
+.page-info { font-size: 0.73rem; color: var(--text-muted); white-space: nowrap; }
+.perpage-select {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text-muted); font-family: 'Inter', sans-serif;
+    font-size: 0.73rem; padding: 3px 6px; border-radius: 5px; outline: none; cursor: pointer;
+}
+.perpage-select:focus { border-color: rgba(99,102,241,0.35); }
+.perpage-select option { background: var(--surface-2); }
 
-        .card:hover {
-            transform: translateY(-2px);
-            border-color: rgba(34, 211, 238, 0.34);
-            box-shadow: 0 18px 32px rgba(5, 2, 12, 0.54);
-        }
+/* ── EMPTY / NO-RESULTS ──────────────────────── */
+.empty-state {
+    text-align: center; padding: 32px 20px; color: var(--text-dim);
+    font-size: 0.82rem; border: 1px dashed var(--border);
+    border-radius: var(--r); background: var(--surface); margin-top: 4px;
+    box-shadow: 0 8px 18px rgba(15,23,42,0.06);
+}
+.empty-state svg { display: block; margin: 0 auto 8px; opacity: .28; }
+.no-results-msg {
+    display: none; text-align: center; padding: 28px; color: var(--text-muted);
+    font-size: 0.82rem; border: 1px dashed var(--border); border-radius: var(--r); margin-top: 4px;
+    box-shadow: 0 8px 18px rgba(15,23,42,0.06);
+}
 
-        .card h2 {
-            margin-bottom: 14px;
-            font-size: 1.14rem;
-            font-family: 'Sora', sans-serif;
-            color: #d6bcfa;
-            letter-spacing: 0.01em;
-        }
+/* ── PREVIEW MODAL ───────────────────────────── */
+.preview-modal {
+    position: fixed; inset: 0; background: rgba(15,23,42,0.45);
+    display: none; align-items: center; justify-content: center;
+    z-index: 1000; padding: 14px; backdrop-filter: blur(5px);
+}
+.preview-modal.active { display: flex; }
+.preview-panel {
+    width: min(960px, 96vw); height: min(84vh, 750px);
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--r-lg); display: flex; flex-direction: column;
+    box-shadow: 0 20px 60px rgba(15,23,42,0.25); overflow: hidden;
+}
+.preview-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px; border-bottom: 1px solid var(--border);
+    background: var(--surface-2); flex-shrink: 0; gap: 10px;
+}
+.preview-header-title {
+    font-size: 0.82rem; font-weight: 600; color: var(--text);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.preview-close {
+    background: var(--surface-2); border: 1px solid var(--border);
+    color: var(--text-muted); width: 24px; height: 24px; border-radius: 50%;
+    cursor: pointer; font-size: 0.72rem;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    transition: background .14s, color .14s;
+}
+.preview-close:hover { background: var(--danger-soft); color: #b91c1c; }
+.preview-frame { flex: 1; border: none; width: 100%; background: #ffffff; }
 
-        .resource-list {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
+/* ── MOBILE ──────────────────────────────────── */
+@media (max-width: 640px) {
+    .page { padding: 10px 9px 52px; }
+    .page-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .resource-item {
+        grid-template-columns: auto auto 1fr;
+        grid-template-rows: auto auto; gap: 5px 7px; padding: 9px;
+    }
+    .row-num { display: none; }
+    .view-count { display: none; }
+    .actions-col { grid-column: 3; grid-row: 2; flex-wrap: wrap; gap: 4px; }
+    .resource-body { grid-column: 3; grid-row: 1; }
+    .reorder-col { grid-column: 1; grid-row: 1 / 3; align-self: center; }
+    .search-wrap { flex: 1 1 100%; max-width: none; }
+    .filter-select { flex: 1 1 100%; }
+    .pagination { gap: 6px; }
+    .page-meta { width: 100%; justify-content: space-between; }
+}
 
-        .resource-item {
-            border: 1px solid rgba(192, 132, 252, 0.22);
-            border-radius: 12px;
-            padding: 12px;
-            background: linear-gradient(120deg, rgba(55, 27, 90, 0.5), rgba(19, 48, 77, 0.34));
-            transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
-        }
+@media (min-width: 1100px) {
+    .resource-list {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px 10px;
+    }
 
-        .resource-item:hover {
-            transform: translateY(-1px);
-            border-color: rgba(34, 211, 238, 0.44);
-            background: linear-gradient(120deg, rgba(65, 31, 106, 0.56), rgba(22, 59, 96, 0.4));
-        }
-
-        .resource-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .resource-title {
-            font-weight: 700;
-            color: #f5f3ff;
-            word-break: break-word;
-        }
-
-        .resource-actions {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-top: 8px;
-        }
-
-        .open-link {
-            color: #67e8f9;
-            text-decoration: none;
-            font-weight: 700;
-            padding: 6px 10px;
-            border-radius: 8px;
-            border: 1px solid rgba(103, 232, 249, 0.34);
-            background: rgba(16, 65, 91, 0.28);
-            transition: all 0.2s ease;
-        }
-
-        .open-link:hover {
-            text-decoration: none;
-            color: #ecfeff;
-            background: rgba(22, 98, 132, 0.36);
-            border-color: rgba(103, 232, 249, 0.62);
-        }
-
-        .count {
-            color: #b6a8d1;
-            font-size: 0.86rem;
-            font-weight: 600;
-        }
-
-        .delete-btn {
-            border: 1px solid var(--danger);
-            background: rgba(239, 68, 68, 0.08);
-            color: var(--danger-soft);
-            border-radius: 8px;
-            padding: 5px 10px;
-            cursor: pointer;
-            font-size: 0.83rem;
-            font-weight: 700;
-            transition: background 0.2s ease, transform 0.2s ease;
-        }
-
-        .delete-btn:hover {
-            background: rgba(239, 68, 68, 0.22);
-            transform: translateY(-1px);
-        }
-
-        .empty {
-            color: var(--text-muted);
-            font-size: 0.92rem;
-            padding: 6px 2px;
-        }
-
-        @media (max-width: 700px) {
-            .container {
-                padding: 18px 12px 30px;
-            }
-
-            .header {
-                padding: 14px 12px;
-            }
-
-            .top-nav a {
-                flex: 1 1 auto;
-                text-align: center;
-            }
-
-            .grid {
-                grid-template-columns: 1fr;
-            }
-
-            .resource-top {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-        }
+    .resource-item { min-height: 44px; }
+}
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="top-nav">
-            <a href="{{ url_for('course_view') }}">Dashboard</a>
-            <a href="{{ url_for('general_resources_page') }}">General Resources</a>
-            {% if admin_mode %}
-                <a href="{{ url_for('admin_add_general_resource') }}">Add Resource</a>
-            {% endif %}
-        </div>
+<div class="page">
 
-        <div class="header">
-            <h1>General Resources</h1>
-            <p>All shared learning resources separated by program type.</p>
-        </div>
+<!-- TOP NAV -->
+<nav class="top-nav">
+    <a href="{{ url_for('course_view') }}">Dashboard</a>
+    <a href="{{ url_for('general_resources_page') }}">General Resources</a>
+    {% if admin_mode %}
+        <a href="{{ url_for('admin_add_general_resource') }}">+ Add Resource</a>
+    {% endif %}
+</nav>
 
-        {% if admin_mode %}
-            <div class="admin-actions">
-                <a class="btn" href="{{ url_for('admin_add_general_resource') }}">+ Add New Resource</a>
-            </div>
-        {% endif %}
-
-        <div class="grid">
-            <div class="card">
-                <h2>Diploma</h2>
-                {% if diploma_resources %}
-                    <ul class="resource-list">
-                        {% for resource in diploma_resources %}
-                            <li class="resource-item">
-                                <div class="resource-top">
-                                    <div class="resource-title">{{ resource[1] }}</div>
-                                    <div class="count">Views: {{ resource[4] or 0 }}</div>
-                                </div>
-                                <div class="resource-actions">
-                                    <a class="open-link" href="{{ url_for('open_general_resource', resource_id=resource[0]) }}" target="_blank">Open Resource</a>
-                                    {% if admin_mode %}
-                                        <form method="post" action="{{ url_for('admin_delete_general_resource', resource_id=resource[0]) }}" onsubmit="return confirm('Delete this resource?');">
-                                            <button class="delete-btn" type="submit">Delete</button>
-                                        </form>
-                                    {% endif %}
-                                </div>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p class="empty">No diploma resources added yet.</p>
-                {% endif %}
-            </div>
-
-            <div class="card">
-                <h2>Degree</h2>
-                {% if degree_resources %}
-                    <ul class="resource-list">
-                        {% for resource in degree_resources %}
-                            <li class="resource-item">
-                                <div class="resource-top">
-                                    <div class="resource-title">{{ resource[1] }}</div>
-                                    <div class="count">Views: {{ resource[4] or 0 }}</div>
-                                </div>
-                                <div class="resource-actions">
-                                    <a class="open-link" href="{{ url_for('open_general_resource', resource_id=resource[0]) }}" target="_blank">Open Resource</a>
-                                    {% if admin_mode %}
-                                        <form method="post" action="{{ url_for('admin_delete_general_resource', resource_id=resource[0]) }}" onsubmit="return confirm('Delete this resource?');">
-                                            <button class="delete-btn" type="submit">Delete</button>
-                                        </form>
-                                    {% endif %}
-                                </div>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                {% else %}
-                    <p class="empty">No degree resources added yet.</p>
-                {% endif %}
-            </div>
-        </div>
+<!-- PAGE HEADER -->
+<header class="page-header">
+    <div>
+        <h1>General Resources</h1>
+        <p>Shared learning materials by program type</p>
     </div>
+    {% if admin_mode %}
+        <a class="btn-add" href="{{ url_for('admin_add_general_resource') }}">
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor">
+                <path d="M6.75 1.25a.75.75 0 0 0-1.5 0v4H1.25a.75.75 0 0 0 0 1.5h4v4a.75.75 0 0 0 1.5 0v-4h4a.75.75 0 0 0 0-1.5h-4v-4Z"/>
+            </svg>
+            Add Resource
+        </a>
+    {% endif %}
+</header>
+
+<!-- TABS -->
+<div class="tab-strip" role="tablist">
+        <button class="tab-btn" role="tab" aria-selected="false"
+            aria-controls="panel-diploma" id="tab-diploma"
+            onclick="switchTab('diploma')">
+        Diploma
+        <span class="tab-badge" id="badge-diploma">{{ diploma_resources | length if diploma_resources else 0 }}</span>
+    </button>
+        <button class="tab-btn active" role="tab" aria-selected="true"
+            aria-controls="panel-degree" id="tab-degree"
+            onclick="switchTab('degree')">
+        Degree
+        <span class="tab-badge" id="badge-degree">{{ degree_resources | length if degree_resources else 0 }}</span>
+    </button>
+</div>
+
+<!-- STICKY FILTER -->
+<div class="filter-zone">
+    <div class="filter-bar">
+        <div class="search-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="11" cy="11" r="7"></circle>
+                <path d="M21 21l-3.5-3.5"></path>
+            </svg>
+            <input class="filter-input" id="resourceSearch" type="text"
+                   placeholder="Search title or tag" autocomplete="off">
+        </div>
+        <select class="filter-select" id="tagFilter">
+            <option value="">All tags</option>
+            {% for tag in all_tags %}
+                <option value="{{ tag }}">{{ tag }}</option>
+            {% endfor %}
+        </select>
+        <span class="result-pill" id="resultCount">— items</span>
+        <span class="active-filter" id="activeFilters">All resources</span>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════
+     DIPLOMA PANEL
+══════════════════════════════════ -->
+<div class="tab-panel" id="panel-diploma" role="tabpanel" aria-labelledby="tab-diploma">
+    {% if diploma_resources %}
+        <ul class="resource-list" id="list-diploma">
+            {% for resource in diploma_resources %}{% set lv = resource[2] or '' %}
+            <li class="resource-item"
+                data-title="{{ resource[1] | lower }}"
+                data-tags="{{ resource[5] | default('') | lower }}"
+                data-program="diploma">
+                <span class="row-num"></span>
+                {% if admin_mode %}
+                <div class="reorder-col">
+                    <form method="post" action="{{ url_for('admin_move_general_resource', resource_id=resource[0], direction='up') }}">
+                        <button class="reorder-btn" type="submit" title="Move Up">▲</button>
+                    </form>
+                    <form method="post" action="{{ url_for('admin_move_general_resource', resource_id=resource[0], direction='down') }}">
+                        <button class="reorder-btn" type="submit" title="Move Down">▼</button>
+                    </form>
+                </div>
+                {% else %}<span class="no-reorder"></span>{% endif %}
+                <div class="resource-body">
+                    <div class="resource-title-row">
+                        <span class="resource-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z" />
+                                <path d="M14 3v6h6" />
+                            </svg>
+                        </span>
+                        <div class="resource-title" title="{{ resource[1] }}">{{ resource[1] }}</div>
+                        {% if resource[4] and resource[4] >= 50 %}
+                            <span class="badge-popular">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.6-4.9-2.6-4.9 2.6.9-5.6-4-3.9 5.5-.8z" />
+                                </svg>
+                                Popular
+                            </span>
+                        {% endif %}
+                    </div>
+                    {% if resource[5] %}<div class="tag-row">{% for tag in resource[5].split(',') %}{% if tag.strip() %}<span class="tag-chip">{{ tag.strip() }}</span>{% endif %}{% endfor %}</div>{% endif %}
+                </div>
+                <div class="view-count">
+                    <div class="eye">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1.5 12s4.5-7 10.5-7 10.5 7 10.5 7-4.5 7-10.5 7S1.5 12 1.5 12z" />
+                            <circle cx="12" cy="12" r="3.5" />
+                        </svg>
+                        <span>{{ resource[4] or 0 }}</span>
+                    </div>
+                    <span>views</span>
+                </div>
+                <div class="actions-col">
+                    <a class="act act-open" href="{{ url_for('open_general_resource', resource_id=resource[0]) }}" target="_blank">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 3h7v7" />
+                            <path d="M10 14L21 3" />
+                            <path d="M21 14v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6" />
+                        </svg>
+                        Open
+                    </a>
+                    {% if lv.startswith('/static/uploads/general_resources/') or lv.lower().endswith('.pdf') or lv.lower().endswith('.html') or lv.lower().endswith('.htm') %}
+                        <button class="act act-preview" type="button" data-link="{{ lv | e }}" data-title="{{ resource[1] | e }}" onclick="openPreviewFromButton(this)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1.5 12s4.5-7 10.5-7 10.5 7 10.5 7-4.5 7-10.5 7S1.5 12 1.5 12z" />
+                                <circle cx="12" cy="12" r="3.5" />
+                            </svg>
+                            Preview
+                        </button>
+                    {% endif %}
+                    {% if admin_mode %}
+                        <a class="act act-edit" href="{{ url_for('admin_edit_general_resource', resource_id=resource[0]) }}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 20h9" />
+                                <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
+                            </svg>
+                            Edit
+                        </a>
+                        <form method="post" action="{{ url_for('admin_delete_general_resource', resource_id=resource[0]) }}" onsubmit="return confirm('Delete this resource?');">
+                            <button class="act act-delete" type="submit">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 6h18" />
+                                    <path d="M8 6V4h8v2" />
+                                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                                    <path d="M10 11v6" />
+                                    <path d="M14 11v6" />
+                                </svg>
+                                Delete
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        <p class="no-results-msg" id="no-diploma">No resources match your search.</p>
+        <div class="pagination" id="pg-diploma" style="display:none"></div>
+    {% else %}
+        <div class="empty-state">
+            <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"/>
+            </svg>No diploma resources added yet.
+        </div>
+    {% endif %}
+</div>
+
+<!-- ══════════════════════════════════
+     DEGREE PANEL
+══════════════════════════════════ -->
+<div class="tab-panel active" id="panel-degree" role="tabpanel" aria-labelledby="tab-degree">
+    {% if degree_resources %}
+        <ul class="resource-list" id="list-degree">
+            {% for resource in degree_resources %}{% set lv = resource[2] or '' %}
+            <li class="resource-item"
+                data-title="{{ resource[1] | lower }}"
+                data-tags="{{ resource[5] | default('') | lower }}"
+                data-program="degree">
+                <span class="row-num"></span>
+                {% if admin_mode %}
+                <div class="reorder-col">
+                    <form method="post" action="{{ url_for('admin_move_general_resource', resource_id=resource[0], direction='up') }}">
+                        <button class="reorder-btn" type="submit" title="Move Up">▲</button>
+                    </form>
+                    <form method="post" action="{{ url_for('admin_move_general_resource', resource_id=resource[0], direction='down') }}">
+                        <button class="reorder-btn" type="submit" title="Move Down">▼</button>
+                    </form>
+                </div>
+                {% else %}<span class="no-reorder"></span>{% endif %}
+                <div class="resource-body">
+                    <div class="resource-title-row">
+                        <span class="resource-icon" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z" />
+                                <path d="M14 3v6h6" />
+                            </svg>
+                        </span>
+                        <div class="resource-title" title="{{ resource[1] }}">{{ resource[1] }}</div>
+                        {% if resource[4] and resource[4] >= 50 %}
+                            <span class="badge-popular">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.6-4.9-2.6-4.9 2.6.9-5.6-4-3.9 5.5-.8z" />
+                                </svg>
+                                Popular
+                            </span>
+                        {% endif %}
+                    </div>
+                    {% if resource[5] %}<div class="tag-row">{% for tag in resource[5].split(',') %}{% if tag.strip() %}<span class="tag-chip">{{ tag.strip() }}</span>{% endif %}{% endfor %}</div>{% endif %}
+                </div>
+                <div class="view-count">
+                    <div class="eye">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1.5 12s4.5-7 10.5-7 10.5 7 10.5 7-4.5 7-10.5 7S1.5 12 1.5 12z" />
+                            <circle cx="12" cy="12" r="3.5" />
+                        </svg>
+                        <span>{{ resource[4] or 0 }}</span>
+                    </div>
+                    <span>views</span>
+                </div>
+                <div class="actions-col">
+                    <a class="act act-open" href="{{ url_for('open_general_resource', resource_id=resource[0]) }}" target="_blank">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 3h7v7" />
+                            <path d="M10 14L21 3" />
+                            <path d="M21 14v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6" />
+                        </svg>
+                        Open
+                    </a>
+                    {% if lv.startswith('/static/uploads/general_resources/') or lv.lower().endswith('.pdf') or lv.lower().endswith('.html') or lv.lower().endswith('.htm') %}
+                        <button class="act act-preview" type="button" data-link="{{ lv | e }}" data-title="{{ resource[1] | e }}" onclick="openPreviewFromButton(this)">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1.5 12s4.5-7 10.5-7 10.5 7 10.5 7-4.5 7-10.5 7S1.5 12 1.5 12z" />
+                                <circle cx="12" cy="12" r="3.5" />
+                            </svg>
+                            Preview
+                        </button>
+                    {% endif %}
+                    {% if admin_mode %}
+                        <a class="act act-edit" href="{{ url_for('admin_edit_general_resource', resource_id=resource[0]) }}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 20h9" />
+                                <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
+                            </svg>
+                            Edit
+                        </a>
+                        <form method="post" action="{{ url_for('admin_delete_general_resource', resource_id=resource[0]) }}" onsubmit="return confirm('Delete this resource?');">
+                            <button class="act act-delete" type="submit">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M3 6h18" />
+                                    <path d="M8 6V4h8v2" />
+                                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                                    <path d="M10 11v6" />
+                                    <path d="M14 11v6" />
+                                </svg>
+                                Delete
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        <p class="no-results-msg" id="no-degree">No resources match your search.</p>
+        <div class="pagination" id="pg-degree" style="display:none"></div>
+    {% else %}
+        <div class="empty-state">
+            <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z"/>
+            </svg>No degree resources added yet.
+        </div>
+    {% endif %}
+</div>
+
+</div><!-- /page -->
+
+<!-- PREVIEW MODAL -->
+<div class="preview-modal" id="previewModal" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="preview-panel">
+        <div class="preview-header">
+            <span class="preview-header-title" id="previewTitle">Preview</span>
+            <button class="preview-close" type="button" onclick="closePreview()" title="Close (Esc)">✕</button>
+        </div>
+        <iframe class="preview-frame" id="previewFrame" title="Resource preview"></iframe>
+    </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════
+   PAGINATION ENGINE
+   Per-panel state: { page, perPage, filtered[] }
+════════════════════════════════════════════════ */
+const DEFAULT_PER = 20;
+const state = {
+    diploma: { page: 1, perPage: DEFAULT_PER, filtered: [] },
+    degree:  { page: 1, perPage: DEFAULT_PER, filtered: [] }
+};
+
+function allItems(id) {
+    const l = document.getElementById('list-' + id);
+    return l ? Array.from(l.querySelectorAll('.resource-item')) : [];
+}
+
+function getFiltered(id, query, tag) {
+    return allItems(id).filter(item => {
+        const title = item.getAttribute('data-title') || '';
+        const tags  = item.getAttribute('data-tags')  || '';
+        const mQ = !query || title.includes(query) || tags.includes(query);
+        const mT = !tag   || tags.split(',').map(v => v.trim()).includes(tag);
+        return mQ && mT;
+    });
+}
+
+function renderPage(id) {
+    const s     = state[id];
+    const all   = allItems(id);
+    const filt  = s.filtered;
+    const start = (s.page - 1) * s.perPage;
+    const end   = start + s.perPage;
+    const pageSet = new Set(filt.slice(start, end));
+
+    const visible = filt.slice(start, end);
+    const isTwoCol = window.matchMedia('(min-width: 1100px)').matches;
+
+    let idx = 0;
+    all.forEach(item => {
+        const show = pageSet.has(item);
+        item.style.display = show ? '' : 'none';
+        if (show) {
+            const el = item.querySelector('.row-num');
+            if (el) {
+                const number = isTwoCol ? Math.floor(idx / 2) + 1 : idx + 1;
+                el.textContent = number;
+            }
+            idx += 1;
+        }
+    });
+    renderPagination(id);
+    updateResultCount();
+}
+
+function renderPagination(id) {
+    const s     = state[id];
+    const total = s.filtered.length;
+    const pages = Math.ceil(total / s.perPage) || 1;
+    const bar   = document.getElementById('pg-' + id);
+    if (!bar) return;
+
+    if (total <= s.perPage) { bar.style.display = 'none'; return; }
+    bar.style.display = 'flex';
+
+    const cur   = s.page;
+    const start = (cur - 1) * s.perPage + 1;
+    const end   = Math.min(cur * s.perPage, total);
+
+    /* page number buttons with ellipsis */
+    let nums = '', prev = null;
+    for (let p = 1; p <= pages; p++) {
+        const show = p === 1 || p === pages || (p >= cur - 1 && p <= cur + 1);
+        if (!show) continue;
+        if (prev !== null && p - prev > 1) nums += '<span class="pg-ellipsis">…</span>';
+        nums += `<button class="pg-btn${p === cur ? ' active' : ''}"
+                    onclick="goPage('${id}',${p})"
+                    ${p === cur ? 'aria-current="page"' : ''}>${p}</button>`;
+        prev = p;
+    }
+
+    bar.innerHTML = `
+        <div class="page-controls">
+            <button class="pg-btn arrow" onclick="goPage('${id}',${cur-1})" ${cur===1?'disabled':''}>‹</button>
+            ${nums}
+            <button class="pg-btn arrow" onclick="goPage('${id}',${cur+1})" ${cur===pages?'disabled':''}>›</button>
+        </div>
+        <div class="page-meta">
+            <span class="page-info">${start}–${end} of ${total}</span>
+            <select class="perpage-select" title="Per page" onchange="changePerPage('${id}',this.value)">
+                ${[10,20,30,40,50].map(n=>`<option value="${n}"${n===s.perPage?' selected':''}>${n}/page</option>`).join('')}
+            </select>
+        </div>`;
+}
+
+function goPage(id, p) {
+    const s = state[id];
+    s.page = Math.max(1, Math.min(p, Math.ceil(s.filtered.length / s.perPage) || 1));
+    renderPage(id);
+    const panel = document.getElementById('panel-' + id);
+    if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function changePerPage(id, val) {
+    state[id].perPage = parseInt(val, 10);
+    state[id].page = 1;
+    renderPage(id);
+}
+
+/* ════════════════════════════════════════════════
+   FILTERS
+════════════════════════════════════════════════ */
+const searchInput = document.getElementById('resourceSearch');
+const tagFilter   = document.getElementById('tagFilter');
+const resultCount = document.getElementById('resultCount');
+const activeFilters = document.getElementById('activeFilters');
+
+function applyFilters() {
+    const q = (searchInput.value || '').trim().toLowerCase();
+    const t = (tagFilter.value  || '').trim().toLowerCase();
+    ['diploma','degree'].forEach(id => {
+        state[id].filtered = getFiltered(id, q, t);
+        state[id].page = 1;
+        const noMsg = document.getElementById('no-' + id);
+        if (noMsg) noMsg.style.display = (allItems(id).length > 0 && state[id].filtered.length === 0) ? 'block' : 'none';
+        renderPage(id);
+    });
+    updateActiveFilters();
+}
+
+function updateResultCount() {
+    const active = document.querySelector('.tab-panel.active');
+    if (!active) return;
+    const id = active.id.replace('panel-', '');
+    const n  = state[id].filtered.length;
+    resultCount.textContent = n + ' item' + (n === 1 ? '' : 's');
+}
+
+function updateActiveFilters() {
+    const q = (searchInput.value || '').trim();
+    const t = (tagFilter.value  || '').trim();
+    const parts = [];
+    if (q) parts.push('Search: ' + q);
+    if (t) parts.push('Tag: ' + t);
+    activeFilters.textContent = parts.length ? parts.join(' | ') : 'All resources';
+}
+
+searchInput.addEventListener('input', applyFilters);
+tagFilter.addEventListener('change', applyFilters);
+
+/* ════════════════════════════════════════════════
+   TAB SWITCHING
+════════════════════════════════════════════════ */
+function switchTab(name) {
+    document.querySelectorAll('.tab-btn').forEach(b => {
+        const on = b.id === 'tab-' + name;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-selected', on);
+    });
+    document.querySelectorAll('.tab-panel').forEach(p =>
+        p.classList.toggle('active', p.id === 'panel-' + name));
+    updateResultCount();
+}
+
+/* INIT */
+applyFilters();
+switchTab('degree');
+
+/* ════════════════════════════════════════════════
+   PREVIEW MODAL
+════════════════════════════════════════════════ */
+const previewModal = document.getElementById('previewModal');
+const previewFrame = document.getElementById('previewFrame');
+const previewTitle = document.getElementById('previewTitle');
+
+function openPreview(link, title) {
+    if (!link) return;
+    previewTitle.textContent = title || 'Preview';
+    previewFrame.src = link;
+    previewModal.classList.add('active');
+    previewModal.setAttribute('aria-hidden', 'false');
+}
+function openPreviewFromButton(btn) {
+    if (!btn) return;
+    openPreview(btn.dataset.link || '', btn.dataset.title || 'Preview');
+}
+function closePreview() {
+    previewModal.classList.remove('active');
+    previewModal.setAttribute('aria-hidden', 'true');
+    previewFrame.src = '';
+}
+previewModal.addEventListener('click', e => { if (e.target === previewModal) closePreview(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePreview(); });
+
+window.addEventListener('resize', () => {
+    renderPage('diploma');
+    renderPage('degree');
+});
+</script>
 </body>
 </html>
