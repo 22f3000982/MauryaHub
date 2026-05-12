@@ -5,12 +5,15 @@ import sqlite3
 import os
 import socket
 import subprocess
+import uuid
+import mimetypes
 from werkzeug.utils import secure_filename
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 from urllib.parse import urlparse
+import requests
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -21,8 +24,99 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 RESOURCE_ALLOWED_EXTENSIONS = {'pdf', 'html', 'htm'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+# Supabase Storage configuration
+SUPABASE_URL = os.environ.get('SUPABASE_URL', '').strip().rstrip('/')
+SUPABASE_SERVICE_KEY = os.environ.get('SUPABASE_SERVICE_KEY', '').strip()
+SUPABASE_STORAGE_BUCKET = os.environ.get('SUPABASE_STORAGE_BUCKET', 'resources').strip()
+
 # Create upload folder if it doesn't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+def get_supabase_public_base():
+    if not SUPABASE_URL or not SUPABASE_STORAGE_BUCKET:
+        return ''
+    return f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_STORAGE_BUCKET}"
+
+def upload_resource_to_supabase(file_storage, folder='general_resources'):
+    if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
+        raise RuntimeError('Supabase Storage is not configured')
+
+    safe_name = secure_filename(file_storage.filename)
+    stamp = int(datetime.utcnow().timestamp())
+    unique = uuid.uuid4().hex
+    object_name = f"{folder}/{unique}_{stamp}_{safe_name}"
+    upload_url = f"{SUPABASE_URL}/storage/v1/object/{SUPABASE_STORAGE_BUCKET}/{object_name}"
+
+    file_storage.stream.seek(0)
+    content_type = file_storage.mimetype or 'application/octet-stream'
+
+    response = requests.post(
+        upload_url,
+        headers={
+            'Authorization': f"Bearer {SUPABASE_SERVICE_KEY}",
+            'Content-Type': content_type,
+            'x-upsert': 'true'
+        },
+        data=file_storage.stream.read()
+    )
+
+    if response.status_code not in (200, 201):
+        raise RuntimeError(f"Supabase upload failed: {response.status_code} {response.text}")
+
+    public_base = get_supabase_public_base()
+    return f"{public_base}/{object_name}"
+
+def extract_supabase_object_path(resource_link):
+    public_base = get_supabase_public_base()
+    if not public_base:
+        return None
+    if not resource_link or not resource_link.startswith(public_base + '/'):
+        return None
+    return resource_link.replace(public_base + '/', '', 1)
+
+def delete_supabase_object(resource_link):
+    object_path = extract_supabase_object_path(resource_link)
+    if not object_path:
+        return
+    if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
+        return
+
+    delete_url = f"{SUPABASE_URL}/storage/v1/object/{SUPABASE_STORAGE_BUCKET}/{object_path}"
+    response = requests.delete(
+        delete_url,
+        headers={
+            'Authorization': f"Bearer {SUPABASE_SERVICE_KEY}",
+            'x-upsert': 'true'
+        }
+    )
+
+    if response.status_code not in (200, 204):
+        print(f"Warning: failed to delete Supabase object {object_path}: {response.status_code}")
+
+def upload_file_path_to_supabase(file_path, object_name):
+    if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
+        raise RuntimeError('Supabase Storage is not configured')
+
+    content_type, _ = mimetypes.guess_type(file_path)
+    content_type = content_type or 'application/octet-stream'
+    upload_url = f"{SUPABASE_URL}/storage/v1/object/{SUPABASE_STORAGE_BUCKET}/{object_name}"
+
+    with open(file_path, 'rb') as handle:
+        response = requests.post(
+            upload_url,
+            headers={
+                'Authorization': f"Bearer {SUPABASE_SERVICE_KEY}",
+                'Content-Type': content_type,
+                'x-upsert': 'true'
+            },
+            data=handle.read()
+        )
+
+    if response.status_code not in (200, 201):
+        raise RuntimeError(f"Supabase upload failed: {response.status_code} {response.text}")
+
+    public_base = get_supabase_public_base()
+    return f"{public_base}/{object_name}"
 
 # Database configuration
 DATABASE_URL = os.environ.get('DATABASE_URL')
@@ -102,6 +196,60 @@ def get_db_connection():
         print(f"Database connection error: {e}")
         print(f"Connection details - Host: {host if 'host' in locals() else 'unknown'}, Port: {port if 'port' in locals() else 'unknown'}")
         return None
+
+def migrate_local_general_resources_to_supabase():
+    if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
+        print('Supabase Storage not configured, skipping migration')
+        return
+
+    local_dir = os.path.join(os.path.dirname(__file__), 'static', 'uploads', 'general_resources')
+    if not os.path.isdir(local_dir):
+        print('No local general_resources folder found, skipping migration')
+        return
+
+    conn = get_db_connection()
+    if not conn:
+        print('Database connection failed, skipping migration')
+        return
+
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT id, resource_link FROM general_resources WHERE resource_link LIKE %s",
+            ('/static/uploads/general_resources/%',)
+        )
+        rows = cur.fetchall()
+
+        migrated = 0
+        for resource_id, resource_link in rows:
+            if not resource_link:
+                continue
+            file_name = resource_link.replace('/static/uploads/general_resources/', '', 1)
+            local_path = os.path.join(local_dir, file_name)
+            if not os.path.exists(local_path):
+                continue
+
+            object_name = f"general_resources/legacy_{resource_id}_{file_name}"
+            try:
+                public_url = upload_file_path_to_supabase(local_path, object_name)
+            except Exception as exc:
+                print(f"Migration failed for {file_name}: {exc}")
+                continue
+
+            cur.execute(
+                'UPDATE general_resources SET resource_link=%s WHERE id=%s',
+                (public_url, resource_id)
+            )
+            migrated += 1
+
+        if migrated:
+            conn.commit()
+            print(f"Migrated {migrated} general_resources files to Supabase")
+    except Exception as exc:
+        conn.rollback()
+        print(f"Migration error: {exc}")
+    finally:
+        conn.close()
 
 # ============================================================================
 # HYBRID DATABASE FUNCTIONS - Ultra-Fast SQLite for Users, Supabase for Admin
@@ -903,12 +1051,11 @@ def admin_add_general_resource():
                 flash('Only PDF or HTML uploads are allowed.', 'error')
                 return redirect(url_for('admin_add_general_resource'))
 
-            safe_name = secure_filename(pdf_file.filename)
-            stored_name = f"{program_type}_{int(datetime.utcnow().timestamp())}_{safe_name}"
-            resources_dir = os.path.join(app.config['UPLOAD_FOLDER'], 'general_resources')
-            os.makedirs(resources_dir, exist_ok=True)
-            pdf_file.save(os.path.join(resources_dir, stored_name))
-            final_link = url_for('static', filename=f'uploads/general_resources/{stored_name}')
+            try:
+                final_link = upload_resource_to_supabase(pdf_file, folder='general_resources')
+            except Exception as exc:
+                flash(f'Failed to upload file: {exc}', 'error')
+                return redirect(url_for('admin_add_general_resource'))
         elif resource_link:
             if resource_link.startswith('/'):
                 final_link = resource_link
@@ -1006,12 +1153,11 @@ def admin_edit_general_resource(resource_id):
                     flash('Only PDF or HTML uploads are allowed.', 'error')
                     return redirect(url_for('admin_edit_general_resource', resource_id=resource_id))
 
-                safe_name = secure_filename(pdf_file.filename)
-                stored_name = f"{program_type}_{int(datetime.utcnow().timestamp())}_{safe_name}"
-                resources_dir = os.path.join(app.config['UPLOAD_FOLDER'], 'general_resources')
-                os.makedirs(resources_dir, exist_ok=True)
-                pdf_file.save(os.path.join(resources_dir, stored_name))
-                final_link = url_for('static', filename=f'uploads/general_resources/{stored_name}')
+                try:
+                    final_link = upload_resource_to_supabase(pdf_file, folder='general_resources')
+                except Exception as exc:
+                    flash(f'Failed to upload file: {exc}', 'error')
+                    return redirect(url_for('admin_edit_general_resource', resource_id=resource_id))
             elif resource_link:
                 if resource_link.startswith('/'):
                     final_link = resource_link
@@ -1067,6 +1213,8 @@ def admin_edit_general_resource(resource_id):
                 file_path = os.path.join(os.path.dirname(__file__), 'static', 'uploads', 'general_resources', file_name)
                 if os.path.exists(file_path):
                     os.remove(file_path)
+            if existing_link and existing_link != final_link:
+                delete_supabase_object(existing_link)
 
             backup_db()
             flash('General resource updated successfully!', 'success')
@@ -1182,6 +1330,8 @@ def admin_delete_general_resource(resource_id):
             file_path = os.path.join(os.path.dirname(__file__), 'static', 'uploads', 'general_resources', file_name)
             if os.path.exists(file_path):
                 os.remove(file_path)
+        if resource_link:
+            delete_supabase_object(resource_link)
 
         backup_db()
         flash('Resource deleted successfully.', 'success')
@@ -2129,6 +2279,9 @@ def internal_server_error(error):
 if __name__ == '__main__':
     # Initialize database
     init_db()
+
+    if os.environ.get('AUTO_MIGRATE_GENERAL_RESOURCES', '').strip().lower() in ('1', 'true', 'yes'):
+        migrate_local_general_resources_to_supabase()
     
     # Run the app
     port = int(os.environ.get('PORT', 5000))
@@ -2138,3 +2291,6 @@ if __name__ == '__main__':
 else:
     # For production (gunicorn)
     init_db()
+
+    if os.environ.get('AUTO_MIGRATE_GENERAL_RESOURCES', '').strip().lower() in ('1', 'true', 'yes'):
+        migrate_local_general_resources_to_supabase()
