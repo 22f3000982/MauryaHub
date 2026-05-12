@@ -37,6 +37,14 @@ def get_supabase_public_base():
         return ''
     return f"{SUPABASE_URL}/storage/v1/object/public/{SUPABASE_STORAGE_BUCKET}"
 
+def get_resource_content_type(filename, fallback):
+    ext = os.path.splitext(filename)[1].lower()
+    if ext in ('.html', '.htm'):
+        return 'text/html; charset=utf-8'
+    if ext == '.pdf':
+        return 'application/pdf'
+    return fallback
+
 def upload_resource_to_supabase(file_storage, folder='general_resources'):
     if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
         raise RuntimeError('Supabase Storage is not configured')
@@ -48,7 +56,10 @@ def upload_resource_to_supabase(file_storage, folder='general_resources'):
     upload_url = f"{SUPABASE_URL}/storage/v1/object/{SUPABASE_STORAGE_BUCKET}/{object_name}"
 
     file_storage.stream.seek(0)
-    content_type = file_storage.mimetype or 'application/octet-stream'
+    content_type = get_resource_content_type(
+        safe_name,
+        file_storage.mimetype or 'application/octet-stream'
+    )
 
     response = requests.post(
         upload_url,
@@ -97,8 +108,9 @@ def upload_file_path_to_supabase(file_path, object_name):
     if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
         raise RuntimeError('Supabase Storage is not configured')
 
-    content_type, _ = mimetypes.guess_type(file_path)
-    content_type = content_type or 'application/octet-stream'
+    guessed_type, _ = mimetypes.guess_type(file_path)
+    fallback_type = guessed_type or 'application/octet-stream'
+    content_type = get_resource_content_type(os.path.basename(file_path), fallback_type)
     upload_url = f"{SUPABASE_URL}/storage/v1/object/{SUPABASE_STORAGE_BUCKET}/{object_name}"
 
     with open(file_path, 'rb') as handle:
