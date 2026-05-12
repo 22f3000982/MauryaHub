@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory, Response
 import psycopg2
 import psycopg2.extras
 import sqlite3
@@ -1386,7 +1386,22 @@ def open_general_resource(resource_id):
         if link.startswith('/'):
             return redirect(link)
 
-        return redirect(ensure_url_scheme(link))
+        normalized_link = ensure_url_scheme(link)
+        link_lower = normalized_link.lower()
+        if link_lower.endswith('.html') or link_lower.endswith('.htm'):
+            try:
+                resp = requests.get(normalized_link, timeout=10)
+                if resp.status_code == 200:
+                    return Response(
+                        resp.content,
+                        status=200,
+                        content_type='text/html; charset=utf-8',
+                        headers={'Content-Disposition': 'inline'}
+                    )
+            except Exception as exc:
+                print(f"Error fetching HTML resource: {exc}")
+
+        return redirect(normalized_link)
     except Exception:
         return "Resource link not found"
     finally:
