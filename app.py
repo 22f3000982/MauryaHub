@@ -45,6 +45,10 @@ def get_resource_content_type(filename, fallback):
         return 'application/pdf'
     return fallback
 
+def get_resource_content_disposition(filename):
+    safe_name = secure_filename(filename)
+    return f'inline; filename="{safe_name}"'
+
 def upload_resource_to_supabase(file_storage, folder='general_resources'):
     if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
         raise RuntimeError('Supabase Storage is not configured')
@@ -66,6 +70,7 @@ def upload_resource_to_supabase(file_storage, folder='general_resources'):
         headers={
             'Authorization': f"Bearer {SUPABASE_SERVICE_KEY}",
             'Content-Type': content_type,
+            'Content-Disposition': get_resource_content_disposition(safe_name),
             'x-upsert': 'true'
         },
         data=file_storage.stream.read()
@@ -119,6 +124,7 @@ def upload_file_path_to_supabase(file_path, object_name):
             headers={
                 'Authorization': f"Bearer {SUPABASE_SERVICE_KEY}",
                 'Content-Type': content_type,
+                'Content-Disposition': get_resource_content_disposition(os.path.basename(file_path)),
                 'x-upsert': 'true'
             },
             data=handle.read()
