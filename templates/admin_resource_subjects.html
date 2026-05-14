@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Resource Subjects</title>
+    <link rel="icon" href="data:,">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: 'Space Grotesk', sans-serif;
+            background:
+                radial-gradient(circle at 8% 10%, rgba(56, 189, 248, 0.16), transparent 36rem),
+                radial-gradient(circle at 90% 18%, rgba(96, 165, 250, 0.16), transparent 32rem),
+                radial-gradient(circle at 70% 86%, rgba(34, 211, 238, 0.12), transparent 36rem),
+                linear-gradient(180deg, #0f172a 0%, #0b1020 52%, #111827 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .panel {
+            width: 100%;
+            max-width: 900px;
+            background: linear-gradient(180deg, rgba(26, 36, 58, 0.92), rgba(20, 28, 46, 0.72));
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: 0 18px 40px rgba(2, 6, 23, 0.5);
+            backdrop-filter: blur(12px);
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            font-family: 'IBM Plex Serif', serif;
+            font-size: 1.8rem;
+            color: #e2e8f0;
+        }
+
+        p {
+            margin: 0 0 18px;
+            color: #9aa4b2;
+            font-size: 0.92rem;
+        }
+
+        form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #cbd5e1;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px 11px;
+            border-radius: 10px;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            background: rgba(15, 23, 42, 0.65);
+            color: #f8fafc;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: rgba(56, 189, 248, 0.6);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
+        }
+
+        .btn {
+            border: none;
+            border-radius: 10px;
+            padding: 10px 16px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #38bdf8, #60a5fa);
+            color: #0b1020;
+            box-shadow: 0 10px 20px rgba(56, 189, 248, 0.28);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: #e2e8f0;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 14px;
+        }
+
+        .card {
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 14px;
+            padding: 14px;
+            background: rgba(15, 23, 42, 0.5);
+        }
+
+        .card h3 {
+            margin: 0 0 10px;
+            font-size: 1rem;
+            color: #e2e8f0;
+        }
+
+        .subject-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .subject-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 8px 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            background: rgba(15, 23, 42, 0.6);
+        }
+
+        .subject-name {
+            font-weight: 600;
+            font-size: 0.92rem;
+        }
+
+        .delete-btn {
+            border: 1px solid rgba(248, 113, 113, 0.5);
+            background: rgba(248, 113, 113, 0.1);
+            color: #fecaca;
+            padding: 4px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.78rem;
+        }
+
+        .footer-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="panel">
+        <h1>Manage Resource Subjects</h1>
+        <p>Create subjects and organize resources inside them.</p>
+
+        <form method="post">
+            <div>
+                <label for="subject_name">Subject Name</label>
+                <input id="subject_name" name="subject_name" type="text" required>
+            </div>
+            <div>
+                <label for="program_type">Program Type</label>
+                <select id="program_type" name="program_type" required>
+                    <option value="">Select Type</option>
+                    <option value="diploma">Diploma</option>
+                    <option value="degree">Degree</option>
+                </select>
+            </div>
+            <div style="display:flex; align-items:flex-end;">
+                <button class="btn btn-primary" type="submit">Add Subject</button>
+            </div>
+        </form>
+
+        <div class="grid">
+            <div class="card">
+                <h3>Diploma Subjects</h3>
+                <div class="subject-list">
+                    {% if subjects_by_program.diploma %}
+                        {% for subject in subjects_by_program.diploma %}
+                            <div class="subject-row">
+                                <span class="subject-name">{{ subject.name }}</span>
+                                <form method="post" action="{{ url_for('admin_delete_resource_subject', subject_id=subject.id) }}" onsubmit="return confirm('Delete this subject?');">
+                                    <button class="delete-btn" type="submit">Delete</button>
+                                </form>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="subject-row">No subjects yet.</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card">
+                <h3>Degree Subjects</h3>
+                <div class="subject-list">
+                    {% if subjects_by_program.degree %}
+                        {% for subject in subjects_by_program.degree %}
+                            <div class="subject-row">
+                                <span class="subject-name">{{ subject.name }}</span>
+                                <form method="post" action="{{ url_for('admin_delete_resource_subject', subject_id=subject.id) }}" onsubmit="return confirm('Delete this subject?');">
+                                    <button class="delete-btn" type="submit">Delete</button>
+                                </form>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="subject-row">No subjects yet.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-actions">
+            <a class="btn btn-secondary" href="{{ url_for('general_resources_page') }}">Back to Resources</a>
+        </div>
+    </div>
+</body>
+</html>

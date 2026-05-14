@@ -115,6 +115,37 @@ def init_db():
         ''')
         print("✓ Created resources table")
 
+        # Create 'general_resource_subjects' table
+        cur.execute('''
+            CREATE TABLE IF NOT EXISTS general_resource_subjects (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                program_type TEXT NOT NULL,
+                sort_order INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        print("✓ Created general_resource_subjects table")
+
+        # Create 'general_resources' table
+        cur.execute('''
+            CREATE TABLE IF NOT EXISTS general_resources (
+                id SERIAL PRIMARY KEY,
+                title TEXT NOT NULL,
+                resource_link TEXT NOT NULL,
+                program_type TEXT NOT NULL,
+                subject_id INTEGER,
+                tags TEXT,
+                watch_count INTEGER DEFAULT 0,
+                sort_order INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        print("✓ Created general_resources table")
+
+        cur.execute('ALTER TABLE general_resources ADD COLUMN IF NOT EXISTS tags TEXT')
+        cur.execute('ALTER TABLE general_resources ADD COLUMN IF NOT EXISTS subject_id INTEGER')
+
         # Create 'feedback' table for landing page testimonials
         cur.execute('''
             CREATE TABLE IF NOT EXISTS feedback (

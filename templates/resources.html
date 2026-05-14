@@ -45,7 +45,7 @@ body {
 }
 
 /* ── LAYOUT ─────────────────────────────────── */
-.page { max-width: 1400px; margin: 0 auto; padding: 6px 8px 30px; width: min(96vw, 1400px); }
+.page { max-width: 1600px; margin: 0 auto; padding: 6px 12px 30px; width: min(98vw, 1600px); }
 
 /* ── TOP NAV ─────────────────────────────────── */
 .top-nav {
@@ -239,7 +239,8 @@ body {
 .badge-popular svg { width: 12px; height: 12px; }
 .resource-title {
     font-weight: 600; font-size: 1.05rem; color: var(--text);
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.35;
+    white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.35;
+    word-break: break-word;
 }
 .tag-row { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 3px; }
 .tag-chip {
@@ -325,6 +326,57 @@ body {
     box-shadow: 0 8px 18px rgba(15,23,42,0.06);
 }
 
+/* ── SUBJECT GRID ───────────────────────────── */
+.subject-zone {
+    margin: 10px 0 14px;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--r-lg);
+    box-shadow: 0 10px 22px rgba(15,23,42,0.08);
+}
+.subject-zone h3 {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    font-weight: 700;
+}
+.subject-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 8px;
+}
+.subject-card {
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    transition: transform .16s ease, box-shadow .16s ease, border-color .16s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+.subject-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--border-md);
+    box-shadow: 0 10px 18px rgba(15,23,42,0.12);
+}
+.subject-card.active {
+    border-color: rgba(99,102,241,0.5);
+    background: var(--accent-soft);
+    color: #1e1b4b;
+}
+.subject-card small {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    font-weight: 600;
+}
+
 /* ── PREVIEW MODAL ───────────────────────────── */
 .preview-modal {
     position: fixed; inset: 0; background: rgba(15,23,42,0.45);
@@ -396,6 +448,7 @@ body {
     <a href="{{ url_for('general_resources_page') }}">General Resources</a>
     {% if admin_mode %}
         <a href="{{ url_for('admin_add_general_resource') }}">+ Add Resource</a>
+        <a href="{{ url_for('admin_resource_subjects') }}">Manage Subjects</a>
     {% endif %}
 </nav>
 
@@ -442,6 +495,9 @@ body {
             <input class="filter-input" id="resourceSearch" type="text"
                    placeholder="Search title or tag" autocomplete="off">
         </div>
+        <select class="filter-select" id="subjectFilter">
+            <option value="">All subjects</option>
+        </select>
         <select class="filter-select" id="tagFilter">
             <option value="">All tags</option>
             {% for tag in all_tags %}
@@ -457,13 +513,19 @@ body {
      DIPLOMA PANEL
 ══════════════════════════════════ -->
 <div class="tab-panel" id="panel-diploma" role="tabpanel" aria-labelledby="tab-diploma">
+    <div class="subject-zone">
+        <h3>Diploma Subjects</h3>
+        <div class="subject-grid" id="subject-grid-diploma"></div>
+    </div>
     {% if diploma_resources %}
         <ul class="resource-list" id="list-diploma">
             {% for resource in diploma_resources %}{% set lv = resource[2] or '' %}
             <li class="resource-item"
                 data-title="{{ resource[1] | lower }}"
                 data-tags="{{ resource[5] | default('') | lower }}"
-                data-program="diploma">
+                data-program="diploma"
+                data-subject-id="{{ resource[6] or '' }}"
+                data-subject-name="{{ resource[7] | default('unassigned') | lower }}">
                 <span class="row-num"></span>
                 {% if admin_mode %}
                 <div class="reorder-col">
@@ -493,6 +555,7 @@ body {
                             </span>
                         {% endif %}
                     </div>
+                    {% if resource[7] %}<div class="tag-row"><span class="tag-chip">Subject: {{ resource[7] }}</span></div>{% endif %}
                     {% if resource[5] %}<div class="tag-row">{% for tag in resource[5].split(',') %}{% if tag.strip() %}<span class="tag-chip">{{ tag.strip() }}</span>{% endif %}{% endfor %}</div>{% endif %}
                 </div>
                 <div class="view-count">
@@ -563,13 +626,19 @@ body {
      DEGREE PANEL
 ══════════════════════════════════ -->
 <div class="tab-panel active" id="panel-degree" role="tabpanel" aria-labelledby="tab-degree">
+    <div class="subject-zone">
+        <h3>Degree Subjects</h3>
+        <div class="subject-grid" id="subject-grid-degree"></div>
+    </div>
     {% if degree_resources %}
         <ul class="resource-list" id="list-degree">
             {% for resource in degree_resources %}{% set lv = resource[2] or '' %}
             <li class="resource-item"
                 data-title="{{ resource[1] | lower }}"
                 data-tags="{{ resource[5] | default('') | lower }}"
-                data-program="degree">
+                data-program="degree"
+                data-subject-id="{{ resource[6] or '' }}"
+                data-subject-name="{{ resource[7] | default('unassigned') | lower }}">
                 <span class="row-num"></span>
                 {% if admin_mode %}
                 <div class="reorder-col">
@@ -599,6 +668,7 @@ body {
                             </span>
                         {% endif %}
                     </div>
+                    {% if resource[7] %}<div class="tag-row"><span class="tag-chip">Subject: {{ resource[7] }}</span></div>{% endif %}
                     {% if resource[5] %}<div class="tag-row">{% for tag in resource[5].split(',') %}{% if tag.strip() %}<span class="tag-chip">{{ tag.strip() }}</span>{% endif %}{% endfor %}</div>{% endif %}
                 </div>
                 <div class="view-count">
@@ -694,13 +764,15 @@ function allItems(id) {
     return l ? Array.from(l.querySelectorAll('.resource-item')) : [];
 }
 
-function getFiltered(id, query, tag) {
+function getFiltered(id, query, tag, subjectId) {
     return allItems(id).filter(item => {
         const title = item.getAttribute('data-title') || '';
         const tags  = item.getAttribute('data-tags')  || '';
+        const itemSubject = item.getAttribute('data-subject-id') || '';
         const mQ = !query || title.includes(query) || tags.includes(query);
         const mT = !tag   || tags.split(',').map(v => v.trim()).includes(tag);
-        return mQ && mT;
+        const mS = !subjectId || (subjectId === '__unassigned' ? !itemSubject : itemSubject === subjectId);
+        return mQ && mT && mS;
     });
 }
 
@@ -790,21 +862,30 @@ function changePerPage(id, val) {
    FILTERS
 ════════════════════════════════════════════════ */
 const searchInput = document.getElementById('resourceSearch');
+const subjectFilter = document.getElementById('subjectFilter');
 const tagFilter   = document.getElementById('tagFilter');
 const resultCount = document.getElementById('resultCount');
 const activeFilters = document.getElementById('activeFilters');
+const subjectsByProgram = {{ subjects_by_program | tojson }};
+const hasUnassigned = {{ has_unassigned | tojson }};
 
 function applyFilters() {
     const q = (searchInput.value || '').trim().toLowerCase();
     const t = (tagFilter.value  || '').trim().toLowerCase();
+    const s = (subjectFilter.value || '').trim();
     ['diploma','degree'].forEach(id => {
-        state[id].filtered = getFiltered(id, q, t);
+        state[id].filtered = getFiltered(id, q, t, s);
         state[id].page = 1;
         const noMsg = document.getElementById('no-' + id);
         if (noMsg) noMsg.style.display = (allItems(id).length > 0 && state[id].filtered.length === 0) ? 'block' : 'none';
         renderPage(id);
     });
     updateActiveFilters();
+    const active = document.querySelector('.tab-panel.active');
+    if (active) {
+        const program = active.id.replace('panel-', '');
+        renderSubjectGrid(program);
+    }
 }
 
 function updateResultCount() {
@@ -818,13 +899,19 @@ function updateResultCount() {
 function updateActiveFilters() {
     const q = (searchInput.value || '').trim();
     const t = (tagFilter.value  || '').trim();
+    const s = (subjectFilter.value || '').trim();
     const parts = [];
     if (q) parts.push('Search: ' + q);
     if (t) parts.push('Tag: ' + t);
+    if (s) {
+        const current = subjectFilter.options[subjectFilter.selectedIndex];
+        if (current) parts.push('Subject: ' + current.textContent);
+    }
     activeFilters.textContent = parts.length ? parts.join(' | ') : 'All resources';
 }
 
 searchInput.addEventListener('input', applyFilters);
+subjectFilter.addEventListener('change', applyFilters);
 tagFilter.addEventListener('change', applyFilters);
 
 /* ════════════════════════════════════════════════
@@ -838,10 +925,13 @@ function switchTab(name) {
     });
     document.querySelectorAll('.tab-panel').forEach(p =>
         p.classList.toggle('active', p.id === 'panel-' + name));
-    updateResultCount();
+    refreshSubjectOptions(name);
+    applyFilters();
+    renderSubjectGrid(name);
 }
 
 /* INIT */
+refreshSubjectOptions('degree');
 applyFilters();
 switchTab('degree');
 
@@ -875,6 +965,45 @@ window.addEventListener('resize', () => {
     renderPage('diploma');
     renderPage('degree');
 });
+
+function refreshSubjectOptions(program) {
+    const list = subjectsByProgram[program] || [];
+    let options = '<option value="">All subjects</option>';
+    if (hasUnassigned[program]) {
+        options += '<option value="__unassigned">Unassigned</option>';
+    }
+    options += list.map(item => `<option value="${item.id}">${item.name}</option>`).join('');
+    subjectFilter.innerHTML = options;
+    subjectFilter.value = '';
+}
+
+function renderSubjectGrid(program) {
+    const grid = document.getElementById('subject-grid-' + program);
+    if (!grid) return;
+    const list = subjectsByProgram[program] || [];
+    const items = [];
+    items.push({ id: '', name: 'All Subjects' });
+    if (hasUnassigned[program]) {
+        items.push({ id: '__unassigned', name: 'Unassigned' });
+    }
+    list.forEach(item => items.push(item));
+    grid.innerHTML = items.map(item => {
+        const isActive = subjectFilter.value === String(item.id);
+        return `
+            <div class="subject-card${isActive ? ' active' : ''}" data-subject="${item.id}">
+                <span>${item.name}</span>
+                <small>View</small>
+            </div>
+        `;
+    }).join('');
+    grid.querySelectorAll('.subject-card').forEach(card => {
+        card.addEventListener('click', () => {
+            subjectFilter.value = card.getAttribute('data-subject') || '';
+            applyFilters();
+            renderSubjectGrid(program);
+        });
+    });
+}
 </script>
 </body>
 </html>

@@ -130,6 +130,11 @@
                 <option value="degree">Degree</option>
             </select>
 
+            <label for="subject_id">Subject</label>
+            <select id="subject_id" name="subject_id" required>
+                <option value="">Select subject</option>
+            </select>
+
             <label for="resource_link">Direct Link (optional if uploading a file)</label>
             <input id="resource_link" name="resource_link" type="text" placeholder="https://drive.google.com/... or direct PDF/HTML URL">
 
@@ -147,5 +152,22 @@
             </div>
         </form>
     </div>
+
+    <script>
+        const subjectsByProgram = {{ subjects_by_program | tojson }};
+        const programSelect = document.getElementById('program_type');
+        const subjectSelect = document.getElementById('subject_id');
+
+        function populateSubjects(program) {
+            const list = subjectsByProgram[program] || [];
+            let options = '<option value="">Select subject</option>';
+            options += list.map(item => `<option value="${item.id}">${item.name}</option>`).join('');
+            subjectSelect.innerHTML = options;
+        }
+
+        programSelect.addEventListener('change', () => {
+            populateSubjects(programSelect.value);
+        });
+    </script>
 </body>
 </html>

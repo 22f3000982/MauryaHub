@@ -129,6 +129,11 @@
                 <option value="degree" {% if resource.program_type == 'degree' %}selected{% endif %}>Degree</option>
             </select>
 
+            <label for="subject_id">Subject</label>
+            <select id="subject_id" name="subject_id" required>
+                <option value="">Select subject</option>
+            </select>
+
             <label for="resource_link">Direct Link (optional if uploading a file)</label>
             <input id="resource_link" name="resource_link" type="text" value="{{ resource.resource_link }}" placeholder="https://drive.google.com/... or direct PDF/HTML URL">
 
@@ -146,5 +151,28 @@
             </div>
         </form>
     </div>
+
+    <script>
+        const subjectsByProgram = {{ subjects_by_program | tojson }};
+        const programSelect = document.getElementById('program_type');
+        const subjectSelect = document.getElementById('subject_id');
+        const currentSubjectId = "{{ resource.subject_id or '' }}";
+
+        function populateSubjects(program, selectedId) {
+            const list = subjectsByProgram[program] || [];
+            let options = '<option value="">Select subject</option>';
+            options += list.map(item => {
+                const selected = selectedId && String(item.id) === String(selectedId) ? ' selected' : '';
+                return `<option value="${item.id}"${selected}>${item.name}</option>`;
+            }).join('');
+            subjectSelect.innerHTML = options;
+        }
+
+        populateSubjects(programSelect.value, currentSubjectId);
+
+        programSelect.addEventListener('change', () => {
+            populateSubjects(programSelect.value, '');
+        });
+    </script>
 </body>
 </html>

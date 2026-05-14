@@ -321,6 +321,29 @@ def normalize_tags(raw_tags):
             normalized.append(cleaned)
     return ', '.join(normalized)
 
+def fetch_general_resource_subjects(conn):
+    subjects_by_program = {'diploma': [], 'degree': []}
+    if not conn:
+        return subjects_by_program
+
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            '''
+            SELECT id, name, program_type
+            FROM general_resource_subjects
+            ORDER BY sort_order, id
+            '''
+        )
+        for subject_id, name, program_type in cur.fetchall():
+            if program_type in subjects_by_program:
+                subjects_by_program[program_type].append({'id': subject_id, 'name': name})
+        cur.close()
+    except Exception as exc:
+        print(f"Error fetching resource subjects: {exc}")
+
+    return subjects_by_program
+
 def log_view_event(content_table, content_id, course_id=None):
     """Store real view event records for analytics (no estimated values)."""
     conn = get_db_connection()
@@ -711,6 +734,17 @@ def init_db():
             )
         ''')
 
+        # Create 'general_resource_subjects' table
+        cur.execute('''
+            CREATE TABLE IF NOT EXISTS general_resource_subjects (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                program_type TEXT NOT NULL,
+                sort_order INTEGER DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+
         # Create 'general_resources' table
         cur.execute('''
             CREATE TABLE IF NOT EXISTS general_resources (
@@ -718,6 +752,7 @@ def init_db():
                 title TEXT NOT NULL,
                 resource_link TEXT NOT NULL,
                 program_type TEXT NOT NULL,
+                subject_id INTEGER,
                 tags TEXT,
                 watch_count INTEGER DEFAULT 0,
                 sort_order INTEGER DEFAULT 0,
@@ -726,6 +761,7 @@ def init_db():
         ''')
 
         cur.execute('ALTER TABLE general_resources ADD COLUMN IF NOT EXISTS tags TEXT')
+        cur.execute('ALTER TABLE general_resources ADD COLUMN IF NOT EXISTS subject_id INTEGER')
 
         # Create 'feedback' table for landing page testimonials
         cur.execute('''
@@ -776,7 +812,7 @@ def backup_db():
         backup_content.append("")
         
         # Backup each table
-        tables = ['courses', 'quiz1', 'quiz2', 'endterm', 'resources', 'general_resources', 'extra_stuff', 'feedback', 'view_events']
+        tables = ['courses', 'quiz1', 'quiz2', 'endterm', 'resources', 'general_resource_subjects', 'general_resources', 'extra_stuff', 'feedback', 'view_events']
         
         for table in tables:
             cur.execute(f"SELECT * FROM {table}")
@@ -1001,35 +1037,57 @@ def general_resources_page():
             diploma_resources=[],
             degree_resources=[],
             admin_mode=session.get('admin_mode', False),
-            all_tags=[]
+            all_tags=[],
+            subjects_by_program={'diploma': [], 'degree': []},
+            has_unassigned={'diploma': False, 'degree': False}
         )
 
     try:
         cur = conn.cursor()
         cur.execute('''
-            SELECT id, title, resource_link, program_type, watch_count, tags
-            FROM general_resources
-            WHERE program_type = %s
-            ORDER BY sort_order, id
+            SELECT gr.id,
+                   gr.title,
+                   gr.resource_link,
+                   gr.program_type,
+                   gr.watch_count,
+                   gr.tags,
+                   gr.subject_id,
+                   s.name
+            FROM general_resources gr
+            LEFT JOIN general_resource_subjects s ON s.id = gr.subject_id
+            WHERE gr.program_type = %s
+            ORDER BY COALESCE(s.sort_order, 9999), COALESCE(s.name, ''), gr.sort_order, gr.id
         ''', ('diploma',))
         diploma_resources = cur.fetchall()
 
         cur.execute('''
-            SELECT id, title, resource_link, program_type, watch_count, tags
-            FROM general_resources
-            WHERE program_type = %s
-            ORDER BY sort_order, id
+            SELECT gr.id,
+                   gr.title,
+                   gr.resource_link,
+                   gr.program_type,
+                   gr.watch_count,
+                   gr.tags,
+                   gr.subject_id,
+                   s.name
+            FROM general_resources gr
+            LEFT JOIN general_resource_subjects s ON s.id = gr.subject_id
+            WHERE gr.program_type = %s
+            ORDER BY COALESCE(s.sort_order, 9999), COALESCE(s.name, ''), gr.sort_order, gr.id
         ''', ('degree',))
         degree_resources = cur.fetchall()
+
+        subjects_by_program = fetch_general_resource_subjects(conn)
         cur.close()
     except Exception as e:
         print(f"Error fetching general resources: {e}")
         diploma_resources = []
         degree_resources = []
+        subjects_by_program = {'diploma': [], 'degree': []}
     finally:
         conn.close()
 
     tag_set = set()
+    has_unassigned = {'diploma': False, 'degree': False}
     for resource in diploma_resources + degree_resources:
         tags_value = resource[5]
         if tags_value:
@@ -1037,14 +1095,121 @@ def general_resources_page():
                 cleaned = tag.strip().lower()
                 if cleaned:
                     tag_set.add(cleaned)
+        program_key = resource[3]
+        if program_key in has_unassigned and not resource[6]:
+            has_unassigned[program_key] = True
 
     return render_template(
         'resources.html',
         diploma_resources=diploma_resources,
         degree_resources=degree_resources,
         admin_mode=session.get('admin_mode', False),
-        all_tags=sorted(tag_set)
+        all_tags=sorted(tag_set),
+        subjects_by_program=subjects_by_program,
+        has_unassigned=has_unassigned
     )
+
+@app.route('/admin/resource-subjects', methods=['GET', 'POST'])
+def admin_resource_subjects():
+    if not session.get('admin_mode'):
+        return redirect(url_for('general_resources_page'))
+
+    conn = get_db_connection()
+    if not conn:
+        flash('Database connection failed', 'error')
+        return redirect(url_for('general_resources_page'))
+
+    if request.method == 'POST':
+        subject_name = request.form.get('subject_name', '').strip()
+        program_type = request.form.get('program_type', '').strip().lower()
+
+        if not subject_name or program_type not in ['diploma', 'degree']:
+            flash('Please provide a valid subject name and program type.', 'error')
+            conn.close()
+            return redirect(url_for('admin_resource_subjects'))
+
+        try:
+            cur = conn.cursor()
+            cur.execute(
+                '''
+                SELECT id FROM general_resource_subjects
+                WHERE program_type=%s AND LOWER(name)=LOWER(%s)
+                LIMIT 1
+                ''',
+                (program_type, subject_name)
+            )
+            if cur.fetchone():
+                flash('Subject already exists for this program.', 'error')
+                cur.close()
+                conn.close()
+                return redirect(url_for('admin_resource_subjects'))
+
+            cur.execute(
+                'SELECT COALESCE(MAX(sort_order), -1) FROM general_resource_subjects WHERE program_type=%s',
+                (program_type,)
+            )
+            next_order = cur.fetchone()[0] + 1
+
+            cur.execute(
+                '''
+                INSERT INTO general_resource_subjects (name, program_type, sort_order)
+                VALUES (%s, %s, %s)
+                ''',
+                (subject_name, program_type, next_order)
+            )
+            conn.commit()
+            cur.close()
+            backup_db()
+            flash('Subject added successfully!', 'success')
+        except Exception as exc:
+            conn.rollback()
+            flash(f'Failed to add subject: {exc}', 'error')
+        finally:
+            conn.close()
+
+        return redirect(url_for('admin_resource_subjects'))
+
+    subjects_by_program = fetch_general_resource_subjects(conn)
+    conn.close()
+    return render_template('admin_resource_subjects.html', subjects_by_program=subjects_by_program)
+
+@app.route('/admin/resource-subjects/delete/<int:subject_id>', methods=['POST'])
+def admin_delete_resource_subject(subject_id):
+    if not session.get('admin_mode'):
+        return redirect(url_for('general_resources_page'))
+
+    conn = get_db_connection()
+    if not conn:
+        flash('Database connection failed', 'error')
+        return redirect(url_for('admin_resource_subjects'))
+
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            'SELECT COUNT(*) FROM general_resources WHERE subject_id=%s',
+            (subject_id,)
+        )
+        if cur.fetchone()[0] > 0:
+            flash('Move or delete resources under this subject first.', 'error')
+            cur.close()
+            conn.close()
+            return redirect(url_for('admin_resource_subjects'))
+
+        cur.execute('DELETE FROM general_resource_subjects WHERE id=%s', (subject_id,))
+        if cur.rowcount == 0:
+            flash('Subject not found.', 'error')
+        else:
+            conn.commit()
+            backup_db()
+            flash('Subject deleted successfully.', 'success')
+        cur.close()
+    except Exception as exc:
+        conn.rollback()
+        flash(f'Failed to delete subject: {exc}', 'error')
+    finally:
+        conn.close()
+
+    return redirect(url_for('admin_resource_subjects'))
 
 @app.route('/admin/resources/add', methods=['GET', 'POST'])
 def admin_add_general_resource():
@@ -1054,6 +1219,7 @@ def admin_add_general_resource():
     if request.method == 'POST':
         title = request.form.get('title', '').strip()
         program_type = request.form.get('program_type', '').strip().lower()
+        subject_id_raw = request.form.get('subject_id', '').strip()
         resource_link = request.form.get('resource_link', '').strip()
         raw_tags = request.form.get('tags', '').strip()
         pdf_file = request.files.get('resource_pdf')
@@ -1062,7 +1228,16 @@ def admin_add_general_resource():
             flash('Please provide a valid title and program type.', 'error')
             return redirect(url_for('admin_add_general_resource'))
 
+        if not subject_id_raw:
+            flash('Please select a subject first.', 'error')
+            return redirect(url_for('admin_add_general_resource'))
+
         final_link = None
+        try:
+            subject_id = int(subject_id_raw)
+        except ValueError:
+            flash('Invalid subject selected.', 'error')
+            return redirect(url_for('admin_add_general_resource'))
 
         if pdf_file and pdf_file.filename:
             if not allowed_resource_file(pdf_file.filename):
@@ -1093,13 +1268,24 @@ def admin_add_general_resource():
         try:
             cur = conn.cursor()
             cur.execute(
+                'SELECT id FROM general_resource_subjects WHERE id=%s AND program_type=%s',
+                (subject_id, program_type)
+            )
+            if not cur.fetchone():
+                flash('Selected subject is not valid for this program.', 'error')
+                cur.close()
+                conn.close()
+                return redirect(url_for('admin_add_general_resource'))
+
+            cur.execute(
                 '''
                 SELECT id FROM general_resources
                 WHERE program_type=%s
+                  AND subject_id=%s
                   AND (LOWER(title)=LOWER(%s) OR resource_link=%s)
                 LIMIT 1
                 ''',
-                (program_type, title, final_link)
+                (program_type, subject_id, title, final_link)
             )
             if cur.fetchone():
                 flash('Duplicate resource detected (same title or link).', 'error')
@@ -1107,14 +1293,17 @@ def admin_add_general_resource():
                 conn.close()
                 return redirect(url_for('admin_add_general_resource'))
 
-            cur.execute('SELECT COALESCE(MAX(sort_order), -1) FROM general_resources WHERE program_type=%s', (program_type,))
+            cur.execute(
+                'SELECT COALESCE(MAX(sort_order), -1) FROM general_resources WHERE program_type=%s AND subject_id=%s',
+                (program_type, subject_id)
+            )
             next_order = cur.fetchone()[0] + 1
             cur.execute(
                 '''
-                INSERT INTO general_resources (title, resource_link, program_type, tags, sort_order)
-                VALUES (%s, %s, %s, %s, %s)
+                INSERT INTO general_resources (title, resource_link, program_type, subject_id, tags, sort_order)
+                VALUES (%s, %s, %s, %s, %s, %s)
                 ''',
-                (title, final_link, program_type, tags_value, next_order)
+                (title, final_link, program_type, subject_id, tags_value, next_order)
             )
             conn.commit()
             cur.close()
@@ -1128,7 +1317,11 @@ def admin_add_general_resource():
 
         return redirect(url_for('general_resources_page'))
 
-    return render_template('admin_add_general_resource.html')
+    conn = get_db_connection()
+    subjects_by_program = fetch_general_resource_subjects(conn) if conn else {'diploma': [], 'degree': []}
+    if conn:
+        conn.close()
+    return render_template('admin_add_general_resource.html', subjects_by_program=subjects_by_program)
 
 @app.route('/admin/resources/edit/<int:resource_id>', methods=['GET', 'POST'])
 def admin_edit_general_resource(resource_id):
@@ -1142,7 +1335,10 @@ def admin_edit_general_resource(resource_id):
 
     try:
         cur = conn.cursor()
-        cur.execute('SELECT title, resource_link, program_type, tags FROM general_resources WHERE id=%s', (resource_id,))
+        cur.execute(
+            'SELECT title, resource_link, program_type, tags, subject_id FROM general_resources WHERE id=%s',
+            (resource_id,)
+        )
         resource = cur.fetchone()
 
         if resource is None:
@@ -1150,17 +1346,28 @@ def admin_edit_general_resource(resource_id):
             cur.close()
             return redirect(url_for('general_resources_page'))
 
-        existing_title, existing_link, existing_program, existing_tags = resource
+        existing_title, existing_link, existing_program, existing_tags, existing_subject_id = resource
 
         if request.method == 'POST':
             title = request.form.get('title', '').strip()
             program_type = request.form.get('program_type', '').strip().lower()
+            subject_id_raw = request.form.get('subject_id', '').strip()
             resource_link = request.form.get('resource_link', '').strip()
             raw_tags = request.form.get('tags', '').strip()
             pdf_file = request.files.get('resource_pdf')
 
             if not title or program_type not in ['diploma', 'degree']:
                 flash('Please provide a valid title and program type.', 'error')
+                return redirect(url_for('admin_edit_general_resource', resource_id=resource_id))
+
+            if not subject_id_raw:
+                flash('Please select a subject first.', 'error')
+                return redirect(url_for('admin_edit_general_resource', resource_id=resource_id))
+
+            try:
+                subject_id = int(subject_id_raw)
+            except ValueError:
+                flash('Invalid subject selected.', 'error')
                 return redirect(url_for('admin_edit_general_resource', resource_id=resource_id))
 
             final_link = existing_link
@@ -1190,37 +1397,49 @@ def admin_edit_general_resource(resource_id):
                 SELECT id FROM general_resources
                 WHERE program_type=%s
                   AND id<>%s
+                  AND subject_id=%s
                   AND (LOWER(title)=LOWER(%s) OR resource_link=%s)
                 LIMIT 1
                 ''',
-                (program_type, resource_id, title, final_link)
+                (program_type, resource_id, subject_id, title, final_link)
             )
             if cur.fetchone():
                 flash('Duplicate resource detected (same title or link).', 'error')
                 return redirect(url_for('admin_edit_general_resource', resource_id=resource_id))
 
+            cur.execute(
+                'SELECT id FROM general_resource_subjects WHERE id=%s AND program_type=%s',
+                (subject_id, program_type)
+            )
+            if not cur.fetchone():
+                flash('Selected subject is not valid for this program.', 'error')
+                return redirect(url_for('admin_edit_general_resource', resource_id=resource_id))
+
             new_sort_order = None
-            if program_type != existing_program:
-                cur.execute('SELECT COALESCE(MAX(sort_order), -1) FROM general_resources WHERE program_type=%s', (program_type,))
+            if program_type != existing_program or subject_id != existing_subject_id:
+                cur.execute(
+                    'SELECT COALESCE(MAX(sort_order), -1) FROM general_resources WHERE program_type=%s AND subject_id=%s',
+                    (program_type, subject_id)
+                )
                 new_sort_order = cur.fetchone()[0] + 1
 
             if new_sort_order is None:
                 cur.execute(
                     '''
                     UPDATE general_resources
-                    SET title=%s, resource_link=%s, program_type=%s, tags=%s
+                    SET title=%s, resource_link=%s, program_type=%s, subject_id=%s, tags=%s
                     WHERE id=%s
                     ''',
-                    (title, final_link, program_type, tags_value, resource_id)
+                    (title, final_link, program_type, subject_id, tags_value, resource_id)
                 )
             else:
                 cur.execute(
                     '''
                     UPDATE general_resources
-                    SET title=%s, resource_link=%s, program_type=%s, tags=%s, sort_order=%s
+                    SET title=%s, resource_link=%s, program_type=%s, subject_id=%s, tags=%s, sort_order=%s
                     WHERE id=%s
                     ''',
-                    (title, final_link, program_type, tags_value, new_sort_order, resource_id)
+                    (title, final_link, program_type, subject_id, tags_value, new_sort_order, resource_id)
                 )
 
             conn.commit()
@@ -1242,9 +1461,16 @@ def admin_edit_general_resource(resource_id):
             'title': existing_title,
             'resource_link': existing_link,
             'program_type': existing_program,
-            'tags': existing_tags or ''
+            'tags': existing_tags or '',
+            'subject_id': existing_subject_id
         }
-        return render_template('admin_edit_general_resource.html', resource=resource_data, resource_id=resource_id)
+        subjects_by_program = fetch_general_resource_subjects(conn)
+        return render_template(
+            'admin_edit_general_resource.html',
+            resource=resource_data,
+            resource_id=resource_id,
+            subjects_by_program=subjects_by_program
+        )
     except Exception as e:
         conn.rollback()
         flash(f'Failed to update resource: {e}', 'error')
