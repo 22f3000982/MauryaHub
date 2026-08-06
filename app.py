@@ -2099,6 +2099,32 @@ def report_general_resource(resource_id):
         cur.close()
         conn.close()
 
+@app.route('/admin/resource-reports/delete/<int:report_id>', methods=['POST'])
+def admin_delete_resource_report(report_id):
+    if not session.get('admin_mode'):
+        return redirect(url_for('general_resources_page'))
+
+    conn = get_db_connection()
+    if not conn:
+        flash('Database connection failed', 'error')
+        return redirect(url_for('general_resources_page'))
+    try:
+        cur = conn.cursor()
+        cur.execute('DELETE FROM general_resource_reports WHERE id=%s', (report_id,))
+        if cur.rowcount:
+            conn.commit()
+            backup_db()
+            flash('Report dismissed successfully.', 'success')
+        else:
+            conn.rollback()
+            flash('Report not found.', 'error')
+    except Exception as exc:
+        conn.rollback()
+        flash(f'Failed to dismiss report: {exc}', 'error')
+    finally:
+        conn.close()
+    return redirect(url_for('general_resources_page'))
+
 # Admin Backup & Restore page
 @app.route('/admin/backup', methods=['GET', 'POST'])
 def admin_backup():

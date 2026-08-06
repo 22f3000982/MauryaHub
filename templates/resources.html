@@ -65,6 +65,14 @@ body {
     transition: color .16s, border-color .16s, background .16s;
 }
 .top-nav a:hover { color: var(--text); border-color: var(--border); background: var(--surface-2); }
+.theme-toggle { margin-left:auto; border:1px solid var(--border); border-radius:999px; padding:5px 10px; background:var(--surface-2); color:var(--text); font:inherit; font-size:.76rem; font-weight:700; cursor:pointer; white-space:nowrap; }
+.theme-toggle:hover { border-color:var(--accent); color:var(--accent); }
+body.dark-theme { --bg:#0f172a; --surface:#172033; --surface-2:#1e293b; --surface-3:#25245a; --card:#172033; --hover:#202b40; --border:#334155; --border-md:#475569; --text:#e5e7eb; --text-muted:#cbd5e1; --text-dim:#94a3b8; --accent:#818cf8; --accent-2:#60a5fa; --accent-soft:rgba(129,140,248,.18); --accent-weak:rgba(129,140,248,.12); }
+body.dark-theme { background:linear-gradient(180deg,#0f172a 0%,#111827 100%); }
+body.dark-theme .tab-btn.active { color:#eef2ff; }
+body.dark-theme .resource-icon, body.dark-theme .tag-chip { border-color:#4f46e5; }
+body.dark-theme .filter-select option { color:var(--text); }
+body.dark-theme .admin-report-item { background:var(--surface); }
 
 /* ── PAGE HEADER ─────────────────────────────── */
 .page-header {
@@ -98,7 +106,9 @@ body {
 .admin-report-heading h2 { font-size:.95rem; color:#9a3412; }
 .admin-report-count { min-width:24px; padding:3px 8px; text-align:center; border-radius:999px; background:#ffedd5; color:#9a3412; font-weight:700; font-size:.75rem; }
 .admin-report-list { display:grid; gap:7px; margin-top:9px; max-height:260px; overflow:auto; }
-.admin-report-item { padding:8px 10px; background:#fff; border:1px solid #fed7aa; border-radius:var(--r-sm); }
+.admin-report-item { position:relative; padding:8px 38px 8px 10px; background:#fff; border:1px solid #fed7aa; border-radius:var(--r-sm); }
+.admin-report-dismiss { position:absolute; top:7px; right:8px; width:22px; height:22px; border:1px solid #fed7aa; border-radius:50%; background:#fff7ed; color:#9a3412; cursor:pointer; line-height:18px; font-size:14px; }
+.admin-report-dismiss:hover { background:#fee2e2; border-color:#fca5a5; color:#b91c1c; }
 .admin-report-item strong { font-size:.82rem; }
 .admin-report-meta, .admin-report-item small { display:block; color:#9a3412; font-size:.7rem; margin-top:3px; }
 .admin-report-item p { color:var(--text-muted); font-size:.78rem; margin-top:5px; word-break:break-word; }
@@ -486,6 +496,7 @@ body {
         <a href="{{ url_for('admin_add_general_resource') }}">+ Add Resource</a>
         <a href="{{ url_for('admin_resource_subjects') }}">Manage Subjects</a>
     {% endif %}
+    <button class="theme-toggle" id="resourceThemeToggle" type="button" aria-label="Toggle theme">🌙 Dark mode</button>
 </nav>
 
 <!-- PAGE HEADER -->
@@ -513,6 +524,9 @@ body {
     <div class="admin-report-list">
         {% for report in reports %}
         <article class="admin-report-item">
+            <form method="post" action="{{ url_for('admin_delete_resource_report', report_id=report[0]) }}" onsubmit="return confirm('Dismiss this report?');">
+                <button type="submit" class="admin-report-dismiss" title="Dismiss report" aria-label="Dismiss report">✕</button>
+            </form>
             <strong>{{ report[2] }}</strong>
             <span class="admin-report-meta">
                 {% if report[3] == 'outdated' %}Outdated content{% elif report[3] == 'broken' %}Broken link{% elif report[3] == 'incorrect' %}Incorrect information{% else %}Other{% endif %}
@@ -1311,6 +1325,22 @@ function renderSubjectGrid(program) {
         });
     });
 }
+
+const resourceThemeToggle = document.getElementById('resourceThemeToggle');
+if (localStorage.getItem('general-resources-theme') === 'dark') {
+    document.body.classList.add('dark-theme');
+}
+function updateResourceThemeButton() {
+    const dark = document.body.classList.contains('dark-theme');
+    resourceThemeToggle.textContent = dark ? '☀️ Light mode' : '🌙 Dark mode';
+    resourceThemeToggle.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
+}
+updateResourceThemeButton();
+resourceThemeToggle.addEventListener('click', () => {
+    document.body.classList.toggle('dark-theme');
+    localStorage.setItem('general-resources-theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
+    updateResourceThemeButton();
+});
 </script>
 </body>
 </html>

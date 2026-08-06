@@ -492,6 +492,51 @@
             margin-right: 4px;
         }
 
+        .theme-toggle {
+            position: fixed;
+            top: 14px;
+            right: 18px;
+            z-index: 1200;
+            border: 1px solid var(--border-soft);
+            border-radius: 999px;
+            padding: 7px 12px;
+            background: rgba(25, 12, 44, 0.88);
+            color: var(--text-main);
+            font: inherit;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+        }
+        .theme-toggle:hover { transform: translateY(-1px); }
+
+        body.light-theme {
+            --bg-1: #f8fafc;
+            --bg-2: #eef2ff;
+            --bg-3: #e0e7ff;
+            --panel: rgba(255, 255, 255, 0.94);
+            --panel-strong: #ffffff;
+            --panel-hover: #f1f5f9;
+            --text-main: #172033;
+            --text-muted: #475569;
+            --border-soft: rgba(100, 116, 139, 0.28);
+            --shadow-main: 0 12px 28px rgba(30, 41, 59, 0.14);
+        }
+        body.light-theme::before { opacity: 0.18; }
+        body.light-theme .sidebar { background: linear-gradient(180deg, #ffffff, #eef2ff); color: var(--text-main); }
+        body.light-theme .sidebar h2 { color: #172033; }
+        body.light-theme .sidebar a { color: #334155; }
+        body.light-theme .sidebar a:hover, body.light-theme .sidebar a.active { color: #172033; background: #e0e7ff; }
+        body.light-theme .sidebar a.resource-link { color: #075985; background: #e0f2fe; }
+        body.light-theme .card { background: linear-gradient(180deg, #ffffff, #f8fafc); color: var(--text-main); box-shadow: 0 10px 24px rgba(30, 41, 59, 0.12); }
+        body.light-theme .item-list li { border-bottom-color: rgba(100, 116, 139, 0.2); }
+        body.light-theme .watch-link { color: #2563eb; }
+        body.light-theme .watch-link:hover { color: #7c3aed; }
+        body.light-theme #searchInput { background: #ffffff; color: var(--text-main); box-shadow: 0 5px 14px rgba(30, 41, 59, 0.1); }
+        body.light-theme .admin-login-form { background: rgba(255, 255, 255, 0.7); }
+        body.light-theme .password-input { background: #ffffff; color: var(--text-main); }
+        body.light-theme .theme-toggle { background: #ffffff; color: #172033; border-color: #cbd5e1; }
+
         .admin-links {
             margin-left: 8px;
             font-size: 0.95em;
@@ -835,6 +880,7 @@
 </head>
 <body>
     <button class="sidebar-toggle" id="sidebarToggle">☰</button>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme">☀️ Light mode</button>
 
     <div class="sidebar" id="sidebar">
         <h2>Dashboard</h2>
@@ -902,11 +948,7 @@
                                         <span class="item-name">{{ quiz1_item[1] }}</span>
                                         {% if quiz1_item[2] %}
                                             <a href="{{ url_for('increment_watch_quiz1', quiz1_id=quiz1_item[0]) }}" target="_blank" class="watch-link">
-                                                {% if admin_mode %}
-                                                    <span class="eye-icon">👁️</span> ({{ quiz1_item[3] }})
-                                                {% else %}
-                                                    ▶️ Watch
-                                                {% endif %}
+                                                ▶️ Watch <span class="eye-icon">· 👁️ ({{ quiz1_item[3]|default(0) }})</span>
                                             </a>
                                         {% else %}
                                             <span class="no-items">Coming Soon</span>
@@ -948,11 +990,7 @@
                                         <span class="item-name">{{ quiz2_item[1] }}</span>
                                         {% if quiz2_item[2] %}
                                             <a href="{{ url_for('increment_watch_quiz2', quiz2_id=quiz2_item[0]) }}" target="_blank" class="watch-link">
-                                                {% if admin_mode %}
-                                                    <span class="eye-icon">👁️</span> ({{ quiz2_item[3]|default(0) }})
-                                                {% else %}
-                                                    ▶️ Watch
-                                                {% endif %}
+                                                ▶️ Watch <span class="eye-icon">· 👁️ ({{ quiz2_item[3]|default(0) }})</span>
                                             </a>
                                         {% else %}
                                             <span class="no-items">Coming Soon</span>
@@ -994,11 +1032,7 @@
                                         <span class="item-name">{{ endterm_item[1] }}</span>
                                         {% if endterm_item[2] %}
                                             <a href="{{ url_for('increment_watch_endterm', endterm_id=endterm_item[0]) }}" target="_blank" class="watch-link">
-                                                {% if admin_mode %}
-                                                    <span class="eye-icon">👁️</span> ({{ endterm_item[3]|default(0) }})
-                                                {% else %}
-                                                    ▶️ Watch
-                                                {% endif %}
+                                                ▶️ Watch <span class="eye-icon">· 👁️ ({{ endterm_item[3]|default(0) }})</span>
                                             </a>
                                         {% else %}
                                             <span class="no-items">Coming Soon</span>
@@ -1042,11 +1076,7 @@
                                         <span class="item-name">{{ resource[1] }}</span>
                                         {% if resource[2] %}
                                             <a href="{{ url_for('increment_watch_resource', resource_id=resource[0]) }}" target="_blank" class="watch-link">
-                                                {% if admin_mode %}
-                                                    <span class="eye-icon">👁️</span> ({{ resource[3]|default(0) }})
-                                                {% else %}
-                                                    ▶️ Watch
-                                                {% endif %}
+                                                ▶️ Watch <span class="eye-icon">· 👁️ ({{ resource[3]|default(0) }})</span>
                                             </a>
                                         {% else %}
                                             <span class="no-items">Coming Soon</span>
@@ -1079,6 +1109,20 @@
         // Sidebar Toggle Functionality
         const sidebar = document.getElementById('sidebar');
         const sidebarToggle = document.getElementById('sidebarToggle');
+        const themeToggle = document.getElementById('themeToggle');
+        const savedTheme = localStorage.getItem('course-detail-theme');
+        if (savedTheme === 'light') document.body.classList.add('light-theme');
+        function updateThemeButton() {
+            const light = document.body.classList.contains('light-theme');
+            themeToggle.textContent = light ? '🌙 Dark mode' : '☀️ Light mode';
+            themeToggle.setAttribute('aria-label', light ? 'Switch to dark theme' : 'Switch to light theme');
+        }
+        updateThemeButton();
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('light-theme');
+            localStorage.setItem('course-detail-theme', document.body.classList.contains('light-theme') ? 'light' : 'dark');
+            updateThemeButton();
+        });
         sidebarToggle.addEventListener('click', () => {
             sidebar.classList.toggle('active');
         });
