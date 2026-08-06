@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory, Response
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory, Response, jsonify
 import psycopg2
 import psycopg2.extras
 import sqlite3
@@ -6,6 +6,8 @@ import os
 import socket
 import subprocess
 import uuid
+import hashlib
+import math
 import mimetypes
 from werkzeug.utils import secure_filename
 import smtplib
@@ -23,6 +25,12 @@ UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 RESOURCE_ALLOWED_EXTENSIONS = {'pdf', 'html', 'htm'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Resource ranking is intentionally cached for a short period. Feedback and
+# view updates invalidate the relevant course immediately.
+_resource_ranking_cache = {}
+RESOURCE_RANKING_CACHE_SECONDS = 300
+RESOURCE_RATING_COOLDOWN_HOURS = 6
 
 # Supabase Storage configuration
 SUPABASE_URL = os.environ.get('SUPABASE_URL', '').strip().rstrip('/')
@@ -214,6 +222,92 @@ def get_db_connection():
         print(f"Database connection error: {e}")
         print(f"Connection details - Host: {host if 'host' in locals() else 'unknown'}, Port: {port if 'port' in locals() else 'unknown'}")
         return None
+
+def anonymous_identity():
+    """Return a lightweight login-free identity and a privacy-safe IP hash."""
+    anonymous_id = request.cookies.get('mh_anon_id') or uuid.uuid4().hex
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr or '').split(',')[0].strip()
+    ip_hash = hashlib.sha256(f'{app.secret_key}:{ip}'.encode('utf-8')).hexdigest()
+    return anonymous_id, ip_hash, not request.cookies.get('mh_anon_id')
+
+def invalidate_resource_ranking(course_id=None):
+    if course_id is None:
+        _resource_ranking_cache.clear()
+    else:
+        _resource_ranking_cache.pop(course_id, None)
+
+def wilson_score(positive, total, z=1.96):
+    if not total:
+        return 0.0
+    n = float(total)
+    p = float(positive) / n
+    denominator = 1 + z * z / n
+    centre = p + z * z / (2 * n)
+    spread = z * math.sqrt((p * (1 - p) + z * z / (4 * n)) / n)
+    return max(0.0, (centre - spread) / denominator)
+
+def resource_score(avg_rating, rating_count, helpful_yes, helpful_total, views, updated_at):
+    """Return the normalized weighted recommendation score and components."""
+    prior_rating = 4.0
+    prior_count = 3.0
+    bayesian = ((rating_count / (rating_count + prior_count)) * avg_rating +
+                (prior_count / (rating_count + prior_count)) * prior_rating) / 5.0
+    helpful = wilson_score(helpful_yes, helpful_total)
+    if updated_at:
+        age_days = max(0.0, (datetime.utcnow() - updated_at.replace(tzinfo=None)).total_seconds() / 86400)
+        freshness = 1 / (1 + age_days / 180)
+    else:
+        freshness = 0.35
+    view_score = math.log10(max(0, views) + 1) / 6.0
+    score = 0.35 * bayesian + 0.30 * helpful + 0.25 * freshness + 0.10 * min(1.0, view_score)
+    helpful_pct = (helpful_yes / helpful_total * 100) if helpful_total else 0
+    return score, bayesian, helpful, freshness, helpful_pct
+
+def general_resource_badge(resource, all_resources):
+    """Return exactly one lightweight, data-driven badge for a resource."""
+    rating_count, helpful_total = resource[9], resource[11]
+    max_recent_views = max((item[18] for item in all_resources), default=0)
+    if helpful_total >= 3 and resource[12] >= 80:
+        return '🎯 Exam Favorite'
+    if resource[18] >= 5 and resource[18] >= max_recent_views * 0.6:
+        return '📈 Trending'
+    if helpful_total >= 3 and resource[15] >= 0.55:
+        return '🔥 Most Helpful'
+    if rating_count >= 3 and resource[14] >= 0.78:
+        return '⭐ Top Rated'
+    return None
+
+def sort_general_resources(resources, sort_key='recommended'):
+    items = list(resources)
+    if sort_key == 'top-rated':
+        items.sort(key=lambda item: (item[14], item[9], item[0]), reverse=True)
+    elif sort_key == 'most-helpful':
+        items.sort(key=lambda item: (item[15], item[11], item[0]), reverse=True)
+    elif sort_key == 'latest':
+        items.sort(key=lambda item: (item[17] or datetime.min, item[0]), reverse=True)
+    elif sort_key == 'most-viewed':
+        items.sort(key=lambda item: (item[4] or 0, item[0]), reverse=True)
+    else:
+        items.sort(key=lambda item: (item[13], item[0]), reverse=True)
+    return [item + (general_resource_badge(item, items),) for item in items]
+
+def decorate_general_resources(rows):
+    decorated = []
+    for row in rows:
+        avg_rating = float(row[8] or 0)
+        rating_count = int(row[9] or 0)
+        helpful_yes = int(row[10] or 0)
+        helpful_total = int(row[11] or 0)
+        score, bayesian, helpful, freshness, helpful_pct = resource_score(
+            avg_rating, rating_count, helpful_yes, helpful_total,
+            int(row[4] or 0), row[13]
+        )
+        helpful_pct = (float(row[12] or 0) / 4.0) * 100 if helpful_total else 0
+        decorated.append(tuple(row[:8]) + (
+            avg_rating, rating_count, helpful_yes, helpful_total, helpful_pct,
+            score, bayesian, helpful, freshness, row[13], int(row[14] or 0)
+        ))
+    return decorated
 
 def migrate_local_general_resources_to_supabase():
     if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
@@ -762,6 +856,70 @@ def init_db():
 
         cur.execute('ALTER TABLE general_resources ADD COLUMN IF NOT EXISTS tags TEXT')
         cur.execute('ALTER TABLE general_resources ADD COLUMN IF NOT EXISTS subject_id INTEGER')
+        cur.execute('ALTER TABLE general_resources ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP')
+
+        cur.execute('''
+            CREATE TABLE IF NOT EXISTS general_resource_feedback (
+                id SERIAL PRIMARY KEY,
+                resource_id INTEGER NOT NULL,
+                anonymous_id TEXT NOT NULL,
+                ip_hash TEXT NOT NULL,
+                resource_link TEXT,
+                resource_title TEXT,
+                rating SMALLINT CHECK (rating BETWEEN 1 AND 5),
+                helpful BOOLEAN,
+                helpfulness SMALLINT CHECK (helpfulness BETWEEN 1 AND 4),
+                review TEXT,
+                review_tags TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE (resource_id, anonymous_id)
+            )
+        ''')
+        cur.execute('ALTER TABLE general_resource_feedback ADD COLUMN IF NOT EXISTS review TEXT')
+        cur.execute('ALTER TABLE general_resource_feedback ADD COLUMN IF NOT EXISTS helpfulness SMALLINT')
+        cur.execute('ALTER TABLE general_resource_feedback ADD COLUMN IF NOT EXISTS review_tags TEXT')
+        cur.execute('ALTER TABLE general_resource_feedback ADD COLUMN IF NOT EXISTS resource_link TEXT')
+        cur.execute('ALTER TABLE general_resource_feedback ADD COLUMN IF NOT EXISTS resource_title TEXT')
+        cur.execute('''
+            UPDATE general_resource_feedback f
+            SET resource_link = r.resource_link,
+                resource_title = r.title
+            FROM general_resources r
+            WHERE f.resource_id = r.id
+              AND (f.resource_link IS NULL OR f.resource_title IS NULL)
+        ''')
+        # Feedback must outlive resource deletions and backup restores. It is
+        # intentionally not foreign-key cascaded; resource_link is the stable
+        # fallback when a resource id changes after a restore.
+        cur.execute('ALTER TABLE general_resource_feedback DROP CONSTRAINT IF EXISTS general_resource_feedback_resource_id_fkey')
+        cur.execute('CREATE INDEX IF NOT EXISTS idx_general_resource_feedback_resource ON general_resource_feedback(resource_id)')
+        cur.execute('CREATE INDEX IF NOT EXISTS idx_general_resource_feedback_link ON general_resource_feedback(resource_link)')
+        cur.execute('CREATE INDEX IF NOT EXISTS idx_general_resource_feedback_ip_resource ON general_resource_feedback(ip_hash, resource_id)')
+
+        cur.execute('''
+            CREATE TABLE IF NOT EXISTS general_resource_review_votes (
+                id SERIAL PRIMARY KEY,
+                review_id INTEGER NOT NULL REFERENCES general_resource_feedback(id) ON DELETE CASCADE,
+                anonymous_id TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE (review_id, anonymous_id)
+            )
+        ''')
+        cur.execute('CREATE INDEX IF NOT EXISTS idx_general_resource_review_votes_review ON general_resource_review_votes(review_id)')
+
+        cur.execute('''
+            CREATE TABLE IF NOT EXISTS general_resource_reports (
+                id SERIAL PRIMARY KEY,
+                resource_id INTEGER NOT NULL REFERENCES general_resources(id) ON DELETE CASCADE,
+                anonymous_id TEXT NOT NULL,
+                issue_type TEXT NOT NULL,
+                details TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE (resource_id, anonymous_id, issue_type)
+            )
+        ''')
+        cur.execute('CREATE INDEX IF NOT EXISTS idx_general_resource_reports_resource ON general_resource_reports(resource_id)')
 
         # Create 'feedback' table for landing page testimonials
         cur.execute('''
@@ -812,7 +970,7 @@ def backup_db():
         backup_content.append("")
         
         # Backup each table
-        tables = ['courses', 'quiz1', 'quiz2', 'endterm', 'resources', 'general_resource_subjects', 'general_resources', 'extra_stuff', 'feedback', 'view_events']
+        tables = ['courses', 'quiz1', 'quiz2', 'endterm', 'resources', 'general_resource_subjects', 'general_resources', 'general_resource_feedback', 'general_resource_review_votes', 'general_resource_reports', 'extra_stuff', 'feedback', 'view_events']
         
         for table in tables:
             cur.execute(f"SELECT * FROM {table}")
@@ -1029,7 +1187,11 @@ def course_view():
 
 @app.route('/resources')
 def general_resources_page():
+    sort_key = request.args.get('sort', 'recommended')
+    if sort_key not in {'recommended', 'top-rated', 'most-helpful', 'latest', 'most-viewed'}:
+        sort_key = 'recommended'
     conn = get_db_connection()
+    reports = []
     if not conn:
         flash('Database connection failed', 'error')
         return render_template(
@@ -1038,13 +1200,20 @@ def general_resources_page():
             degree_resources=[],
             admin_mode=session.get('admin_mode', False),
             all_tags=[],
+            resource_sort=sort_key,
             subjects_by_program={'diploma': [], 'degree': []},
-            has_unassigned={'diploma': False, 'degree': False}
+            has_unassigned={'diploma': False, 'degree': False},
+            reports=[]
         )
 
     try:
         cur = conn.cursor()
-        cur.execute('''
+        cache_key = 'general:diploma'
+        diploma_cache = _resource_ranking_cache.get(cache_key)
+        if diploma_cache and time.time() - diploma_cache['created'] < RESOURCE_RANKING_CACHE_SECONDS:
+            diploma_resources = diploma_cache['resources']
+        else:
+            cur.execute('''
             SELECT gr.id,
                    gr.title,
                    gr.resource_link,
@@ -1052,15 +1221,39 @@ def general_resources_page():
                    gr.watch_count,
                    gr.tags,
                    gr.subject_id,
-                   s.name
+                   s.name,
+                   COALESCE(rf.avg_rating, 0), COALESCE(rf.rating_count, 0),
+                   COALESCE(rf.helpful_yes, 0), COALESCE(rf.helpful_total, 0),
+                   COALESCE(rf.helpful_avg, 0), gr.updated_at, COALESCE(rv.recent_views, 0)
             FROM general_resources gr
             LEFT JOIN general_resource_subjects s ON s.id = gr.subject_id
+            LEFT JOIN (
+                SELECT resource_id, AVG(rating) FILTER (WHERE rating IS NOT NULL) AS avg_rating,
+                       COUNT(rating) AS rating_count,
+                       COUNT(*) FILTER (WHERE helpfulness >= 3) AS helpful_yes,
+                       COUNT(helpfulness) AS helpful_total,
+                       COALESCE(AVG(helpfulness), 0) AS helpful_avg
+                FROM general_resource_feedback GROUP BY resource_id
+            ) rf ON rf.resource_id = gr.id
+            LEFT JOIN (
+                SELECT content_id, COUNT(*) AS recent_views
+                FROM view_events
+                WHERE content_table='general_resources'
+                  AND viewed_at >= CURRENT_TIMESTAMP - INTERVAL '7 days'
+                GROUP BY content_id
+            ) rv ON rv.content_id = gr.id
             WHERE gr.program_type = %s
             ORDER BY COALESCE(s.sort_order, 9999), COALESCE(s.name, ''), gr.sort_order, gr.id
         ''', ('diploma',))
-        diploma_resources = cur.fetchall()
+            diploma_resources = decorate_general_resources(cur.fetchall())
+            _resource_ranking_cache[cache_key] = {'created': time.time(), 'resources': diploma_resources}
 
-        cur.execute('''
+        cache_key = 'general:degree'
+        degree_cache = _resource_ranking_cache.get(cache_key)
+        if degree_cache and time.time() - degree_cache['created'] < RESOURCE_RANKING_CACHE_SECONDS:
+            degree_resources = degree_cache['resources']
+        else:
+            cur.execute('''
             SELECT gr.id,
                    gr.title,
                    gr.resource_link,
@@ -1068,21 +1261,58 @@ def general_resources_page():
                    gr.watch_count,
                    gr.tags,
                    gr.subject_id,
-                   s.name
+                   s.name,
+                   COALESCE(rf.avg_rating, 0), COALESCE(rf.rating_count, 0),
+                   COALESCE(rf.helpful_yes, 0), COALESCE(rf.helpful_total, 0),
+                   COALESCE(rf.helpful_avg, 0), gr.updated_at, COALESCE(rv.recent_views, 0)
             FROM general_resources gr
             LEFT JOIN general_resource_subjects s ON s.id = gr.subject_id
+            LEFT JOIN (
+                SELECT resource_id, AVG(rating) FILTER (WHERE rating IS NOT NULL) AS avg_rating,
+                       COUNT(rating) AS rating_count,
+                       COUNT(*) FILTER (WHERE helpfulness >= 3) AS helpful_yes,
+                       COUNT(helpfulness) AS helpful_total,
+                       COALESCE(AVG(helpfulness), 0) AS helpful_avg
+                FROM general_resource_feedback GROUP BY resource_id
+            ) rf ON rf.resource_id = gr.id
+            LEFT JOIN (
+                SELECT content_id, COUNT(*) AS recent_views
+                FROM view_events
+                WHERE content_table='general_resources'
+                  AND viewed_at >= CURRENT_TIMESTAMP - INTERVAL '7 days'
+                GROUP BY content_id
+            ) rv ON rv.content_id = gr.id
             WHERE gr.program_type = %s
             ORDER BY COALESCE(s.sort_order, 9999), COALESCE(s.name, ''), gr.sort_order, gr.id
         ''', ('degree',))
-        degree_resources = cur.fetchall()
+            degree_resources = decorate_general_resources(cur.fetchall())
+            _resource_ranking_cache[cache_key] = {'created': time.time(), 'resources': degree_resources}
+
+        diploma_resources = sort_general_resources(diploma_resources, sort_key)
+        degree_resources = sort_general_resources(degree_resources, sort_key)
 
         subjects_by_program = fetch_general_resource_subjects(conn)
+        if session.get('admin_mode', False):
+            try:
+                cur.execute('''
+                    SELECT rr.id, rr.resource_id, COALESCE(gr.title, 'Deleted resource'),
+                           rr.issue_type, rr.details, rr.anonymous_id, rr.created_at
+                    FROM general_resource_reports rr
+                    LEFT JOIN general_resources gr ON gr.id = rr.resource_id
+                    ORDER BY rr.created_at DESC
+                    LIMIT 100
+                ''')
+                reports = cur.fetchall()
+            except Exception as report_error:
+                print(f"Error fetching resource reports: {report_error}")
+                reports = []
         cur.close()
     except Exception as e:
         print(f"Error fetching general resources: {e}")
         diploma_resources = []
         degree_resources = []
         subjects_by_program = {'diploma': [], 'degree': []}
+        reports = []
     finally:
         conn.close()
 
@@ -1105,8 +1335,10 @@ def general_resources_page():
         degree_resources=degree_resources,
         admin_mode=session.get('admin_mode', False),
         all_tags=sorted(tag_set),
+        resource_sort=sort_key,
         subjects_by_program=subjects_by_program,
-        has_unassigned=has_unassigned
+        has_unassigned=has_unassigned,
+        reports=reports
     )
 
 @app.route('/admin/resource-subjects', methods=['GET', 'POST'])
@@ -1427,7 +1659,7 @@ def admin_edit_general_resource(resource_id):
                 cur.execute(
                     '''
                     UPDATE general_resources
-                    SET title=%s, resource_link=%s, program_type=%s, subject_id=%s, tags=%s
+                    SET title=%s, resource_link=%s, program_type=%s, subject_id=%s, tags=%s, updated_at=CURRENT_TIMESTAMP
                     WHERE id=%s
                     ''',
                     (title, final_link, program_type, subject_id, tags_value, resource_id)
@@ -1436,13 +1668,15 @@ def admin_edit_general_resource(resource_id):
                 cur.execute(
                     '''
                     UPDATE general_resources
-                    SET title=%s, resource_link=%s, program_type=%s, subject_id=%s, tags=%s, sort_order=%s
+                    SET title=%s, resource_link=%s, program_type=%s, subject_id=%s, tags=%s, sort_order=%s, updated_at=CURRENT_TIMESTAMP
                     WHERE id=%s
                     ''',
                     (title, final_link, program_type, subject_id, tags_value, new_sort_order, resource_id)
                 )
 
             conn.commit()
+            invalidate_resource_ranking(f'general:{existing_program}')
+            invalidate_resource_ranking(f'general:{program_type}')
 
             static_prefix = '/static/uploads/general_resources/'
             if existing_link and existing_link != final_link and existing_link.startswith(static_prefix):
@@ -1596,7 +1830,7 @@ def open_general_resource(resource_id):
     try:
         cur = conn.cursor()
         cur.execute(
-            'UPDATE general_resources SET watch_count = watch_count + 1 WHERE id=%s RETURNING resource_link',
+            'UPDATE general_resources SET watch_count = watch_count + 1 WHERE id=%s RETURNING resource_link, program_type',
             (resource_id,)
         )
         row = cur.fetchone()
@@ -1607,6 +1841,7 @@ def open_general_resource(resource_id):
             return "Resource link not found"
 
         link = row[0].strip()
+        invalidate_resource_ranking(f'general:{row[1]}')
         log_view_event('general_resources', resource_id, None)
 
         if link.startswith('/'):
@@ -1631,6 +1866,237 @@ def open_general_resource(resource_id):
     except Exception:
         return "Resource link not found"
     finally:
+        conn.close()
+
+@app.route('/api/general-resources/<int:resource_id>/feedback', methods=['POST'])
+def submit_general_resource_feedback(resource_id):
+    data = request.get_json(silent=True) or {}
+    rating_provided = 'rating' in data
+    helpfulness_provided = 'helpfulness' in data
+    review_provided = 'review' in data
+    tags_provided = 'review_tags' in data
+    rating = data.get('rating')
+    helpful = data.get('helpful')
+    helpfulness = data.get('helpfulness')
+    review = (data.get('review') or '').strip()
+    allowed_review_tags = {
+        'Easy to understand', 'Complete syllabus', 'Good for revision',
+        'Good examples', 'Outdated', 'Missing topics'
+    }
+    review_tags = [tag for tag in (data.get('review_tags') or []) if tag in allowed_review_tags]
+    try:
+        rating = int(rating) if rating is not None else None
+    except (TypeError, ValueError):
+        rating = None
+    if rating is not None and rating not in range(1, 6):
+        return {'success': False, 'error': 'Rating must be between 1 and 5.'}, 400
+    if helpful is not None and not isinstance(helpful, bool):
+        return {'success': False, 'error': 'Helpful vote must be yes or no.'}, 400
+    try:
+        helpfulness = int(helpfulness) if helpfulness is not None else None
+    except (TypeError, ValueError):
+        helpfulness = None
+    if helpfulness is not None and helpfulness not in range(1, 5):
+        return {'success': False, 'error': 'Please choose one of the four helpfulness levels.'}, 400
+    if len(review) > 500:
+        return {'success': False, 'error': 'Review must be 500 characters or less.'}, 400
+    if (rating is None and helpful is None and helpfulness is None and not review
+            and not review_tags and not review_provided and not tags_provided):
+        return {'success': False, 'error': 'Please add a rating, helpful vote, or review.'}, 400
+
+    anonymous_id, ip_hash, needs_cookie = anonymous_identity()
+    conn = get_db_connection()
+    if not conn:
+        return {'success': False, 'error': 'Database connection failed.'}, 500
+    cur = conn.cursor()
+    try:
+        cur.execute('SELECT program_type, resource_link, title FROM general_resources WHERE id=%s', (resource_id,))
+        resource = cur.fetchone()
+        if not resource:
+            return {'success': False, 'error': 'Resource not found.'}, 404
+        cur.execute('''
+            SELECT rating, helpfulness, updated_at FROM general_resource_feedback
+            WHERE (resource_id=%s OR resource_link=%s)
+              AND (anonymous_id=%s OR ip_hash=%s)
+            ORDER BY updated_at DESC LIMIT 1
+        ''', (resource_id, resource[1], anonymous_id, ip_hash))
+        previous = cur.fetchone()
+        rating_changed = bool(previous and rating_provided and rating is not None and previous[0] != rating)
+        helpfulness_changed = bool(previous and helpfulness_provided and helpfulness is not None and previous[1] != helpfulness)
+        if previous and previous[2] and (rating_changed or helpfulness_changed):
+            elapsed = datetime.utcnow() - previous[2].replace(tzinfo=None)
+            cooldown = timedelta(hours=RESOURCE_RATING_COOLDOWN_HOURS)
+            if elapsed < cooldown:
+                remaining = max(1, math.ceil((cooldown - elapsed).total_seconds() / 3600))
+                return {'success': False, 'error': f'You can rate this resource again in about {remaining} hour(s).'}, 429
+
+        cur.execute('''
+            INSERT INTO general_resource_feedback (resource_id, anonymous_id, ip_hash, resource_link, resource_title, rating, helpful, helpfulness, review, review_tags)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            ON CONFLICT (resource_id, anonymous_id) DO UPDATE SET
+                resource_link = EXCLUDED.resource_link,
+                resource_title = EXCLUDED.resource_title,
+                rating = COALESCE(EXCLUDED.rating, general_resource_feedback.rating),
+                helpful = COALESCE(EXCLUDED.helpful, general_resource_feedback.helpful),
+                helpfulness = COALESCE(EXCLUDED.helpfulness, general_resource_feedback.helpfulness),
+                review = COALESCE(EXCLUDED.review, general_resource_feedback.review),
+                review_tags = COALESCE(EXCLUDED.review_tags, general_resource_feedback.review_tags),
+                ip_hash = EXCLUDED.ip_hash,
+                updated_at = CURRENT_TIMESTAMP
+        ''', (
+            resource_id, anonymous_id, ip_hash, resource[1], resource[2], rating, helpful,
+            helpfulness, review if review_provided else None,
+            ','.join(review_tags) if tags_provided else None
+        ))
+        conn.commit()
+        invalidate_resource_ranking(f'general:{resource[0]}')
+        response = jsonify({'success': True, 'message': 'Feedback updated successfully.' if previous else 'Thanks for your feedback!'})
+        if needs_cookie:
+            response.set_cookie('mh_anon_id', anonymous_id, max_age=60 * 60 * 24 * 365,
+                               httponly=True, samesite='Lax', secure=request.is_secure)
+        return response
+    except Exception as exc:
+        conn.rollback()
+        print(f'Error saving general resource feedback: {exc}')
+        return {'success': False, 'error': 'Could not save feedback.'}, 500
+    finally:
+        cur.close()
+        conn.close()
+
+@app.route('/api/general-resources/<int:resource_id>/reviews')
+def get_general_resource_reviews(resource_id):
+    anonymous_id, _, _ = anonymous_identity()
+    conn = get_db_connection()
+    if not conn:
+        return {'reviews': []}
+    try:
+        cur = conn.cursor()
+        cur.execute('SELECT resource_link FROM general_resources WHERE id=%s', (resource_id,))
+        resource = cur.fetchone()
+        resource_link = resource[0] if resource else None
+        cur.execute('''
+            SELECT f.id, f.review, f.review_tags, f.updated_at,
+                   (SELECT COUNT(*) FROM general_resource_review_votes v WHERE v.review_id=f.id) AS helpful_count,
+                   EXISTS(
+                       SELECT 1 FROM general_resource_review_votes v2
+                       WHERE v2.review_id=f.id AND v2.anonymous_id=%s
+                   ) AS viewer_helpful
+            FROM general_resource_feedback f
+            WHERE (f.resource_id=%s OR (%s IS NOT NULL AND f.resource_link=%s))
+              AND f.review IS NOT NULL AND BTRIM(f.review) <> ''
+            ORDER BY helpful_count DESC, f.updated_at DESC
+            LIMIT 5
+        ''', (anonymous_id, resource_id, resource_link, resource_link))
+        reviews = [
+            {'id': row[0], 'review': row[1], 'tags': row[2].split(',') if row[2] else [],
+             'date': row[3].strftime('%d %b %Y') if row[3] else '',
+             'helpfulCount': row[4] or 0, 'viewerHelpful': bool(row[5])}
+            for row in cur.fetchall()
+        ]
+        cur.execute('''
+            SELECT rating, helpfulness, review, review_tags
+            FROM general_resource_feedback
+            WHERE (resource_id=%s OR (%s IS NOT NULL AND resource_link=%s))
+              AND anonymous_id=%s
+            ORDER BY updated_at DESC LIMIT 1
+        ''', (resource_id, resource_link, resource_link, anonymous_id))
+        mine = cur.fetchone()
+        return {
+            'reviews': reviews,
+            'mine': ({
+                'rating': mine[0], 'helpfulness': mine[1], 'review': mine[2] or '',
+                'tags': mine[3].split(',') if mine[3] else []
+            } if mine else None)
+        }
+    except Exception as exc:
+        print(f'Error fetching general resource reviews: {exc}')
+        return {'reviews': []}
+    finally:
+        conn.close()
+
+@app.route('/api/general-resources/<int:resource_id>/reviews/<int:review_id>/helpful', methods=['POST'])
+def vote_general_resource_review_helpful(resource_id, review_id):
+    anonymous_id, _, needs_cookie = anonymous_identity()
+    conn = get_db_connection()
+    if not conn:
+        return {'success': False, 'error': 'Database connection failed.'}, 500
+    try:
+        cur = conn.cursor()
+        cur.execute('SELECT resource_link FROM general_resources WHERE id=%s', (resource_id,))
+        resource = cur.fetchone()
+        resource_link = resource[0] if resource else None
+        cur.execute('''
+            SELECT f.id FROM general_resource_feedback f
+            WHERE f.id=%s
+              AND (f.resource_id=%s OR (%s IS NOT NULL AND f.resource_link=%s))
+              AND f.review IS NOT NULL AND BTRIM(f.review) <> ''
+        ''', (review_id, resource_id, resource_link, resource_link))
+        if not cur.fetchone():
+            return {'success': False, 'error': 'Review not found.'}, 404
+        cur.execute('''
+            SELECT id FROM general_resource_review_votes
+            WHERE review_id=%s AND anonymous_id=%s
+        ''', (review_id, anonymous_id))
+        existing = cur.fetchone()
+        if existing:
+            cur.execute('DELETE FROM general_resource_review_votes WHERE id=%s', (existing[0],))
+            voted = False
+        else:
+            cur.execute('''
+                INSERT INTO general_resource_review_votes (review_id, anonymous_id)
+                VALUES (%s, %s) ON CONFLICT (review_id, anonymous_id) DO NOTHING
+            ''', (review_id, anonymous_id))
+            voted = True
+        cur.execute('SELECT COUNT(*) FROM general_resource_review_votes WHERE review_id=%s', (review_id,))
+        count = cur.fetchone()[0]
+        conn.commit()
+        response = jsonify({'success': True, 'helpfulCount': count, 'viewerHelpful': voted})
+        if needs_cookie:
+            response.set_cookie('mh_anon_id', anonymous_id, max_age=60 * 60 * 24 * 365,
+                                httponly=True, samesite='Lax', secure=request.is_secure)
+        return response
+    except Exception as exc:
+        conn.rollback()
+        print(f'Error saving review helpful vote: {exc}')
+        return {'success': False, 'error': 'Could not save helpful vote.'}, 500
+    finally:
+        conn.close()
+
+@app.route('/api/general-resources/<int:resource_id>/report', methods=['POST'])
+def report_general_resource(resource_id):
+    data = request.get_json(silent=True) or {}
+    issue_type = (data.get('issue_type') or '').strip()
+    details = (data.get('details') or '').strip()[:300]
+    allowed_issues = {'outdated', 'broken', 'incorrect', 'other'}
+    if issue_type not in allowed_issues:
+        return {'success': False, 'error': 'Please select a valid issue.'}, 400
+
+    anonymous_id, _, needs_cookie = anonymous_identity()
+    conn = get_db_connection()
+    if not conn:
+        return {'success': False, 'error': 'Database connection failed.'}, 500
+    cur = conn.cursor()
+    try:
+        cur.execute('SELECT id FROM general_resources WHERE id=%s', (resource_id,))
+        if not cur.fetchone():
+            return {'success': False, 'error': 'Resource not found.'}, 404
+        cur.execute('''
+            INSERT INTO general_resource_reports (resource_id, anonymous_id, issue_type, details)
+            VALUES (%s, %s, %s, %s)
+            ON CONFLICT (resource_id, anonymous_id, issue_type) DO NOTHING
+        ''', (resource_id, anonymous_id, issue_type, details or None))
+        conn.commit()
+        response = jsonify({'success': True, 'message': 'Thanks, we will review this resource.'})
+        if needs_cookie:
+            response.set_cookie('mh_anon_id', anonymous_id, max_age=60 * 60 * 24 * 365,
+                               httponly=True, samesite='Lax', secure=request.is_secure)
+        return response
+    except Exception as exc:
+        conn.rollback()
+        print(f'Error saving resource report: {exc}')
+        return {'success': False, 'error': 'Could not submit report.'}, 500
+    finally:
+        cur.close()
         conn.close()
 
 # Admin Backup & Restore page

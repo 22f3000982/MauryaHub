@@ -93,6 +93,15 @@ body {
     transition: opacity .16s, box-shadow .16s, transform .16s; flex-shrink: 0;
 }
 .btn-add:hover { opacity: .92; transform: translateY(-1px); box-shadow: 0 12px 22px rgba(59,130,246,0.25); }
+.admin-report-panel { margin-bottom:12px; padding:12px 14px; background:#fff7ed; border:1px solid #fed7aa; border-radius:var(--r-lg); }
+.admin-report-heading { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.admin-report-heading h2 { font-size:.95rem; color:#9a3412; }
+.admin-report-count { min-width:24px; padding:3px 8px; text-align:center; border-radius:999px; background:#ffedd5; color:#9a3412; font-weight:700; font-size:.75rem; }
+.admin-report-list { display:grid; gap:7px; margin-top:9px; max-height:260px; overflow:auto; }
+.admin-report-item { padding:8px 10px; background:#fff; border:1px solid #fed7aa; border-radius:var(--r-sm); }
+.admin-report-item strong { font-size:.82rem; }
+.admin-report-meta, .admin-report-item small { display:block; color:#9a3412; font-size:.7rem; margin-top:3px; }
+.admin-report-item p { color:var(--text-muted); font-size:.78rem; margin-top:5px; word-break:break-word; }
 
 /* ── TABS ────────────────────────────────────── */
 .tab-strip {
@@ -176,6 +185,7 @@ body {
     padding: 3px 10px; border-radius: 999px; border: 1px dashed var(--border);
     background: var(--surface-2); white-space: nowrap;
 }
+.resource-rating-summary { color: var(--text-dim); font-size: 0.68rem; margin-top: 4px; }
 
 /* ── TAB PANELS ──────────────────────────────── */
 .tab-panel { display: none; }
@@ -273,6 +283,8 @@ body {
 .act-open:hover  { filter: brightness(1.05); box-shadow: 0 10px 18px rgba(99,102,241,0.25); }
 .act-preview { color: var(--text);   background: var(--surface-2);    border-color: var(--border); }
 .act-preview:hover  { background: var(--surface-3); border-color: var(--border); }
+.act-rate { color: #92400e; background: #fef3c7; border-color: #fbbf24; }
+.act-rate:hover { background: #fde68a; border-color: #f59e0b; }
 .act-edit    { color: var(--accent); background: transparent;  border-color: rgba(99,102,241,0.4); }
 .act-edit:hover  { background: var(--accent-weak); border-color: rgba(99,102,241,0.6); }
 .act-delete  { color: #fca5a5;       background: transparent;  border-color: rgba(239,68,68,0.35); }
@@ -408,6 +420,30 @@ body {
 }
 .preview-close:hover { background: var(--danger-soft); color: #b91c1c; }
 .preview-frame { flex: 1; border: none; width: 100%; background: #ffffff; }
+.preview-modal.feedback-only .preview-panel { height: auto; max-height: min(84vh, 750px); }
+.preview-modal.feedback-only .preview-frame { display: none; }
+.preview-modal.feedback-only .feedback-strip { border-top: 0; }
+.feedback-strip { padding: 8px 12px; border-top: 1px solid var(--border); background: var(--surface-2); display: flex; align-items: center; gap: 7px; flex-wrap: wrap; font-size: .76rem; }
+.feedback-strip button { border: 1px solid var(--border); background: var(--surface); color: var(--text-muted); border-radius: 6px; padding: 4px 7px; cursor: pointer; }
+.feedback-strip button.selected { color: var(--accent); border-color: var(--accent); }
+.feedback-submit { background: var(--accent) !important; color: #fff !important; border-color: var(--accent) !important; }
+.feedback-message { color: var(--text-muted); }
+.feedback-review { flex: 1 0 100%; min-height: 44px; max-height: 90px; resize: vertical; border: 1px solid var(--border); border-radius: 6px; padding: 7px; font: inherit; font-size: .76rem; color: var(--text); background: var(--surface); }
+.feedback-review::placeholder { color: var(--text-dim); }
+.recent-reviews { flex: 1 0 100%; color: var(--text-muted); font-size: .72rem; max-height: 58px; overflow: auto; }
+.recent-review { padding: 4px 0; border-top: 1px solid var(--border); }
+.review-helpful { margin-left: 6px; padding: 2px 5px !important; font-size: .65rem !important; }
+.review-helpful.voted { color: var(--accent) !important; border-color: var(--accent) !important; }
+.feedback-tags { flex: 1 0 100%; display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+.feedback-tags button { font-size: .7rem; padding: 4px 7px; }
+.feedback-tags button.positive { border-color: #bbf7d0; color: #15803d; background: #f0fdf4; }
+.feedback-tags button.negative { border-color: #fecaca; color: #b91c1c; background: #fef2f2; }
+.feedback-tags button.selected.positive { color: #166534; border-color: #16a34a; background: #dcfce7; }
+.feedback-tags button.selected.negative { color: #991b1b; border-color: #dc2626; background: #fee2e2; }
+.report-zone { flex: 1 0 100%; border-top: 1px solid var(--border); padding-top: 6px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.report-zone select, .report-zone input { border: 1px solid var(--border); border-radius: 6px; padding: 5px 7px; font: inherit; font-size: .72rem; color: var(--text); background: var(--surface); }
+.report-zone input { flex: 1 1 180px; }
+.report-link { background: transparent !important; border: 0 !important; color: var(--text-muted) !important; padding-left: 0 !important; text-decoration: underline; }
 
 /* ── MOBILE ──────────────────────────────────── */
 @media (max-width: 640px) {
@@ -468,6 +504,28 @@ body {
     {% endif %}
 </header>
 
+{% if admin_mode and reports %}
+<section class="admin-report-panel" id="resourceReports" aria-label="Resource reports">
+    <div class="admin-report-heading">
+        <h2>Resource reports</h2>
+        <span class="admin-report-count">{{ reports|length }}</span>
+    </div>
+    <div class="admin-report-list">
+        {% for report in reports %}
+        <article class="admin-report-item">
+            <strong>{{ report[2] }}</strong>
+            <span class="admin-report-meta">
+                {% if report[3] == 'outdated' %}Outdated content{% elif report[3] == 'broken' %}Broken link{% elif report[3] == 'incorrect' %}Incorrect information{% else %}Other{% endif %}
+                · {{ report[6].strftime('%d %b %Y, %I:%M %p') if report[6] else '' }}
+            </span>
+            <p>{{ report[4] or 'No details provided.' }}</p>
+            <small>Anonymous reporter: {{ (report[5] or 'unknown')[:12] }}…</small>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
 <!-- TABS -->
 <div class="tab-strip" role="tablist">
         <button class="tab-btn" role="tab" aria-selected="false"
@@ -503,6 +561,13 @@ body {
             {% for tag in all_tags %}
                 <option value="{{ tag }}">{{ tag }}</option>
             {% endfor %}
+        </select>
+        <select class="filter-select" id="resourceSort" aria-label="Sort resources" onchange="changeResourceSort(this.value)">
+            <option value="recommended" {% if resource_sort == 'recommended' %}selected{% endif %}>Recommended</option>
+            <option value="top-rated" {% if resource_sort == 'top-rated' %}selected{% endif %}>Top Rated</option>
+            <option value="most-helpful" {% if resource_sort == 'most-helpful' %}selected{% endif %}>Most Helpful</option>
+            <option value="latest" {% if resource_sort == 'latest' %}selected{% endif %}>Latest</option>
+            <option value="most-viewed" {% if resource_sort == 'most-viewed' %}selected{% endif %}>Most Viewed</option>
         </select>
         <span class="result-pill" id="resultCount">— items</span>
         <span class="active-filter" id="activeFilters">All resources</span>
@@ -546,17 +611,18 @@ body {
                             </svg>
                         </span>
                         <div class="resource-title" title="{{ resource[1] }}">{{ resource[1] }}</div>
-                        {% if resource[4] and resource[4] >= 50 %}
+                        {% if resource[19] %}
                             <span class="badge-popular">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.6-4.9-2.6-4.9 2.6.9-5.6-4-3.9 5.5-.8z" />
                                 </svg>
-                                Popular
+                                {{ resource[19] }}
                             </span>
                         {% endif %}
                     </div>
                     {% if resource[7] %}<div class="tag-row"><span class="tag-chip">Subject: {{ resource[7] }}</span></div>{% endif %}
                     {% if resource[5] %}<div class="tag-row">{% for tag in resource[5].split(',') %}{% if tag.strip() %}<span class="tag-chip">{{ tag.strip() }}</span>{% endif %}{% endfor %}</div>{% endif %}
+                    <div class="resource-rating-summary">{% if resource[9] %}⭐ {{ '%.1f'|format(resource[8]) }} ({{ resource[9] }}){% else %}No ratings yet{% endif %}{% if resource[11] %} · 👍 {{ '%.0f'|format(resource[12]) }}% helpful{% endif %}</div>
                 </div>
                 <div class="view-count">
                     <div class="eye">
@@ -569,7 +635,8 @@ body {
                     <span>views</span>
                 </div>
                 <div class="actions-col">
-                    <a class="act act-open" href="{{ url_for('open_general_resource', resource_id=resource[0]) }}" target="_blank">
+                    <button class="act act-rate" type="button" data-resource-id="{{ resource[0] }}" data-title="{{ resource[1] | e }}" onclick="openFeedbackFromCard(this)">Rate</button>
+                    <a class="act act-open" href="{{ url_for('open_general_resource', resource_id=resource[0]) }}" target="_blank" data-resource-id="{{ resource[0] }}" data-title="{{ resource[1] | e }}" onclick="openFeedbackAfterOpen(this)">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M14 3h7v7" />
                             <path d="M10 14L21 3" />
@@ -578,7 +645,7 @@ body {
                         Open
                     </a>
                     {% if lv.startswith('/static/uploads/general_resources/') or lv.lower().endswith('.pdf') or lv.lower().endswith('.html') or lv.lower().endswith('.htm') %}
-                        <button class="act act-preview" type="button" data-link="{{ lv | e }}" data-title="{{ resource[1] | e }}" onclick="openPreviewFromButton(this)">
+                        <button class="act act-preview" type="button" data-link="{{ lv | e }}" data-title="{{ resource[1] | e }}" data-resource-id="{{ resource[0] }}" onclick="openPreviewFromButton(this)">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M1.5 12s4.5-7 10.5-7 10.5 7 10.5 7-4.5 7-10.5 7S1.5 12 1.5 12z" />
                                 <circle cx="12" cy="12" r="3.5" />
@@ -659,17 +726,18 @@ body {
                             </svg>
                         </span>
                         <div class="resource-title" title="{{ resource[1] }}">{{ resource[1] }}</div>
-                        {% if resource[4] and resource[4] >= 50 %}
+                        {% if resource[19] %}
                             <span class="badge-popular">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.6-4.9-2.6-4.9 2.6.9-5.6-4-3.9 5.5-.8z" />
                                 </svg>
-                                Popular
+                                {{ resource[19] }}
                             </span>
                         {% endif %}
                     </div>
                     {% if resource[7] %}<div class="tag-row"><span class="tag-chip">Subject: {{ resource[7] }}</span></div>{% endif %}
                     {% if resource[5] %}<div class="tag-row">{% for tag in resource[5].split(',') %}{% if tag.strip() %}<span class="tag-chip">{{ tag.strip() }}</span>{% endif %}{% endfor %}</div>{% endif %}
+                    <div class="resource-rating-summary">{% if resource[9] %}⭐ {{ '%.1f'|format(resource[8]) }} ({{ resource[9] }}){% else %}No ratings yet{% endif %}{% if resource[11] %} · 👍 {{ '%.0f'|format(resource[12]) }}% helpful{% endif %}</div>
                 </div>
                 <div class="view-count">
                     <div class="eye">
@@ -682,7 +750,8 @@ body {
                     <span>views</span>
                 </div>
                 <div class="actions-col">
-                    <a class="act act-open" href="{{ url_for('open_general_resource', resource_id=resource[0]) }}" target="_blank">
+                    <button class="act act-rate" type="button" data-resource-id="{{ resource[0] }}" data-title="{{ resource[1] | e }}" onclick="openFeedbackFromCard(this)">Rate</button>
+                    <a class="act act-open" href="{{ url_for('open_general_resource', resource_id=resource[0]) }}" target="_blank" data-resource-id="{{ resource[0] }}" data-title="{{ resource[1] | e }}" onclick="openFeedbackAfterOpen(this)">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M14 3h7v7" />
                             <path d="M10 14L21 3" />
@@ -691,7 +760,7 @@ body {
                         Open
                     </a>
                     {% if lv.startswith('/static/uploads/general_resources/') or lv.lower().endswith('.pdf') or lv.lower().endswith('.html') or lv.lower().endswith('.htm') %}
-                        <button class="act act-preview" type="button" data-link="{{ lv | e }}" data-title="{{ resource[1] | e }}" onclick="openPreviewFromButton(this)">
+                        <button class="act act-preview" type="button" data-link="{{ lv | e }}" data-title="{{ resource[1] | e }}" data-resource-id="{{ resource[0] }}" onclick="openPreviewFromButton(this)">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M1.5 12s4.5-7 10.5-7 10.5 7 10.5 7-4.5 7-10.5 7S1.5 12 1.5 12z" />
                                 <circle cx="12" cy="12" r="3.5" />
@@ -745,6 +814,42 @@ body {
             <button class="preview-close" type="button" onclick="closePreview()" title="Close (Esc)">✕</button>
         </div>
         <iframe class="preview-frame" id="previewFrame" title="Resource preview"></iframe>
+        <div class="feedback-strip" id="feedbackStrip">
+            <span>Rate this resource:</span>
+            <span id="feedbackStars">{% for n in range(1, 6) %}<button type="button" data-rating="{{ n }}" onclick="selectResourceRating({{ n }})">★</button>{% endfor %}</span>
+            <span>Was it helpful?</span>
+            <button type="button" title="25% helpful" data-helpfulness="1" onclick="selectResourceHelpful(1)">😕 25%</button>
+            <button type="button" title="50% helpful" data-helpfulness="2" onclick="selectResourceHelpful(2)">😐 50%</button>
+            <button type="button" title="75% helpful" data-helpfulness="3" onclick="selectResourceHelpful(3)">🙂 75%</button>
+            <button type="button" title="100% helpful" data-helpfulness="4" onclick="selectResourceHelpful(4)">🤩 100%</button>
+            <div class="feedback-tags">
+                <span>Quick tags:</span>
+                <button type="button" class="positive" data-review-tag="Easy to understand" onclick="toggleReviewTag(this)">Easy to understand</button>
+                <button type="button" class="positive" data-review-tag="Complete syllabus" onclick="toggleReviewTag(this)">Complete syllabus</button>
+                <button type="button" class="positive" data-review-tag="Good for revision" onclick="toggleReviewTag(this)">Good for revision</button>
+                <button type="button" class="positive" data-review-tag="Good examples" onclick="toggleReviewTag(this)">Good examples</button>
+                <button type="button" class="negative" data-review-tag="Outdated" onclick="toggleReviewTag(this)">Outdated</button>
+                <button type="button" class="negative" data-review-tag="Missing topics" onclick="toggleReviewTag(this)">Missing topics</button>
+            </div>
+            <textarea id="feedbackReview" class="feedback-review" maxlength="500" placeholder="Optional review: what did you like or what can be improved?"></textarea>
+            <button type="button" id="feedbackSubmitButton" class="feedback-submit" onclick="submitResourceFeedback()">Submit</button>
+            <button type="button" id="feedbackEditButton" class="feedback-submit" onclick="editFeedback()" style="display:none">Edit your feedback</button>
+            <span class="feedback-message" id="feedbackMessage"></span>
+            <div class="recent-reviews" id="recentReviews"></div>
+            <div class="report-zone">
+                <button type="button" class="report-link" onclick="toggleReportForm()">Report an issue</button>
+                <select id="reportIssue" style="display:none">
+                    <option value="">Choose issue</option>
+                    <option value="outdated">Outdated content</option>
+                    <option value="broken">Broken link</option>
+                    <option value="incorrect">Incorrect information</option>
+                    <option value="other">Other</option>
+                </select>
+                <input id="reportDetails" type="text" maxlength="300" placeholder="Optional details" style="display:none">
+                <button id="reportSubmit" type="button" class="feedback-submit" onclick="submitResourceReport()" style="display:none">Send report</button>
+                <span id="reportMessage" class="feedback-message"></span>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -869,6 +974,12 @@ const activeFilters = document.getElementById('activeFilters');
 const subjectsByProgram = {{ subjects_by_program | tojson }};
 const hasUnassigned = {{ has_unassigned | tojson }};
 
+function changeResourceSort(value) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('sort', value);
+    window.location.href = url.toString();
+}
+
 function applyFilters() {
     const q = (searchInput.value || '').trim().toLowerCase();
     const t = (tagFilter.value  || '').trim().toLowerCase();
@@ -930,10 +1041,38 @@ function switchTab(name) {
     renderSubjectGrid(name);
 }
 
+function saveResourceViewState() {
+    try {
+        const active = document.querySelector('.tab-panel.active');
+        sessionStorage.setItem('mh_resource_view_state', JSON.stringify({
+            program: active ? active.id.replace('panel-', '') : 'degree',
+            subject: subjectFilter.value || '',
+            tag: tagFilter.value || '',
+            search: searchInput.value || ''
+        }));
+    } catch (_) {}
+}
+
+function restoreResourceViewState() {
+    let saved = null;
+    try {
+        saved = JSON.parse(sessionStorage.getItem('mh_resource_view_state') || 'null');
+        sessionStorage.removeItem('mh_resource_view_state');
+    } catch (_) {}
+    const program = saved && (saved.program === 'diploma' || saved.program === 'degree') ? saved.program : 'degree';
+    searchInput.value = saved && saved.search ? saved.search : '';
+    tagFilter.value = saved && saved.tag ? saved.tag : '';
+    switchTab(program);
+    if (saved && saved.subject) {
+        refreshSubjectOptions(program);
+        subjectFilter.value = saved.subject;
+        applyFilters();
+        renderSubjectGrid(program);
+    }
+}
+
 /* INIT */
-refreshSubjectOptions('degree');
-applyFilters();
-switchTab('degree');
+restoreResourceViewState();
 
 /* ════════════════════════════════════════════════
    PREVIEW MODAL
@@ -941,25 +1080,193 @@ switchTab('degree');
 const previewModal = document.getElementById('previewModal');
 const previewFrame = document.getElementById('previewFrame');
 const previewTitle = document.getElementById('previewTitle');
+let feedbackResourceId = null;
+let feedbackRating = null;
+let feedbackHelpful = null;
+let feedbackReviewTags = [];
+let feedbackSaved = false;
+let feedbackEditing = false;
 
-function openPreview(link, title) {
+function setFeedbackFormEditable(editable) {
+    feedbackEditing = editable;
+    document.querySelectorAll('#feedbackStars button, #feedbackStrip button[data-helpfulness], [data-review-tag]').forEach(btn => {
+        btn.disabled = !editable;
+    });
+    document.getElementById('feedbackReview').disabled = !editable;
+    document.getElementById('feedbackSubmitButton').style.display = editable ? '' : 'none';
+    document.getElementById('feedbackEditButton').style.display = editable ? 'none' : '';
+    document.getElementById('feedbackSubmitButton').textContent = editable && feedbackSaved ? 'Update feedback' : 'Submit';
+}
+
+function editFeedback() {
+    setFeedbackFormEditable(true);
+    document.getElementById('feedbackMessage').textContent = '';
+}
+
+function fillExistingFeedback(mine) {
+    if (!mine) {
+        setFeedbackFormEditable(true);
+        return;
+    }
+    feedbackRating = mine.rating;
+    feedbackHelpful = mine.helpfulness;
+    feedbackReviewTags = Array.isArray(mine.tags) ? mine.tags : [];
+    document.getElementById('feedbackReview').value = mine.review || '';
+    document.querySelectorAll('#feedbackStars button').forEach(btn => btn.classList.toggle('selected', Number(btn.dataset.rating) <= Number(feedbackRating || 0)));
+    document.querySelectorAll('#feedbackStrip button[data-helpfulness]').forEach(btn => btn.classList.toggle('selected', String(feedbackHelpful) === btn.dataset.helpfulness));
+    document.querySelectorAll('[data-review-tag]').forEach(btn => btn.classList.toggle('selected', feedbackReviewTags.includes(btn.dataset.reviewTag)));
+    setFeedbackFormEditable(false);
+}
+
+function renderRecentReviews(data) {
+    const target = document.getElementById('recentReviews');
+    target.innerHTML = data.reviews && data.reviews.length
+        ? '<strong>Recent reviews</strong>' + data.reviews.map(item => {
+            const voteLabel = item.viewerHelpful ? '👎 Remove vote' : '👍 Helpful';
+            const votedClass = item.viewerHelpful ? ' voted' : '';
+            return `<div class="recent-review">“${escapeHtml(item.review)}”${item.tags && item.tags.length ? ` · ${item.tags.map(escapeHtml).join(', ')}` : ''}${item.date ? ` · ${item.date}` : ''} <button type="button" class="review-helpful${votedClass}" onclick="toggleReviewHelpful(${Number(item.id)}, this)">${voteLabel} · ${Number(item.helpfulCount || 0)}</button></div>`;
+        }).join('')
+        : '';
+}
+
+function openPreview(link, title, resourceId) {
     if (!link) return;
     previewTitle.textContent = title || 'Preview';
     previewFrame.src = link;
+    feedbackResourceId = resourceId || null;
+    feedbackRating = null;
+    feedbackHelpful = null;
+    feedbackReviewTags = [];
+    feedbackSaved = false;
+    feedbackEditing = false;
+    document.querySelectorAll('#feedbackStars button, #feedbackStrip button[data-helpfulness]').forEach(btn => btn.classList.remove('selected'));
+    document.querySelectorAll('[data-review-tag]').forEach(btn => btn.classList.remove('selected'));
+    document.getElementById('feedbackReview').value = '';
+    document.getElementById('feedbackSubmitButton').textContent = 'Submit';
+    document.getElementById('feedbackSubmitButton').style.display = '';
+    document.getElementById('feedbackEditButton').style.display = 'none';
+    document.getElementById('feedbackMessage').textContent = '';
+    document.getElementById('reportMessage').textContent = '';
+    document.getElementById('reportIssue').style.display = 'none';
+    document.getElementById('reportDetails').style.display = 'none';
+    document.getElementById('reportSubmit').style.display = 'none';
+    document.getElementById('recentReviews').textContent = 'Loading reviews…';
+    previewModal.classList.remove('feedback-only');
+    previewFrame.style.display = '';
     previewModal.classList.add('active');
     previewModal.setAttribute('aria-hidden', 'false');
+    fetch(`/api/general-resources/${resourceId}/reviews`)
+        .then(response => response.json())
+        .then(data => {
+            renderRecentReviews(data);
+            fillExistingFeedback(data.mine);
+        })
+        .catch(() => { document.getElementById('recentReviews').textContent = ''; });
 }
 function openPreviewFromButton(btn) {
     if (!btn) return;
-    openPreview(btn.dataset.link || '', btn.dataset.title || 'Preview');
+    openPreview(btn.dataset.link || '', btn.dataset.title || 'Preview', btn.dataset.resourceId);
+}
+function openFeedbackAfterOpen(link) {
+    if (!link) return;
+    openFeedbackFromCard(link);
+}
+function openFeedbackFromCard(button) {
+    if (!button) return;
+    openPreview('about:blank', button.dataset.title || 'Rate resource', button.dataset.resourceId);
+    previewModal.classList.add('feedback-only');
+    previewFrame.style.display = 'none';
 }
 function closePreview() {
+    const shouldRefresh = feedbackSaved;
     previewModal.classList.remove('active');
     previewModal.setAttribute('aria-hidden', 'true');
     previewFrame.src = '';
+    previewModal.classList.remove('feedback-only');
+    previewFrame.style.display = '';
+    if (shouldRefresh) {
+        saveResourceViewState();
+        window.location.reload();
+    }
 }
 previewModal.addEventListener('click', e => { if (e.target === previewModal) closePreview(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closePreview(); });
+
+function selectResourceRating(value) {
+    feedbackRating = value;
+    document.querySelectorAll('#feedbackStars button').forEach(btn => btn.classList.toggle('selected', Number(btn.dataset.rating) <= value));
+}
+function selectResourceHelpful(value) {
+    feedbackHelpful = value;
+    document.querySelectorAll('#feedbackStrip button[data-helpfulness]').forEach(btn => btn.classList.toggle('selected', String(value) === btn.dataset.helpfulness));
+}
+function toggleReviewTag(button) {
+    const tag = button.dataset.reviewTag;
+    if (feedbackReviewTags.includes(tag)) {
+        feedbackReviewTags = feedbackReviewTags.filter(item => item !== tag);
+        button.classList.remove('selected');
+    } else {
+        feedbackReviewTags.push(tag);
+        button.classList.add('selected');
+    }
+}
+function submitResourceFeedback() {
+    const review = document.getElementById('feedbackReview').value.trim();
+    if (!feedbackResourceId || (!feedbackRating && feedbackHelpful === null && !review)) {
+        document.getElementById('feedbackMessage').textContent = 'Choose a rating, helpful vote, or write a review.';
+        return;
+    }
+    fetch(`/api/general-resources/${feedbackResourceId}/feedback`, {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({rating: feedbackRating, helpfulness: feedbackHelpful, review: review, review_tags: feedbackReviewTags})
+    }).then(async response => ({ok: response.ok, data: await response.json()}))
+      .then(({ok, data}) => {
+          document.getElementById('feedbackMessage').textContent = data.message || data.error || '';
+          if (ok) {
+              feedbackSaved = true;
+              document.getElementById('feedbackMessage').textContent = 'Feedback saved. You can edit it anytime.';
+              setFeedbackFormEditable(false);
+          }
+      }).catch(() => { document.getElementById('feedbackMessage').textContent = 'Could not save feedback.'; });
+}
+
+function toggleReviewHelpful(reviewId, button) {
+    fetch(`/api/general-resources/${feedbackResourceId}/reviews/${reviewId}/helpful`, {
+        method: 'POST', headers: {'Content-Type': 'application/json'}
+    }).then(async response => ({ok: response.ok, data: await response.json()}))
+      .then(({ok, data}) => {
+          if (!ok) return;
+          button.classList.toggle('voted', !!data.viewerHelpful);
+          button.textContent = `${data.viewerHelpful ? '👎 Remove vote' : '👍 Helpful'} · ${Number(data.helpfulCount || 0)}`;
+      }).catch(() => {});
+}
+
+function toggleReportForm() {
+    const visible = document.getElementById('reportIssue').style.display !== 'none';
+    ['reportIssue', 'reportDetails', 'reportSubmit'].forEach(id => {
+        document.getElementById(id).style.display = visible ? 'none' : '';
+    });
+}
+
+function submitResourceReport() {
+    const issueType = document.getElementById('reportIssue').value;
+    const details = document.getElementById('reportDetails').value.trim();
+    if (!issueType) {
+        document.getElementById('reportMessage').textContent = 'Choose an issue first.';
+        return;
+    }
+    fetch(`/api/general-resources/${feedbackResourceId}/report`, {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({issue_type: issueType, details: details})
+    }).then(async response => ({ok: response.ok, data: await response.json()}))
+      .then(({data}) => {
+          document.getElementById('reportMessage').textContent = data.message || data.error || '';
+      }).catch(() => { document.getElementById('reportMessage').textContent = 'Could not send report.'; });
+}
+
+function escapeHtml(value) {
+    return String(value).replace(/[&<>'"]/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
+}
 
 window.addEventListener('resize', () => {
     renderPage('diploma');
