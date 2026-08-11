@@ -1453,9 +1453,46 @@
                 </div>
 
                 <div class="nav-section">
+                    <div class="nav-section-title">Account</div>
+
+                    {% if current_user %}
+                        <a class="nav-link" href="{{ url_for('my_resource_submissions') }}">
+                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                <path d="M6 5.5H18M6 12H18M6 18.5H13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                            </svg>
+                            <span class="nav-label">My Submissions</span>
+                        </a>
+
+                        <a class="nav-link" href="{{ url_for('submit_general_resource') }}">
+                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                            </svg>
+                            <span class="nav-label">Submit Resource</span>
+                        </a>
+
+                        <a class="nav-link" href="{{ url_for('user_logout') }}">
+                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                <path d="M10 6H6.5A1.5 1.5 0 0 0 5 7.5V16.5A1.5 1.5 0 0 0 6.5 18H10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                <path d="M14 8L18 12L14 16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M18 12H10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                            </svg>
+                            <span class="nav-label">Logout</span>
+                        </a>
+                    {% else %}
+                        <a class="nav-link" href="{{ url_for('google_login', next=request.path) }}">
+                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                <path d="M12 12.25A4 4 0 1 0 12 4.25A4 4 0 0 0 12 12.25Z" stroke="currentColor" stroke-width="1.8"/>
+                                <path d="M4.75 20A7.25 7.25 0 0 1 19.25 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                            </svg>
+                            <span class="nav-label">Google Login</span>
+                        </a>
+                    {% endif %}
+                </div>
+
+                <div class="nav-section">
                     <div class="nav-section-title">Admin</div>
 
-                    {% if not session['admin_mode'] %}
+                    {% if not session.get('admin_mode') %}
                         <form class="admin-login-form" action="{{ url_for('admin_login') }}" method="post">
                             <div class="admin-login-title">Admin access</div>
 
@@ -1484,6 +1521,14 @@
                                 <path d="M5 18.75H19" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
                             </svg>
                             <span class="nav-label">Add Resource</span>
+                        </a>
+
+                        <a class="nav-link" href="{{ url_for('admin_pending_resource_submissions') }}">
+                            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                <path d="M6 5.5H18M6 12H18M6 18.5H13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                <path d="M17 16L19 18L22 14.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <span class="nav-label">Pending Resources</span>
                         </a>
 
                         <a class="nav-link" href="{{ url_for('admin_analytics') }}">
@@ -1552,7 +1597,7 @@
                         <span class="avatar">AD</span>
                         <span class="profile-copy">
                             <span class="profile-name">Admin</span>
-                            <span class="profile-role">{% if session['admin_mode'] %}Active{% else %}Viewer{% endif %}</span>
+                            <span class="profile-role">{% if session.get('admin_mode') %}Active{% else %}Viewer{% endif %}</span>
                         </span>
                     </div>
                 </div>
@@ -1594,7 +1639,7 @@
                                 <p class="section-note">Select a course to continue.</p>
                             </div>
 
-                            {% if session['admin_mode'] %}
+                            {% if session.get('admin_mode') %}
                                 <a class="btn" href="{{ url_for('admin_add_course') }}">
                                     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
                                         <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
@@ -1637,7 +1682,7 @@
                                         </div>
 
                                         <div class="course-footer">
-                                            {% if session['admin_mode'] %}
+                                            {% if session.get('admin_mode') %}
                                                 {% if course[1]|lower == 'business analytics' %}
                                                     <a href="https://ba-quiz-calculator.vercel.app/" target="_blank" rel="noopener noreferrer" class="course-action-link">
                                                         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -1687,7 +1732,7 @@
                                         </p>
                                     </div>
 
-                                    {% if session['admin_mode'] %}
+                                    {% if session.get('admin_mode') %}
                                         <a class="btn" href="{{ url_for('admin_add_course') }}">Create course</a>
                                     {% endif %}
                                 </div>

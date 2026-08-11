@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Submissions</title>
+    <link rel="icon" href="data:,">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: #f4f7fb;
+            color: #0f172a;
+            min-height: 100vh;
+            padding: 22px;
+        }
+        .shell { max-width: 1040px; margin: 0 auto; }
+        .topbar, .card {
+            background: #ffffff;
+            border: 1px solid #dbe3ef;
+            border-radius: 14px;
+            box-shadow: 0 12px 28px rgba(15, 23, 42, .08);
+        }
+        .topbar {
+            padding: 18px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+        h1 { margin: 0; font-size: 1.7rem; }
+        .muted { color: #64748b; font-size: .9rem; margin-top: 4px; }
+        .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            padding: 9px 13px;
+            border: 1px solid #cbd5e1;
+            background: #fff;
+            color: #0f172a;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: .86rem;
+        }
+        .btn-primary { background: #2563eb; color: #fff; border-color: #2563eb; }
+        .grid { display: grid; gap: 10px; }
+        .card { padding: 16px; }
+        .row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+            align-items: start;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 12px;
+            margin-top: 12px;
+        }
+        .row:first-child { border-top: 0; padding-top: 0; margin-top: 0; }
+        .title { font-weight: 800; margin-bottom: 5px; }
+        .meta { display: flex; flex-wrap: wrap; gap: 7px; color: #64748b; font-size: .82rem; }
+        .status {
+            border-radius: 999px;
+            padding: 5px 10px;
+            font-size: .76rem;
+            font-weight: 800;
+            text-transform: capitalize;
+            white-space: nowrap;
+        }
+        .pending { background: #fef3c7; color: #92400e; }
+        .approved { background: #dcfce7; color: #166534; }
+        .rejected { background: #fee2e2; color: #991b1b; }
+        .reason {
+            margin-top: 8px;
+            padding: 9px 10px;
+            background: #fff1f2;
+            border: 1px solid #fecdd3;
+            color: #9f1239;
+            border-radius: 10px;
+            font-size: .86rem;
+        }
+        .empty { text-align: center; padding: 34px 16px; color: #64748b; }
+        @media (max-width: 640px) {
+            body { padding: 12px; }
+            .row { grid-template-columns: 1fr; }
+            .status { width: fit-content; }
+        }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <section class="topbar">
+            <div>
+                <h1>My Submissions</h1>
+                <div class="muted">Track what is pending, approved, or rejected.</div>
+            </div>
+            <div class="actions">
+                <a class="btn btn-primary" href="{{ url_for('submit_general_resource') }}">Submit Resource</a>
+                <a class="btn" href="{{ url_for('general_resources_page') }}">General Resources</a>
+            </div>
+        </section>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <section class="card" style="margin-bottom: 14px;">
+                    {% for category, message in messages %}
+                        <div style="padding:10px 12px; border-radius:10px; font-size:.86rem; font-weight:700; margin-top:8px; {% if loop.first %}margin-top:0;{% endif %} {% if category == 'success' %}background:#dcfce7; border:1px solid #bbf7d0; color:#166534;{% else %}background:#fee2e2; border:1px solid #fecaca; color:#991b1b;{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </section>
+            {% endif %}
+        {% endwith %}
+
+        <section class="card">
+            {% if submissions %}
+                <div class="grid">
+                    {% for item in submissions %}
+                        <article class="row">
+                            <div>
+                                <div class="title">{{ item.title }}</div>
+                                <div class="meta">
+                                    <span>{{ item.program_type|title }}</span>
+                                    <span>{{ item.subject_name or 'No subject' }}</span>
+                                    <span>{{ item.created_at.strftime('%d %b %Y') if item.created_at else '' }}</span>
+                                    {% if item.tags %}<span>{{ item.tags }}</span>{% endif %}
+                                </div>
+                                {% if item.description %}
+                                    <p class="muted">{{ item.description }}</p>
+                                {% endif %}
+                                {% if item.status == 'rejected' and item.rejection_reason %}
+                                    <div class="reason">Rejected reason: {{ item.rejection_reason }}</div>
+                                {% endif %}
+                            </div>
+                            <span class="status {{ item.status }}">{{ item.status }}</span>
+                        </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty">You have not submitted any resources yet.</div>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>

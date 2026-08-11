@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pending Resource Submissions</title>
+    <link rel="icon" href="data:,">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: #f4f7fb;
+            color: #0f172a;
+            min-height: 100vh;
+            padding: 22px;
+        }
+        .shell { max-width: 1180px; margin: 0 auto; }
+        .topbar, .card {
+            background: #ffffff;
+            border: 1px solid #dbe3ef;
+            border-radius: 14px;
+            box-shadow: 0 12px 28px rgba(15, 23, 42, .08);
+        }
+        .topbar {
+            padding: 18px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+        h1 { margin: 0; font-size: 1.7rem; }
+        .muted { color: #64748b; font-size: .9rem; margin-top: 4px; }
+        .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+        .btn, button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            padding: 9px 13px;
+            border: 1px solid #cbd5e1;
+            background: #fff;
+            color: #0f172a;
+            text-decoration: none;
+            font-weight: 800;
+            font-size: .84rem;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .btn-primary, .approve { background: #16a34a; color: #fff; border-color: #16a34a; }
+        .btn-blue { background: #2563eb; color: #fff; border-color: #2563eb; }
+        .reject { background: #dc2626; color: #fff; border-color: #dc2626; }
+        .card { padding: 16px; }
+        .item {
+            display: grid;
+            grid-template-columns: 1fr 360px;
+            gap: 14px;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 14px;
+            margin-top: 14px;
+        }
+        .item:first-child { border-top: 0; padding-top: 0; margin-top: 0; }
+        .title { font-weight: 900; font-size: 1rem; margin-bottom: 6px; }
+        .meta { display: flex; flex-wrap: wrap; gap: 7px; color: #64748b; font-size: .82rem; }
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: 4px 9px;
+            font-size: .74rem;
+            font-weight: 800;
+            text-transform: capitalize;
+        }
+        .pending { background: #fef3c7; color: #92400e; }
+        .approved { background: #dcfce7; color: #166534; }
+        .rejected { background: #fee2e2; color: #991b1b; }
+        .description {
+            margin-top: 9px;
+            color: #475569;
+            font-size: .88rem;
+        }
+        .review-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px;
+        }
+        textarea {
+            width: 100%;
+            min-height: 76px;
+            resize: vertical;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 9px 10px;
+            font: inherit;
+            margin: 8px 0;
+        }
+        .empty { text-align: center; padding: 34px 16px; color: #64748b; }
+        @media (max-width: 820px) {
+            body { padding: 12px; }
+            .item { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <section class="topbar">
+            <div>
+                <h1>Resource Submissions</h1>
+                <div class="muted">Approve user resources or reject with a reason.</div>
+            </div>
+            <div class="actions">
+                <a class="btn btn-blue" href="{{ url_for('general_resources_page') }}">General Resources</a>
+                <a class="btn" href="{{ url_for('admin_add_general_resource') }}">Admin Add Resource</a>
+            </div>
+        </section>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <section class="card" style="margin-bottom: 14px;">
+                    {% for category, message in messages %}
+                        <div style="padding:10px 12px; border-radius:10px; font-size:.86rem; font-weight:700; margin-top:8px; {% if loop.first %}margin-top:0;{% endif %} {% if category == 'success' %}background:#dcfce7; border:1px solid #bbf7d0; color:#166534;{% else %}background:#fee2e2; border:1px solid #fecaca; color:#991b1b;{% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </section>
+            {% endif %}
+        {% endwith %}
+
+        <section class="card">
+            {% if submissions %}
+                {% for item in submissions %}
+                    <article class="item">
+                        <div>
+                            <div class="title">{{ item.title }}</div>
+                            <div class="meta">
+                                <span class="chip {{ item.status }}">{{ item.status }}</span>
+                                <span>{{ item.program_type|title }}</span>
+                                <span>{{ item.subject_name or 'No subject' }}</span>
+                                <span>{{ item.created_at.strftime('%d %b %Y, %I:%M %p') if item.created_at else '' }}</span>
+                                <span>{{ item.submitter_name }} &lt;{{ item.submitter_email }}&gt;</span>
+                            </div>
+                            {% if item.tags %}
+                                <div class="description">Tags: {{ item.tags }}</div>
+                            {% endif %}
+                            {% if item.description %}
+                                <div class="description">{{ item.description }}</div>
+                            {% endif %}
+                            {% if item.status == 'rejected' and item.rejection_reason %}
+                                <div class="description">Reject reason: {{ item.rejection_reason }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="review-box">
+                            <div class="actions">
+                                <a class="btn" href="{{ item.resource_link }}" target="_blank" rel="noopener">Preview/Open</a>
+                                {% if item.status == 'pending' %}
+                                    <form method="post" action="{{ url_for('admin_approve_resource_submission', submission_id=item.id) }}">
+                                        <button class="approve" type="submit">Approve</button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                            {% if item.status == 'pending' %}
+                                <form method="post" action="{{ url_for('admin_reject_resource_submission', submission_id=item.id) }}">
+                                    <textarea name="rejection_reason" placeholder="Reason shown to user, e.g. Link is not opening." required></textarea>
+                                    <button class="reject" type="submit">Reject</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </article>
+                {% endfor %}
+            {% else %}
+                <div class="empty">No submissions yet.</div>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>

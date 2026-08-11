@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory, Response, jsonify
+from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory, Response, jsonify, g
 import psycopg2
 import psycopg2.extras
 import sqlite3
@@ -9,12 +9,13 @@ import uuid
 import hashlib
 import math
 import mimetypes
+import secrets
 from werkzeug.utils import secure_filename
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlencode
 import requests
 
 app = Flask(__name__)
@@ -25,6 +26,18 @@ UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 RESOURCE_ALLOWED_EXTENSIONS = {'pdf', 'html', 'htm'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# Google OAuth configuration. Add these on Render before enabling login.
+GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '').strip()
+GOOGLE_CLIENT_SECRET = os.environ.get('GOOGLE_CLIENT_SECRET', '').strip()
+GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth'
+GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token'
+GOOGLE_USERINFO_URL = 'https://www.googleapis.com/oauth2/v2/userinfo'
+ADMIN_EMAILS = {
+    email.strip().lower()
+    for email in os.environ.get('ADMIN_EMAILS', '').split(',')
+    if email.strip()
+}
 
 # Resource ranking is intentionally cached for a short period. Feedback and
 # view updates invalidate the relevant course immediately.
@@ -246,6 +259,47 @@ def anonymous_identity():
     ip = request.headers.get('X-Forwarded-For', request.remote_addr or '').split(',')[0].strip()
     ip_hash = hashlib.sha256(f'{app.secret_key}:{ip}'.encode('utf-8')).hexdigest()
     return anonymous_id, ip_hash, not request.cookies.get('mh_anon_id')
+
+def fetch_user_by_id(user_id):
+    if not user_id:
+        return None
+    conn = get_db_connection()
+    if not conn:
+        return None
+    try:
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cur.execute(
+            '''
+            SELECT id, google_id, name, email, profile_picture, role, is_active
+            FROM users
+            WHERE id=%s AND is_active=TRUE
+            ''',
+            (user_id,)
+        )
+        user = cur.fetchone()
+        cur.close()
+        return dict(user) if user else None
+    except Exception as exc:
+        print(f'Error fetching current user: {exc}')
+        return None
+    finally:
+        conn.close()
+
+@app.before_request
+def load_current_user():
+    g.current_user = fetch_user_by_id(session.get('user_id'))
+    if g.current_user and g.current_user.get('role') == 'admin':
+        session['admin_mode'] = True
+
+@app.context_processor
+def inject_current_user():
+    return {'current_user': getattr(g, 'current_user', None)}
+
+def login_required(next_endpoint='general_resources_page'):
+    if not getattr(g, 'current_user', None):
+        flash('Please login with Google to continue.', 'error')
+        return redirect(url_for('google_login', next=request.path or url_for(next_endpoint)))
+    return None
 
 def invalidate_resource_ranking(course_id=None):
     if course_id is None:
@@ -874,6 +928,48 @@ def init_db():
         cur.execute('ALTER TABLE general_resources ADD COLUMN IF NOT EXISTS tags TEXT')
         cur.execute('ALTER TABLE general_resources ADD COLUMN IF NOT EXISTS subject_id INTEGER')
         cur.execute('ALTER TABLE general_resources ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP')
+        cur.execute('ALTER TABLE general_resources ADD COLUMN IF NOT EXISTS is_published BOOLEAN DEFAULT TRUE')
+        cur.execute('ALTER TABLE general_resources ADD COLUMN IF NOT EXISTS submitted_by INTEGER')
+        cur.execute('ALTER TABLE general_resources ADD COLUMN IF NOT EXISTS approved_by INTEGER')
+        cur.execute('ALTER TABLE general_resources ADD COLUMN IF NOT EXISTS approved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP')
+        cur.execute('ALTER TABLE general_resources ADD COLUMN IF NOT EXISTS source_submission_id INTEGER')
+        cur.execute('UPDATE general_resources SET is_published=TRUE WHERE is_published IS NULL')
+
+        cur.execute('''
+            CREATE TABLE IF NOT EXISTS users (
+                id SERIAL PRIMARY KEY,
+                google_id TEXT UNIQUE,
+                name TEXT NOT NULL,
+                email TEXT UNIQUE NOT NULL,
+                profile_picture TEXT,
+                role TEXT DEFAULT 'user',
+                is_active BOOLEAN DEFAULT TRUE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        cur.execute('CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)')
+
+        cur.execute('''
+            CREATE TABLE IF NOT EXISTS pending_general_resources (
+                id SERIAL PRIMARY KEY,
+                submitted_by INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                title TEXT NOT NULL,
+                resource_link TEXT NOT NULL,
+                program_type TEXT NOT NULL,
+                subject_id INTEGER,
+                description TEXT,
+                tags TEXT,
+                status TEXT DEFAULT 'pending',
+                rejection_reason TEXT,
+                reviewed_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+                reviewed_at TIMESTAMP,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        cur.execute('CREATE INDEX IF NOT EXISTS idx_pending_general_resources_status ON pending_general_resources(status)')
+        cur.execute('CREATE INDEX IF NOT EXISTS idx_pending_general_resources_user ON pending_general_resources(submitted_by)')
 
         cur.execute('''
             CREATE TABLE IF NOT EXISTS general_resource_feedback (
@@ -987,7 +1083,13 @@ def backup_db():
         backup_content.append("")
         
         # Backup each table
-        tables = ['courses', 'quiz1', 'quiz2', 'endterm', 'resources', 'general_resource_subjects', 'general_resources', 'general_resource_feedback', 'general_resource_review_votes', 'general_resource_reports', 'extra_stuff', 'feedback', 'view_events']
+        tables = [
+            'courses', 'quiz1', 'quiz2', 'endterm', 'resources',
+            'users', 'general_resource_subjects', 'general_resources',
+            'pending_general_resources', 'general_resource_feedback',
+            'general_resource_review_votes', 'general_resource_reports',
+            'extra_stuff', 'feedback', 'view_events'
+        ]
         
         for table in tables:
             cur.execute(f"SELECT * FROM {table}")
@@ -1191,6 +1293,141 @@ def delete_feedback():
 import time
 from flask import send_file
 
+def google_redirect_uri():
+    configured = os.environ.get('GOOGLE_REDIRECT_URI', '').strip()
+    if configured:
+        return configured
+    return url_for('google_callback', _external=True)
+
+@app.route('/auth/google')
+def google_login():
+    if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
+        flash('Google login is not configured yet. Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET on Render.', 'error')
+        return redirect(url_for('general_resources_page'))
+
+    next_url = request.args.get('next') or url_for('general_resources_page')
+    state = secrets.token_urlsafe(24)
+    session['google_oauth_state'] = state
+    session['google_oauth_next'] = next_url
+    params = {
+        'client_id': GOOGLE_CLIENT_ID,
+        'redirect_uri': google_redirect_uri(),
+        'response_type': 'code',
+        'scope': 'openid email profile',
+        'state': state,
+        'access_type': 'online',
+        'prompt': 'select_account'
+    }
+    return redirect(f'{GOOGLE_AUTH_URL}?{urlencode(params)}')
+
+@app.route('/auth/google/callback')
+def google_callback():
+    state = request.args.get('state', '')
+    if not state or state != session.get('google_oauth_state'):
+        flash('Google login session expired. Please try again.', 'error')
+        return redirect(url_for('general_resources_page'))
+
+    code = request.args.get('code')
+    if not code:
+        flash('Google login failed. Please try again.', 'error')
+        return redirect(url_for('general_resources_page'))
+
+    try:
+        token_response = requests.post(
+            GOOGLE_TOKEN_URL,
+            data={
+                'code': code,
+                'client_id': GOOGLE_CLIENT_ID,
+                'client_secret': GOOGLE_CLIENT_SECRET,
+                'redirect_uri': google_redirect_uri(),
+                'grant_type': 'authorization_code'
+            },
+            timeout=10
+        )
+        token_response.raise_for_status()
+        access_token = token_response.json().get('access_token')
+        if not access_token:
+            raise RuntimeError('Missing Google access token')
+
+        user_response = requests.get(
+            GOOGLE_USERINFO_URL,
+            headers={'Authorization': f'Bearer {access_token}'},
+            timeout=10
+        )
+        user_response.raise_for_status()
+        profile = user_response.json()
+        email = (profile.get('email') or '').strip().lower()
+        google_id = profile.get('id')
+        name = profile.get('name') or email.split('@')[0]
+        picture = profile.get('picture')
+        if not email or not google_id:
+            raise RuntimeError('Google did not return a usable profile')
+
+        conn = get_db_connection()
+        if not conn:
+            flash('Database connection failed after Google login.', 'error')
+            return redirect(url_for('general_resources_page'))
+
+        try:
+            role = 'admin' if email in ADMIN_EMAILS else 'user'
+            cur = conn.cursor()
+            cur.execute('SELECT id, role FROM users WHERE email=%s', (email,))
+            existing = cur.fetchone()
+            if existing:
+                user_id, existing_role = existing
+                final_role = existing_role or role
+                if email in ADMIN_EMAILS:
+                    final_role = 'admin'
+                cur.execute(
+                    '''
+                    UPDATE users
+                    SET google_id=%s, name=%s, profile_picture=%s, role=%s,
+                        is_active=TRUE, updated_at=CURRENT_TIMESTAMP
+                    WHERE id=%s
+                    ''',
+                    (google_id, name, picture, final_role, user_id)
+                )
+            else:
+                cur.execute(
+                    '''
+                    INSERT INTO users (google_id, name, email, profile_picture, role)
+                    VALUES (%s, %s, %s, %s, %s)
+                    RETURNING id
+                    ''',
+                    (google_id, name, email, picture, role)
+                )
+                user_id = cur.fetchone()[0]
+                final_role = role
+            conn.commit()
+            cur.close()
+        finally:
+            conn.close()
+
+        session['user_id'] = user_id
+        session['user_name'] = name
+        session['user_email'] = email
+        session['user_role'] = final_role
+        if final_role == 'admin':
+            session['admin_mode'] = True
+        session.pop('google_oauth_state', None)
+        next_url = session.pop('google_oauth_next', None) or url_for('general_resources_page')
+        flash('Logged in successfully.', 'success')
+        return redirect(next_url)
+    except Exception as exc:
+        print(f'Google login error: {exc}')
+        flash('Google login failed. Please try again.', 'error')
+        return redirect(url_for('general_resources_page'))
+
+@app.route('/logout')
+def user_logout():
+    was_google_admin = session.get('user_role') == 'admin'
+    for key in ['user_id', 'user_name', 'user_email', 'user_role', 'google_oauth_state', 'google_oauth_next']:
+        session.pop(key, None)
+    if session.get('admin_mode') and was_google_admin and not session.get('legacy_admin_mode'):
+        session.pop('admin_mode', None)
+    flash('Logged out successfully.', 'success')
+    return redirect(url_for('general_resources_page'))
+
 # Home - Show all courses
 @app.route('/dashboard', methods=['GET', 'POST'])
 def course_view():
@@ -1260,6 +1497,7 @@ def general_resources_page():
                 GROUP BY content_id
             ) rv ON rv.content_id = gr.id
             WHERE gr.program_type = %s
+              AND COALESCE(gr.is_published, TRUE) = TRUE
             ORDER BY COALESCE(s.sort_order, 9999), COALESCE(s.name, ''), gr.sort_order, gr.id
         ''', ('diploma',))
             diploma_resources = decorate_general_resources(cur.fetchall())
@@ -1300,6 +1538,7 @@ def general_resources_page():
                 GROUP BY content_id
             ) rv ON rv.content_id = gr.id
             WHERE gr.program_type = %s
+              AND COALESCE(gr.is_published, TRUE) = TRUE
             ORDER BY COALESCE(s.sort_order, 9999), COALESCE(s.name, ''), gr.sort_order, gr.id
         ''', ('degree',))
             degree_resources = decorate_general_resources(cur.fetchall())
@@ -1549,10 +1788,15 @@ def admin_add_general_resource():
             next_order = cur.fetchone()[0] + 1
             cur.execute(
                 '''
-                INSERT INTO general_resources (title, resource_link, program_type, subject_id, tags, sort_order)
-                VALUES (%s, %s, %s, %s, %s, %s)
+                INSERT INTO general_resources
+                    (title, resource_link, program_type, subject_id, tags, sort_order,
+                     is_published, approved_by, approved_at)
+                VALUES (%s, %s, %s, %s, %s, %s, TRUE, %s, CURRENT_TIMESTAMP)
                 ''',
-                (title, final_link, program_type, subject_id, tags_value, next_order)
+                (
+                    title, final_link, program_type, subject_id, tags_value,
+                    next_order, g.current_user['id'] if getattr(g, 'current_user', None) else None
+                )
             )
             conn.commit()
             cur.close()
@@ -1575,6 +1819,309 @@ def admin_add_general_resource():
     if conn:
         conn.close()
     return render_template('admin_add_general_resource.html', subjects_by_program=subjects_by_program)
+
+@app.route('/resources/submit', methods=['GET', 'POST'])
+def submit_general_resource():
+    auth_redirect = login_required()
+    if auth_redirect:
+        return auth_redirect
+
+    if request.method == 'POST':
+        title = request.form.get('title', '').strip()
+        program_type = request.form.get('program_type', '').strip().lower()
+        subject_id_raw = request.form.get('subject_id', '').strip()
+        resource_link = request.form.get('resource_link', '').strip()
+        description = request.form.get('description', '').strip()
+        raw_tags = request.form.get('tags', '').strip()
+        pdf_file = request.files.get('resource_pdf')
+
+        if not title or program_type not in ['diploma', 'degree']:
+            flash('Please provide a valid title and program type.', 'error')
+            return redirect(url_for('submit_general_resource'))
+
+        if not subject_id_raw:
+            flash('Please select a subject first.', 'error')
+            return redirect(url_for('submit_general_resource'))
+
+        try:
+            subject_id = int(subject_id_raw)
+        except ValueError:
+            flash('Invalid subject selected.', 'error')
+            return redirect(url_for('submit_general_resource'))
+
+        final_link = None
+        if pdf_file and pdf_file.filename:
+            if not allowed_resource_file(pdf_file.filename):
+                flash('Only PDF or HTML uploads are allowed.', 'error')
+                return redirect(url_for('submit_general_resource'))
+            try:
+                final_link = upload_resource_to_supabase(pdf_file, folder='pending_general_resources')
+            except Exception as exc:
+                flash(f'Failed to upload file: {exc}', 'error')
+                return redirect(url_for('submit_general_resource'))
+        elif resource_link:
+            final_link = resource_link if resource_link.startswith('/') else ensure_url_scheme(resource_link)
+        else:
+            flash('Please add either a direct link or a PDF/HTML file.', 'error')
+            return redirect(url_for('submit_general_resource'))
+
+        tags_value = normalize_tags(raw_tags)
+        conn = get_db_connection()
+        if not conn:
+            flash('Database connection failed', 'error')
+            return redirect(url_for('submit_general_resource'))
+
+        try:
+            cur = conn.cursor()
+            cur.execute(
+                'SELECT id FROM general_resource_subjects WHERE id=%s AND program_type=%s',
+                (subject_id, program_type)
+            )
+            if not cur.fetchone():
+                flash('Selected subject is not valid for this program.', 'error')
+                cur.close()
+                conn.close()
+                return redirect(url_for('submit_general_resource'))
+
+            cur.execute(
+                '''
+                SELECT id FROM pending_general_resources
+                WHERE submitted_by=%s
+                  AND status='pending'
+                  AND (LOWER(title)=LOWER(%s) OR resource_link=%s)
+                LIMIT 1
+                ''',
+                (g.current_user['id'], title, final_link)
+            )
+            if cur.fetchone():
+                flash('You already have a pending submission with the same title or link.', 'error')
+                cur.close()
+                conn.close()
+                return redirect(url_for('submit_general_resource'))
+
+            cur.execute(
+                '''
+                INSERT INTO pending_general_resources
+                    (submitted_by, title, resource_link, program_type, subject_id, description, tags)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                ''',
+                (g.current_user['id'], title, final_link, program_type, subject_id, description, tags_value)
+            )
+            conn.commit()
+            cur.close()
+            backup_db()
+            flash('Resource submitted for admin approval.', 'success')
+            return redirect(url_for('my_resource_submissions'))
+        except Exception as exc:
+            conn.rollback()
+            flash(f'Failed to submit resource: {exc}', 'error')
+        finally:
+            conn.close()
+
+        return redirect(url_for('submit_general_resource'))
+
+    conn = get_db_connection()
+    subjects_by_program = fetch_general_resource_subjects(conn) if conn else {'diploma': [], 'degree': []}
+    if conn:
+        conn.close()
+    return render_template('submit_general_resource.html', subjects_by_program=subjects_by_program)
+
+@app.route('/my-submissions')
+def my_resource_submissions():
+    auth_redirect = login_required()
+    if auth_redirect:
+        return auth_redirect
+
+    conn = get_db_connection()
+    submissions = []
+    if not conn:
+        flash('Database connection failed', 'error')
+    else:
+        try:
+            cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            cur.execute(
+                '''
+                SELECT p.id, p.title, p.resource_link, p.program_type, p.description,
+                       p.tags, p.status, p.rejection_reason, p.created_at, p.reviewed_at,
+                       s.name AS subject_name
+                FROM pending_general_resources p
+                LEFT JOIN general_resource_subjects s ON s.id = p.subject_id
+                WHERE p.submitted_by=%s
+                ORDER BY p.created_at DESC
+                ''',
+                (g.current_user['id'],)
+            )
+            submissions = [dict(row) for row in cur.fetchall()]
+            cur.close()
+        except Exception as exc:
+            print(f'Error fetching user submissions: {exc}')
+            flash('Failed to load your submissions.', 'error')
+        finally:
+            conn.close()
+
+    return render_template('my_resource_submissions.html', submissions=submissions)
+
+@app.route('/admin/resources/submissions')
+def admin_pending_resource_submissions():
+    if not session.get('admin_mode'):
+        return redirect(url_for('general_resources_page'))
+
+    conn = get_db_connection()
+    submissions = []
+    if not conn:
+        flash('Database connection failed', 'error')
+    else:
+        try:
+            cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+            cur.execute(
+                '''
+                SELECT p.id, p.title, p.resource_link, p.program_type, p.description,
+                       p.tags, p.status, p.rejection_reason, p.created_at, p.reviewed_at,
+                       s.name AS subject_name, u.name AS submitter_name, u.email AS submitter_email
+                FROM pending_general_resources p
+                JOIN users u ON u.id = p.submitted_by
+                LEFT JOIN general_resource_subjects s ON s.id = p.subject_id
+                ORDER BY
+                    CASE p.status WHEN 'pending' THEN 0 WHEN 'approved' THEN 1 ELSE 2 END,
+                    p.created_at DESC
+                LIMIT 200
+                '''
+            )
+            submissions = [dict(row) for row in cur.fetchall()]
+            cur.close()
+        except Exception as exc:
+            print(f'Error fetching pending resources: {exc}')
+            flash('Failed to load pending submissions.', 'error')
+        finally:
+            conn.close()
+
+    return render_template('admin_pending_resources.html', submissions=submissions)
+
+@app.route('/admin/resources/submissions/<int:submission_id>/approve', methods=['POST'])
+def admin_approve_resource_submission(submission_id):
+    if not session.get('admin_mode'):
+        return redirect(url_for('general_resources_page'))
+
+    conn = get_db_connection()
+    if not conn:
+        flash('Database connection failed', 'error')
+        return redirect(url_for('admin_pending_resource_submissions'))
+
+    try:
+        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cur.execute(
+            '''
+            SELECT * FROM pending_general_resources
+            WHERE id=%s AND status='pending'
+            FOR UPDATE
+            ''',
+            (submission_id,)
+        )
+        submission = cur.fetchone()
+        if not submission:
+            flash('Submission not found or already reviewed.', 'error')
+            cur.close()
+            conn.close()
+            return redirect(url_for('admin_pending_resource_submissions'))
+
+        cur.execute(
+            '''
+            SELECT id FROM general_resources
+            WHERE program_type=%s
+              AND subject_id=%s
+              AND (LOWER(title)=LOWER(%s) OR resource_link=%s)
+            LIMIT 1
+            ''',
+            (submission['program_type'], submission['subject_id'], submission['title'], submission['resource_link'])
+        )
+        if cur.fetchone():
+            flash('Duplicate public resource detected. Reject it or edit existing resource first.', 'error')
+            cur.close()
+            conn.close()
+            return redirect(url_for('admin_pending_resource_submissions'))
+
+        cur.execute(
+            'SELECT COALESCE(MAX(sort_order), -1) AS next_base FROM general_resources WHERE program_type=%s AND subject_id=%s',
+            (submission['program_type'], submission['subject_id'])
+        )
+        next_order = cur.fetchone()['next_base'] + 1
+        reviewer_id = g.current_user['id'] if getattr(g, 'current_user', None) else None
+        cur.execute(
+            '''
+            INSERT INTO general_resources
+                (title, resource_link, program_type, subject_id, tags, sort_order,
+                 is_published, submitted_by, approved_by, approved_at, source_submission_id)
+            VALUES (%s, %s, %s, %s, %s, %s, TRUE, %s, %s, CURRENT_TIMESTAMP, %s)
+            ''',
+            (
+                submission['title'], submission['resource_link'], submission['program_type'],
+                submission['subject_id'], submission['tags'], next_order,
+                submission['submitted_by'], reviewer_id, submission['id']
+            )
+        )
+        cur.execute(
+            '''
+            UPDATE pending_general_resources
+            SET status='approved', reviewed_by=%s, reviewed_at=CURRENT_TIMESTAMP,
+                rejection_reason=NULL, updated_at=CURRENT_TIMESTAMP
+            WHERE id=%s
+            ''',
+            (reviewer_id, submission_id)
+        )
+        conn.commit()
+        cur.close()
+        invalidate_resource_ranking(f"general:{submission['program_type']}")
+        backup_db()
+        flash('Submission approved and published.', 'success')
+    except Exception as exc:
+        conn.rollback()
+        flash(f'Failed to approve submission: {exc}', 'error')
+    finally:
+        conn.close()
+
+    return redirect(url_for('admin_pending_resource_submissions'))
+
+@app.route('/admin/resources/submissions/<int:submission_id>/reject', methods=['POST'])
+def admin_reject_resource_submission(submission_id):
+    if not session.get('admin_mode'):
+        return redirect(url_for('general_resources_page'))
+
+    reason = request.form.get('rejection_reason', '').strip()
+    if not reason:
+        flash('Please add a rejection reason.', 'error')
+        return redirect(url_for('admin_pending_resource_submissions'))
+
+    conn = get_db_connection()
+    if not conn:
+        flash('Database connection failed', 'error')
+        return redirect(url_for('admin_pending_resource_submissions'))
+
+    try:
+        reviewer_id = g.current_user['id'] if getattr(g, 'current_user', None) else None
+        cur = conn.cursor()
+        cur.execute(
+            '''
+            UPDATE pending_general_resources
+            SET status='rejected', rejection_reason=%s, reviewed_by=%s,
+                reviewed_at=CURRENT_TIMESTAMP, updated_at=CURRENT_TIMESTAMP
+            WHERE id=%s AND status='pending'
+            ''',
+            (reason, reviewer_id, submission_id)
+        )
+        if cur.rowcount == 0:
+            flash('Submission not found or already reviewed.', 'error')
+        else:
+            conn.commit()
+            backup_db()
+            flash('Submission rejected with reason.', 'success')
+        cur.close()
+    except Exception as exc:
+        conn.rollback()
+        flash(f'Failed to reject submission: {exc}', 'error')
+    finally:
+        conn.close()
+
+    return redirect(url_for('admin_pending_resource_submissions'))
 
 @app.route('/admin/resources/edit/<int:resource_id>', methods=['GET', 'POST'])
 def admin_edit_general_resource(resource_id):
@@ -2179,6 +2726,7 @@ def admin_login():
     password = request.form['password']
     if password == '4129':
         session['admin_mode'] = True
+        session['legacy_admin_mode'] = True
     else:
         flash('काहे को छेड़ता है पराई वेबसाइट को? 😜😉')
     return redirect(url_for('course_view'))
@@ -2464,6 +3012,7 @@ def admin_analytics():
 @app.route('/admin_logout')
 def admin_logout():
     session.pop('admin_mode', None)
+    session.pop('legacy_admin_mode', None)
     return redirect(url_for('course_view'))
 
 # Admin - Add course

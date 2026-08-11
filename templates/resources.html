@@ -550,7 +550,15 @@ body.dark-theme .page-header .active-filter {
     <a href="{{ url_for('general_resources_page') }}">General Resources</a>
     {% if admin_mode %}
         <a href="{{ url_for('admin_add_general_resource') }}">+ Add Resource</a>
+        <a href="{{ url_for('admin_pending_resource_submissions') }}">Pending Submissions</a>
         <a href="{{ url_for('admin_resource_subjects') }}">Manage Subjects</a>
+    {% endif %}
+    {% if current_user %}
+        <a href="{{ url_for('submit_general_resource') }}">Submit Resource</a>
+        <a href="{{ url_for('my_resource_submissions') }}">My Submissions</a>
+        <a href="{{ url_for('user_logout') }}">Logout</a>
+    {% else %}
+        <a href="{{ url_for('google_login', next=request.path) }}">Login</a>
     {% endif %}
     <button class="theme-toggle" id="resourceThemeToggle" type="button" aria-label="Toggle theme">🌙 Dark mode</button>
 </nav>
@@ -582,6 +590,15 @@ body.dark-theme .page-header .active-filter {
             </svg>
             Add Resource
         </a>
+    {% elif current_user %}
+        <a class="btn-add" href="{{ url_for('submit_general_resource') }}">
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor">
+                <path d="M6.75 1.25a.75.75 0 0 0-1.5 0v4H1.25a.75.75 0 0 0 0 1.5h4v4a.75.75 0 0 0 1.5 0v-4h4a.75.75 0 0 0 0-1.5h-4v-4Z"/>
+            </svg>
+            Submit Resource
+        </a>
+    {% else %}
+        <a class="btn-add" href="{{ url_for('google_login', next=request.path) }}">Login to Submit</a>
     {% endif %}
     <div class="filter-zone">
         <div class="filter-bar">
