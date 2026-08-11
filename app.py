@@ -36,6 +36,10 @@ RESOURCE_RATING_COOLDOWN_HOURS = 6
 SUPABASE_URL = os.environ.get('SUPABASE_URL', '').strip().rstrip('/')
 SUPABASE_SERVICE_KEY = os.environ.get('SUPABASE_SERVICE_KEY', '').strip()
 SUPABASE_STORAGE_BUCKET = os.environ.get('SUPABASE_STORAGE_BUCKET', 'resources').strip()
+LOCAL_RESOURCE_UPLOADS = (
+    os.environ.get('LOCAL_RESOURCE_UPLOADS', '').strip().lower() in ('1', 'true', 'yes')
+    or not os.environ.get('RENDER')
+)
 
 # Create upload folder if it doesn't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -59,7 +63,20 @@ def get_resource_content_disposition(filename):
 
 def upload_resource_to_supabase(file_storage, folder='general_resources'):
     if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
-        raise RuntimeError('Supabase Storage is not configured')
+        if not LOCAL_RESOURCE_UPLOADS:
+            raise RuntimeError(
+                'Supabase Storage is not configured. Set SUPABASE_URL and '
+                'SUPABASE_SERVICE_KEY in Render environment variables.'
+            )
+
+        # Local development fallback. Render uses Supabase Storage because its
+        # local filesystem is ephemeral and can be cleared on redeploy.
+        safe_name = secure_filename(file_storage.filename)
+        local_folder = os.path.join(app.config['UPLOAD_FOLDER'], folder)
+        os.makedirs(local_folder, exist_ok=True)
+        local_name = f'{uuid.uuid4().hex}_{safe_name}'
+        file_storage.save(os.path.join(local_folder, local_name))
+        return f'/{app.config["UPLOAD_FOLDER"]}/{folder}/{local_name}'.replace('\\', '/')
 
     safe_name = secure_filename(file_storage.filename)
     stamp = int(datetime.utcnow().timestamp())
@@ -1540,6 +1557,10 @@ def admin_add_general_resource():
             conn.commit()
             cur.close()
             backup_db()
+            # The general-resources page caches its ranked lists for a few
+            # minutes. Clear that cache immediately after a successful insert
+            # so the new item is visible on the redirect right away.
+            invalidate_resource_ranking(f'general:{program_type}')
             flash('General resource added successfully!', 'success')
         except Exception as e:
             conn.rollback()
@@ -1767,6 +1788,7 @@ def admin_move_general_resource(resource_id, direction):
 
         conn.commit()
         cur.close()
+        invalidate_resource_ranking(f'general:{program_type}')
         backup_db()
         return redirect(url_for('general_resources_page'))
     except Exception as e:
@@ -1788,7 +1810,10 @@ def admin_delete_general_resource(resource_id):
 
     try:
         cur = conn.cursor()
-        cur.execute('SELECT resource_link FROM general_resources WHERE id=%s', (resource_id,))
+        cur.execute(
+            'SELECT resource_link, program_type FROM general_resources WHERE id=%s',
+            (resource_id,)
+        )
         resource = cur.fetchone()
 
         if resource is None:
@@ -1797,10 +1822,11 @@ def admin_delete_general_resource(resource_id):
             conn.close()
             return redirect(url_for('general_resources_page'))
 
-        resource_link = resource[0]
+        resource_link, program_type = resource
         cur.execute('DELETE FROM general_resources WHERE id=%s', (resource_id,))
         conn.commit()
         cur.close()
+        invalidate_resource_ranking(f'general:{program_type}')
 
         static_prefix = '/static/uploads/general_resources/'
         if resource_link and resource_link.startswith(static_prefix):

@@ -77,7 +77,8 @@ body.dark-theme .admin-report-item { background:var(--surface); }
 /* ── PAGE HEADER ─────────────────────────────── */
 .page-header {
     display: flex; align-items: center;
-    justify-content: space-between; gap: 12px;
+    flex-wrap: wrap;
+    justify-content: flex-start; gap: 14px;
     padding: 13px 16px;
     background: var(--surface);
     border: 1px solid var(--border);
@@ -85,6 +86,7 @@ body.dark-theme .admin-report-item { background:var(--surface); }
     margin-bottom: 12px;
     box-shadow: 0 12px 24px rgba(15,23,42,0.08);
 }
+.page-heading { flex: 0 0 auto; }
 .page-header h1 {
     font-family: 'DM Serif Display', serif;
     font-size: clamp(1.6rem, 3vw, 2rem);
@@ -98,6 +100,7 @@ body.dark-theme .admin-report-item { background:var(--surface); }
     font-size: 0.78rem; font-weight: 700; font-family: 'Inter', sans-serif;
     cursor: pointer; text-decoration: none;
     display: inline-flex; align-items: center; gap: 5px;
+    margin-left: auto;
     transition: opacity .16s, box-shadow .16s, transform .16s; flex-shrink: 0;
 }
 .btn-add:hover { opacity: .92; transform: translateY(-1px); box-shadow: 0 12px 22px rgba(59,130,246,0.25); }
@@ -112,6 +115,12 @@ body.dark-theme .admin-report-item { background:var(--surface); }
 .admin-report-item strong { font-size:.82rem; }
 .admin-report-meta, .admin-report-item small { display:block; color:#9a3412; font-size:.7rem; margin-top:3px; }
 .admin-report-item p { color:var(--text-muted); font-size:.78rem; margin-top:5px; word-break:break-word; }
+.resource-flash-messages { display:grid; gap:8px; margin:0 0 12px; }
+.resource-flash { display:flex; align-items:center; gap:8px; padding:10px 13px; border-radius:var(--r); border:1px solid; font-size:.82rem; font-weight:600; }
+.resource-flash-success { color:#166534; background:#f0fdf4; border-color:#bbf7d0; }
+.resource-flash-error { color:#991b1b; background:#fef2f2; border-color:#fecaca; }
+body.dark-theme .resource-flash-success { color:#bbf7d0; background:rgba(22,101,52,.22); border-color:#166534; }
+body.dark-theme .resource-flash-error { color:#fecaca; background:rgba(153,27,27,.22); border-color:#991b1b; }
 
 /* ── TABS ────────────────────────────────────── */
 .tab-strip {
@@ -119,6 +128,51 @@ body.dark-theme .admin-report-item { background:var(--surface); }
     background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--r); padding: 4px; margin-bottom: 0;
     box-shadow: 0 10px 24px rgba(15,23,42,0.08);
+}
+.page-header .tab-strip {
+    flex: 0 1 360px;
+    min-width: 260px;
+    box-shadow: none;
+}
+.page-header .filter-zone {
+    flex: 1 0 100%;
+    position: static;
+    z-index: auto;
+    background: transparent;
+    padding: 0;
+}
+.page-header .filter-zone::before { display: none; }
+.page-header .filter-bar {
+    justify-content: flex-start;
+    background: linear-gradient(135deg, #eff6ff 0%, #eef2ff 100%);
+    border-color: #bfdbfe;
+    box-shadow: inset 0 0 0 1px rgba(99,102,241,0.12);
+}
+body.dark-theme .page-header .filter-bar {
+    background: linear-gradient(135deg, rgba(30,64,175,.22), rgba(67,56,202,.22));
+    border-color: #4f46e5;
+}
+.page-header .search-wrap,
+.page-header .filter-select {
+    background: #ffffff;
+    border-color: #93c5fd;
+}
+.page-header .result-pill,
+.page-header .active-filter {
+    background: #dbeafe;
+    border-color: #bfdbfe;
+    color: #1e3a8a;
+}
+body.dark-theme .page-header .search-wrap,
+body.dark-theme .page-header .filter-select {
+    background: var(--surface-2);
+    border-color: #4f46e5;
+}
+body.dark-theme .page-header .result-pill,
+body.dark-theme .page-header .active-filter {
+    background: rgba(79,70,229,.28);
+    border-color: #4f46e5;
+    color: #dbeafe;
 }
 .tab-btn {
     flex: 1; background: transparent; border: none;
@@ -458,7 +512,9 @@ body.dark-theme .admin-report-item { background:var(--surface); }
 /* ── MOBILE ──────────────────────────────────── */
 @media (max-width: 640px) {
     .page { padding: 10px 9px 52px; }
-    .page-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .page-header { flex-direction: column; align-items: stretch; gap: 8px; }
+    .page-header .tab-strip { min-width: 0; width: 100%; flex-basis: auto; }
+    .btn-add { margin-left: 0; justify-content: center; }
     .resource-item {
         grid-template-columns: auto auto 1fr;
         grid-template-rows: auto auto; gap: 5px 7px; padding: 9px;
@@ -501,9 +557,23 @@ body.dark-theme .admin-report-item { background:var(--surface); }
 
 <!-- PAGE HEADER -->
 <header class="page-header">
-    <div>
+    <div class="page-heading">
         <h1>General Resources</h1>
         <p>Shared learning materials by program type</p>
+    </div>
+    <div class="tab-strip" role="tablist">
+        <button class="tab-btn" role="tab" aria-selected="false"
+            aria-controls="panel-diploma" id="tab-diploma"
+            onclick="switchTab('diploma')">
+            Diploma
+            <span class="tab-badge" id="badge-diploma">{{ diploma_resources | length if diploma_resources else 0 }}</span>
+        </button>
+        <button class="tab-btn active" role="tab" aria-selected="true"
+            aria-controls="panel-degree" id="tab-degree"
+            onclick="switchTab('degree')">
+            Degree
+            <span class="tab-badge" id="badge-degree">{{ degree_resources | length if degree_resources else 0 }}</span>
+        </button>
     </div>
     {% if admin_mode %}
         <a class="btn-add" href="{{ url_for('admin_add_general_resource') }}">
@@ -513,7 +583,50 @@ body.dark-theme .admin-report-item { background:var(--surface); }
             Add Resource
         </a>
     {% endif %}
+    <div class="filter-zone">
+        <div class="filter-bar">
+            <div class="search-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <path d="M21 21l-3.5-3.5"></path>
+                </svg>
+                <input class="filter-input" id="resourceSearch" type="text"
+                       placeholder="Search title or tag" autocomplete="off">
+            </div>
+            <select class="filter-select" id="subjectFilter">
+                <option value="">All subjects</option>
+            </select>
+            <select class="filter-select" id="tagFilter">
+                <option value="">All tags</option>
+                {% for tag in all_tags %}
+                    <option value="{{ tag }}">{{ tag }}</option>
+                {% endfor %}
+            </select>
+            <select class="filter-select" id="resourceSort" aria-label="Sort resources" onchange="changeResourceSort(this.value)">
+                <option value="recommended" {% if resource_sort == 'recommended' %}selected{% endif %}>Recommended</option>
+                <option value="top-rated" {% if resource_sort == 'top-rated' %}selected{% endif %}>Top Rated</option>
+                <option value="most-helpful" {% if resource_sort == 'most-helpful' %}selected{% endif %}>Most Helpful</option>
+                <option value="latest" {% if resource_sort == 'latest' %}selected{% endif %}>Latest</option>
+                <option value="most-viewed" {% if resource_sort == 'most-viewed' %}selected{% endif %}>Most Viewed</option>
+            </select>
+            <span class="result-pill" id="resultCount">- items</span>
+            <span class="active-filter" id="activeFilters">All resources</span>
+        </div>
+    </div>
 </header>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="resource-flash-messages" role="status" aria-live="polite">
+            {% for category, message in messages %}
+                <div class="resource-flash resource-flash-{{ category }}">
+                    <span aria-hidden="true">{% if category == 'success' %}✓{% else %}!{% endif %}</span>
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
 
 {% if admin_mode and reports %}
 <section class="admin-report-panel" id="resourceReports" aria-label="Resource reports">
@@ -539,54 +652,6 @@ body.dark-theme .admin-report-item { background:var(--surface); }
     </div>
 </section>
 {% endif %}
-
-<!-- TABS -->
-<div class="tab-strip" role="tablist">
-        <button class="tab-btn" role="tab" aria-selected="false"
-            aria-controls="panel-diploma" id="tab-diploma"
-            onclick="switchTab('diploma')">
-        Diploma
-        <span class="tab-badge" id="badge-diploma">{{ diploma_resources | length if diploma_resources else 0 }}</span>
-    </button>
-        <button class="tab-btn active" role="tab" aria-selected="true"
-            aria-controls="panel-degree" id="tab-degree"
-            onclick="switchTab('degree')">
-        Degree
-        <span class="tab-badge" id="badge-degree">{{ degree_resources | length if degree_resources else 0 }}</span>
-    </button>
-</div>
-
-<!-- STICKY FILTER -->
-<div class="filter-zone">
-    <div class="filter-bar">
-        <div class="search-wrap">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <circle cx="11" cy="11" r="7"></circle>
-                <path d="M21 21l-3.5-3.5"></path>
-            </svg>
-            <input class="filter-input" id="resourceSearch" type="text"
-                   placeholder="Search title or tag" autocomplete="off">
-        </div>
-        <select class="filter-select" id="subjectFilter">
-            <option value="">All subjects</option>
-        </select>
-        <select class="filter-select" id="tagFilter">
-            <option value="">All tags</option>
-            {% for tag in all_tags %}
-                <option value="{{ tag }}">{{ tag }}</option>
-            {% endfor %}
-        </select>
-        <select class="filter-select" id="resourceSort" aria-label="Sort resources" onchange="changeResourceSort(this.value)">
-            <option value="recommended" {% if resource_sort == 'recommended' %}selected{% endif %}>Recommended</option>
-            <option value="top-rated" {% if resource_sort == 'top-rated' %}selected{% endif %}>Top Rated</option>
-            <option value="most-helpful" {% if resource_sort == 'most-helpful' %}selected{% endif %}>Most Helpful</option>
-            <option value="latest" {% if resource_sort == 'latest' %}selected{% endif %}>Latest</option>
-            <option value="most-viewed" {% if resource_sort == 'most-viewed' %}selected{% endif %}>Most Viewed</option>
-        </select>
-        <span class="result-pill" id="resultCount">— items</span>
-        <span class="active-filter" id="activeFilters">All resources</span>
-    </div>
-</div>
 
 <!-- ══════════════════════════════════
      DIPLOMA PANEL
