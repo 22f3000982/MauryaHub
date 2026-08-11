@@ -26,6 +26,7 @@ UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 RESOURCE_ALLOWED_EXTENSIONS = {'pdf', 'html', 'htm'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+MAX_PENDING_RESOURCE_UPLOAD_BYTES = 5 * 1024 * 1024
 
 # Google OAuth configuration. Add these on Render before enabling login.
 GOOGLE_CLIENT_ID = os.environ.get('GOOGLE_CLIENT_ID', '').strip()
@@ -73,6 +74,49 @@ def get_resource_content_type(filename, fallback):
 def get_resource_content_disposition(filename):
     safe_name = secure_filename(filename)
     return f'inline; filename="{safe_name}"'
+
+def uploaded_file_size(file_storage):
+    if not file_storage or not getattr(file_storage, 'stream', None):
+        return 0
+    current_pos = file_storage.stream.tell()
+    file_storage.stream.seek(0, os.SEEK_END)
+    size = file_storage.stream.tell()
+    file_storage.stream.seek(current_pos)
+    return size
+
+def render_html_resource_preview(resource_link):
+    if not resource_link:
+        return None
+    link = resource_link.strip()
+    link_lower = link.lower()
+
+    if link.startswith('/'):
+        local_path = os.path.join(app.root_path, link.lstrip('/').replace('/', os.sep))
+        if (link_lower.endswith('.html') or link_lower.endswith('.htm')) and os.path.exists(local_path):
+            with open(local_path, 'rb') as handle:
+                return Response(
+                    handle.read(),
+                    status=200,
+                    content_type='text/html; charset=utf-8',
+                    headers={'Content-Disposition': 'inline'}
+                )
+        return redirect(link)
+
+    normalized_link = ensure_url_scheme(link)
+    lower = normalized_link.lower()
+    if lower.endswith('.html') or lower.endswith('.htm'):
+        try:
+            resp = requests.get(normalized_link, timeout=10)
+            if resp.status_code == 200:
+                return Response(
+                    resp.content,
+                    status=200,
+                    content_type='text/html; charset=utf-8',
+                    headers={'Content-Disposition': 'inline'}
+                )
+        except Exception as exc:
+            print(f"Error fetching HTML preview: {exc}")
+    return redirect(normalized_link)
 
 def upload_resource_to_supabase(file_storage, folder='general_resources'):
     if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
@@ -1854,6 +1898,9 @@ def submit_general_resource():
             if not allowed_resource_file(pdf_file.filename):
                 flash('Only PDF or HTML uploads are allowed.', 'error')
                 return redirect(url_for('submit_general_resource'))
+            if uploaded_file_size(pdf_file) > MAX_PENDING_RESOURCE_UPLOAD_BYTES:
+                flash('Files above 5 MB are not allowed here. Please upload the file to Google Drive and submit the Drive link instead.', 'error')
+                return redirect(url_for('submit_general_resource'))
             try:
                 final_link = upload_resource_to_supabase(pdf_file, folder='pending_general_resources')
             except Exception as exc:
@@ -1911,7 +1958,7 @@ def submit_general_resource():
             cur.close()
             backup_db()
             flash('Resource submitted for admin approval.', 'success')
-            return redirect(url_for('my_resource_submissions'))
+            return redirect(url_for('submit_general_resource'))
         except Exception as exc:
             conn.rollback()
             flash(f'Failed to submit resource: {exc}', 'error')
@@ -1922,21 +1969,9 @@ def submit_general_resource():
 
     conn = get_db_connection()
     subjects_by_program = fetch_general_resource_subjects(conn) if conn else {'diploma': [], 'degree': []}
-    if conn:
-        conn.close()
-    return render_template('submit_general_resource.html', subjects_by_program=subjects_by_program)
-
-@app.route('/my-submissions')
-def my_resource_submissions():
-    auth_redirect = login_required()
-    if auth_redirect:
-        return auth_redirect
-
-    conn = get_db_connection()
     submissions = []
-    if not conn:
-        flash('Database connection failed', 'error')
-    else:
+    submission_stats = {'total': 0, 'approved': 0, 'pending': 0, 'rejected': 0}
+    if conn:
         try:
             cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
             cur.execute(
@@ -1952,14 +1987,71 @@ def my_resource_submissions():
                 (g.current_user['id'],)
             )
             submissions = [dict(row) for row in cur.fetchall()]
+            cur.execute(
+                '''
+                SELECT
+                    COUNT(*) AS total,
+                    COUNT(*) FILTER (WHERE status='approved') AS approved,
+                    COUNT(*) FILTER (WHERE status='pending') AS pending,
+                    COUNT(*) FILTER (WHERE status='rejected') AS rejected
+                FROM pending_general_resources
+                WHERE submitted_by=%s
+                ''',
+                (g.current_user['id'],)
+            )
+            row = cur.fetchone()
+            if row:
+                submission_stats = {
+                    'total': int(row['total'] or 0),
+                    'approved': int(row['approved'] or 0),
+                    'pending': int(row['pending'] or 0),
+                    'rejected': int(row['rejected'] or 0)
+                }
             cur.close()
         except Exception as exc:
-            print(f'Error fetching user submissions: {exc}')
-            flash('Failed to load your submissions.', 'error')
+            print(f'Error loading submission dashboard: {exc}')
+            flash('Failed to load your submission history.', 'error')
         finally:
             conn.close()
+    return render_template(
+        'submit_general_resource.html',
+        subjects_by_program=subjects_by_program,
+        submissions=submissions,
+        submission_stats=submission_stats
+    )
 
-    return render_template('my_resource_submissions.html', submissions=submissions)
+@app.route('/admin/resources/submissions/<int:submission_id>/preview')
+def admin_preview_resource_submission(submission_id):
+    if not session.get('admin_mode'):
+        return redirect(url_for('general_resources_page'))
+
+    conn = get_db_connection()
+    if not conn:
+        flash('Database connection failed', 'error')
+        return redirect(url_for('admin_pending_resource_submissions'))
+
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            'SELECT resource_link FROM pending_general_resources WHERE id=%s',
+            (submission_id,)
+        )
+        row = cur.fetchone()
+        cur.close()
+        if not row or not row[0]:
+            flash('Submission preview link not found.', 'error')
+            return redirect(url_for('admin_pending_resource_submissions'))
+        return render_html_resource_preview(row[0])
+    except Exception as exc:
+        print(f'Error previewing submission: {exc}')
+        flash('Could not preview this submission.', 'error')
+        return redirect(url_for('admin_pending_resource_submissions'))
+    finally:
+        conn.close()
+
+@app.route('/my-submissions')
+def my_resource_submissions():
+    return redirect(url_for('submit_general_resource'))
 
 @app.route('/admin/resources/submissions')
 def admin_pending_resource_submissions():
@@ -2417,25 +2509,7 @@ def open_general_resource(resource_id):
         invalidate_resource_ranking(f'general:{row[1]}')
         log_view_event('general_resources', resource_id, None)
 
-        if link.startswith('/'):
-            return redirect(link)
-
-        normalized_link = ensure_url_scheme(link)
-        link_lower = normalized_link.lower()
-        if link_lower.endswith('.html') or link_lower.endswith('.htm'):
-            try:
-                resp = requests.get(normalized_link, timeout=10)
-                if resp.status_code == 200:
-                    return Response(
-                        resp.content,
-                        status=200,
-                        content_type='text/html; charset=utf-8',
-                        headers={'Content-Disposition': 'inline'}
-                    )
-            except Exception as exc:
-                print(f"Error fetching HTML resource: {exc}")
-
-        return redirect(normalized_link)
+        return render_html_resource_preview(link)
     except Exception:
         return "Resource link not found"
     finally:

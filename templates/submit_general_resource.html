@@ -3,128 +3,495 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Submit Resource</title>
+    <title>Add Your Notes</title>
     <link rel="icon" href="data:,">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Fraunces:opsz,wght@9..144,700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg: #f8f5f1;
+            --panel: #ffffff;
+            --panel-soft: #fcfaf7;
+            --text: #201a15;
+            --muted: #73675d;
+            --line: #e8ddd2;
+            --accent: #c76b3f;
+            --accent-soft: #fff0e7;
+            --green: #1f9d55;
+            --green-soft: #eaf8ef;
+            --blue: #2563eb;
+            --blue-soft: #e8f0ff;
+            --amber: #d97706;
+            --amber-soft: #fff3da;
+            --red: #dc2626;
+            --red-soft: #feeceb;
+            --shadow: 0 20px 40px rgba(72, 52, 37, 0.08);
+            --radius: 22px;
+            --radius-sm: 14px;
+        }
         * { box-sizing: border-box; }
         body {
             margin: 0;
-            font-family: 'Space Grotesk', sans-serif;
-            background:
-                radial-gradient(circle at 8% 10%, rgba(56, 189, 248, 0.16), transparent 36rem),
-                radial-gradient(circle at 90% 18%, rgba(96, 165, 250, 0.16), transparent 32rem),
-                linear-gradient(180deg, #0f172a 0%, #0b1020 52%, #111827 100%);
-            color: #f8fafc;
+            font-family: "Manrope", sans-serif;
+            color: var(--text);
             min-height: 100vh;
+            background:
+                radial-gradient(circle at top left, rgba(247, 208, 173, 0.32), transparent 24rem),
+                radial-gradient(circle at 88% 12%, rgba(250, 227, 197, 0.42), transparent 22rem),
+                linear-gradient(180deg, #fdf8f3 0%, #f7f2eb 100%);
+            padding: 28px 18px 40px;
+        }
+        .shell { max-width: 1180px; margin: 0 auto; }
+        .topbar {
             display: flex;
+            justify-content: space-between;
+            gap: 14px;
             align-items: center;
-            justify-content: center;
-            padding: 16px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
         }
-        .panel {
-            width: 100%;
-            max-width: 620px;
-            background: linear-gradient(180deg, rgba(26, 36, 58, 0.94), rgba(20, 28, 46, 0.76));
-            border: 1px solid rgba(148, 163, 184, 0.25);
-            border-radius: 18px;
-            padding: 22px;
-            box-shadow: 0 18px 40px rgba(2, 6, 23, 0.5);
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 11px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.72);
+            border: 1px solid rgba(199,107,63,.18);
+            color: #9a4f2b;
+            font-size: .76rem;
+            font-weight: 800;
+            letter-spacing: .04em;
+            text-transform: uppercase;
         }
-        h1 { margin: 0 0 8px; font-family: 'IBM Plex Serif', serif; font-size: 1.7rem; color: #e2e8f0; }
-        p { margin: 0 0 16px; color: #9aa4b2; font-size: 0.92rem; }
-        label { display: block; margin: 10px 0 6px; font-size: 0.85rem; font-weight: 600; color: #cbd5e1; }
-        input, select, textarea {
-            width: 100%;
-            padding: 10px 11px;
-            border-radius: 10px;
-            border: 1px solid rgba(148, 163, 184, 0.3);
-            background: rgba(15, 23, 42, 0.65);
-            color: #f8fafc;
-            font: inherit;
+        h1 {
+            margin: 10px 0 8px;
+            font-family: "Fraunces", serif;
+            font-size: clamp(2rem, 4vw, 3rem);
+            line-height: 1.02;
+            letter-spacing: 0;
         }
-        textarea { min-height: 90px; resize: vertical; }
-        input:focus, select:focus, textarea:focus {
-            outline: none;
-            border-color: rgba(56, 189, 248, 0.7);
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.18);
+        .subcopy {
+            max-width: 720px;
+            color: var(--muted);
+            font-size: .98rem;
         }
-        .hint {
-            margin-top: 10px;
-            font-size: 0.82rem;
-            color: #bae6fd;
-            background: rgba(30, 41, 59, 0.55);
-            border: 1px solid rgba(148, 163, 184, 0.25);
-            border-radius: 10px;
-            padding: 8px 10px;
+        .top-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
         }
-        .flash { margin-bottom: 12px; padding: 9px 11px; border-radius: 10px; font-size: .86rem; font-weight: 700; }
-        .flash-success { color: #bbf7d0; background: rgba(22, 101, 52, .24); border: 1px solid #166534; }
-        .flash-error { color: #fecaca; background: rgba(153, 27, 27, .24); border: 1px solid #991b1b; }
-        .actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
-        .btn {
+        .btn, button {
             border: none;
-            border-radius: 10px;
-            padding: 10px 16px;
-            font-weight: 700;
+            border-radius: 999px;
+            padding: 12px 18px;
+            font: inherit;
+            font-weight: 800;
             cursor: pointer;
             text-decoration: none;
-            display: inline-block;
-            font: inherit;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
-        .btn-primary { background: linear-gradient(135deg, #38bdf8, #60a5fa); color: #0b1020; }
-        .btn-secondary { background: transparent; color: #e2e8f0; border: 1px solid rgba(148, 163, 184, 0.35); }
+        .btn-primary {
+            background: linear-gradient(135deg, #ca7349, #e28b5a);
+            color: #fff;
+            box-shadow: 0 16px 26px rgba(199,107,63,.22);
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,.76);
+            color: var(--text);
+            border: 1px solid var(--line);
+        }
+        .flash-stack {
+            display: grid;
+            gap: 10px;
+            margin: 0 0 18px;
+        }
+        .flash {
+            border-radius: 16px;
+            padding: 13px 15px;
+            font-size: .9rem;
+            font-weight: 700;
+            border: 1px solid;
+        }
+        .flash-success { color: #166534; background: #ecfdf3; border-color: #b7ebc6; }
+        .flash-error { color: #991b1b; background: #fff1f2; border-color: #fecdd3; }
+        .grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.6fr) minmax(280px, .9fr);
+            gap: 18px;
+            align-items: start;
+        }
+        .card {
+            background: rgba(255,255,255,.88);
+            border: 1px solid rgba(232,221,210,.9);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(12px);
+        }
+        .form-card { padding: 22px; }
+        .side-stack {
+            display: grid;
+            gap: 18px;
+        }
+        .side-card { padding: 20px; }
+        .section-title {
+            font-size: 1.12rem;
+            font-weight: 800;
+            margin: 0 0 14px;
+        }
+        .field-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px 16px;
+        }
+        .field.full { grid-column: 1 / -1; }
+        label {
+            display: block;
+            margin: 0 0 7px;
+            font-size: .84rem;
+            font-weight: 800;
+        }
+        .req { color: var(--red); }
+        input, select, textarea {
+            width: 100%;
+            border-radius: 14px;
+            border: 1px solid var(--line);
+            background: #fffdfb;
+            color: var(--text);
+            padding: 13px 14px;
+            font: inherit;
+            outline: none;
+            transition: border-color .16s, box-shadow .16s, background .16s;
+        }
+        textarea { min-height: 94px; resize: vertical; }
+        input:focus, select:focus, textarea:focus {
+            border-color: #d28a64;
+            box-shadow: 0 0 0 4px rgba(202,115,73,.12);
+            background: #ffffff;
+        }
+        .field-note {
+            margin-top: 6px;
+            color: var(--muted);
+            font-size: .8rem;
+        }
+        .dropzone {
+            position: relative;
+            border: 1.5px dashed #dcc7b5;
+            border-radius: 20px;
+            background: linear-gradient(180deg, #fffdfa 0%, #fff8f2 100%);
+            padding: 28px 18px;
+            text-align: center;
+        }
+        .dropzone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .drop-icon {
+            width: 58px;
+            height: 58px;
+            margin: 0 auto 10px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: #fff;
+            border: 1px solid #ead7c7;
+            color: #b96a42;
+            font-size: 1.4rem;
+            font-weight: 900;
+        }
+        .drop-title { font-weight: 800; font-size: 1rem; }
+        .drop-sub { margin-top: 5px; color: var(--muted); font-size: .84rem; }
+        .submit-btn {
+            width: 100%;
+            margin-top: 16px;
+            border-radius: 16px;
+            padding: 15px 18px;
+            background: linear-gradient(135deg, #85776e, #9b8f86);
+            color: #fff;
+            font-size: .96rem;
+        }
+        .guidelines {
+            display: grid;
+            gap: 12px;
+        }
+        .guide-row {
+            display: grid;
+            grid-template-columns: 22px 1fr;
+            gap: 10px;
+            align-items: start;
+            color: var(--muted);
+        }
+        .guide-check {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: var(--green-soft);
+            color: var(--green);
+            font-size: .78rem;
+            font-weight: 900;
+            margin-top: 1px;
+        }
+        .divider {
+            height: 1px;
+            background: var(--line);
+            margin: 16px 0 10px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+        }
+        .stat {
+            border-radius: 18px;
+            padding: 14px 10px;
+            text-align: center;
+            background: var(--panel-soft);
+            border: 1px solid var(--line);
+        }
+        .stat.approved { background: var(--green-soft); border-color: #c9ead5; }
+        .stat.pending { background: var(--amber-soft); border-color: #f5ddb0; }
+        .stat.rejected { background: var(--red-soft); border-color: #fecaca; }
+        .stat-value { font-size: 1.7rem; font-weight: 900; line-height: 1; }
+        .stat-label { margin-top: 6px; font-size: .74rem; color: var(--muted); font-weight: 800; text-transform: uppercase; }
+        .history-card {
+            margin-top: 22px;
+            padding: 20px;
+        }
+        .history-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: end;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow: hidden;
+        }
+        .history-table th,
+        .history-table td {
+            text-align: left;
+            padding: 14px 10px;
+            border-top: 1px solid var(--line);
+            vertical-align: top;
+            font-size: .88rem;
+        }
+        .history-table th {
+            color: var(--muted);
+            font-size: .78rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            border-top: none;
+            padding-top: 0;
+        }
+        .history-title { font-weight: 800; margin-bottom: 4px; }
+        .history-meta { color: var(--muted); font-size: .78rem; }
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: 5px 11px;
+            font-size: .76rem;
+            font-weight: 800;
+            white-space: nowrap;
+        }
+        .status-pending { background: var(--blue-soft); color: var(--blue); }
+        .status-approved { background: var(--green-soft); color: var(--green); }
+        .status-rejected { background: var(--red-soft); color: var(--red); }
+        .status-note { margin-top: 7px; color: var(--red); font-size: .8rem; line-height: 1.45; }
+        .empty {
+            padding: 26px 8px 12px;
+            color: var(--muted);
+            text-align: center;
+        }
+        @media (max-width: 980px) {
+            .grid { grid-template-columns: 1fr; }
+            .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (max-width: 720px) {
+            body { padding: 16px 12px 28px; }
+            .field-grid { grid-template-columns: 1fr; }
+            .stats { grid-template-columns: 1fr 1fr; }
+            .history-wrap { overflow-x: auto; }
+            .history-table { min-width: 760px; }
+        }
     </style>
 </head>
 <body>
-    <main class="panel">
-        <h1>Submit Resource</h1>
-        <p>Your resource will go to admin review first. After approval it will be visible to everyone.</p>
+    <main class="shell">
+        <section class="topbar">
+            <div>
+                <span class="eyebrow">Community Notes</span>
+                <h1>Add your notes for everyone</h1>
+                <p class="subcopy">Upload useful notes, PDFs, or HTML study material. We will review it first, and after approval it will show up in General Resources. XP can plug into this later without changing the flow.</p>
+            </div>
+            <div class="top-actions">
+                <a class="btn btn-secondary" href="{{ url_for('general_resources_page') }}">Back to General Resources</a>
+            </div>
+        </section>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
-            {% for category, message in messages %}
-                <div class="flash flash-{{ category }}">{{ message }}</div>
-            {% endfor %}
+            {% if messages %}
+                <div class="flash-stack">
+                    {% for category, message in messages %}
+                        <div class="flash flash-{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
         {% endwith %}
 
-        <form method="post" enctype="multipart/form-data">
-            <label for="title">Title</label>
-            <input id="title" name="title" type="text" required>
+        <section class="grid">
+            <article class="card form-card">
+                <h2 class="section-title">Upload resource</h2>
+                <form method="post" enctype="multipart/form-data">
+                    <div class="field-grid">
+                        <div class="field">
+                            <label for="program_type">Program <span class="req">*</span></label>
+                            <select id="program_type" name="program_type" required>
+                                <option value="">Choose program</option>
+                                <option value="diploma">Diploma</option>
+                                <option value="degree">Degree</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="subject_id">Subject <span class="req">*</span></label>
+                            <select id="subject_id" name="subject_id" required>
+                                <option value="">Select subject</option>
+                            </select>
+                        </div>
+                        <div class="field full">
+                            <label for="title">Title <span class="req">*</span></label>
+                            <input id="title" name="title" type="text" placeholder="Example: DL Notes Hinglish week 1 to 8" required>
+                        </div>
+                        <div class="field full">
+                            <label for="resource_link">Direct link</label>
+                            <input id="resource_link" name="resource_link" type="text" placeholder="Drive, Notion, PDF, HTML or any direct study link">
+                            <div class="field-note">Leave this blank if you are uploading the file directly. If your file is larger than 5 MB, upload it to Google Drive and paste the Drive link here.</div>
+                        </div>
+                        <div class="field full">
+                            <label for="tags">Tags</label>
+                            <input id="tags" name="tags" type="text" placeholder="week-1, formula sheet, PYQ, revision">
+                        </div>
+                        <div class="field full">
+                            <label for="description">Short note for review</label>
+                            <textarea id="description" name="description" placeholder="What is inside, how useful it is, which unit or exam it helps with."></textarea>
+                        </div>
+                        <div class="field full">
+                            <label for="resource_pdf">PDF or HTML file</label>
+                            <div class="dropzone">
+                                <input id="resource_pdf" name="resource_pdf" type="file" accept=".pdf,application/pdf,.html,.htm,text/html">
+                                <div class="drop-icon">+</div>
+                                <div class="drop-title">Drop your file here or click to browse</div>
+                                <div class="drop-sub">PDF and HTML files are accepted up to 5 MB. Bigger files should be shared through a Google Drive link.</div>
+                            </div>
+                        </div>
+                    </div>
 
-            <label for="program_type">Program Type</label>
-            <select id="program_type" name="program_type" required>
-                <option value="">Select type</option>
-                <option value="diploma">Diploma</option>
-                <option value="degree">Degree</option>
-            </select>
+                    <button class="submit-btn" type="submit">Submit for Review</button>
+                </form>
+            </article>
 
-            <label for="subject_id">Subject</label>
-            <select id="subject_id" name="subject_id" required>
-                <option value="">Select subject</option>
-            </select>
+            <aside class="side-stack">
+                <section class="card side-card">
+                    <h2 class="section-title">Guidelines</h2>
+                    <div class="guidelines">
+                        <div class="guide-row">
+                            <span class="guide-check">✓</span>
+                            <div>Upload only useful course-specific notes, PDFs, handouts, or HTML study material.</div>
+                        </div>
+                        <div class="guide-row">
+                            <span class="guide-check">✓</span>
+                            <div>Keep direct uploads at 5 MB or below. If the file is bigger than 5 MB, upload it to Google Drive and submit the Drive link instead.</div>
+                        </div>
+                        <div class="guide-row">
+                            <span class="guide-check">✓</span>
+                            <div>Make sure the file opens properly, and select the correct program and subject so we can place it in the right section.</div>
+                        </div>
+                    </div>
+                    <div class="divider"></div>
+                    <p class="subcopy" style="font-size:.9rem; max-width:none;">Your submission will be reviewed by admin first. Once approved, it will become visible in General Resources.</p>
+                </section>
 
-            <label for="resource_link">Direct Link (optional if uploading a file)</label>
-            <input id="resource_link" name="resource_link" type="text" placeholder="https://drive.google.com/... or direct PDF/HTML URL">
+                <section class="card side-card">
+                    <h2 class="section-title">Your contributions</h2>
+                    <div class="stats">
+                        <div class="stat">
+                            <div class="stat-value">{{ submission_stats.total }}</div>
+                            <div class="stat-label">Total</div>
+                        </div>
+                        <div class="stat approved">
+                            <div class="stat-value">{{ submission_stats.approved }}</div>
+                            <div class="stat-label">Approved</div>
+                        </div>
+                        <div class="stat pending">
+                            <div class="stat-value">{{ submission_stats.pending }}</div>
+                            <div class="stat-label">Pending</div>
+                        </div>
+                        <div class="stat rejected">
+                            <div class="stat-value">{{ submission_stats.rejected }}</div>
+                            <div class="stat-label">Rejected</div>
+                        </div>
+                    </div>
+                </section>
+            </aside>
+        </section>
 
-            <label for="description">Description (optional)</label>
-            <textarea id="description" name="description" placeholder="Short note for admin: source, week, exam relevance, etc."></textarea>
-
-            <label for="tags">Tags (comma separated)</label>
-            <input id="tags" name="tags" type="text" placeholder="mlf, statistics, week-1">
-
-            <label for="resource_pdf">Upload PDF/HTML (optional if link provided)</label>
-            <input id="resource_pdf" name="resource_pdf" type="file" accept=".pdf,application/pdf,.html,.htm,text/html">
-
-            <div class="hint">At least one field is required: either direct link or PDF/HTML file.</div>
-
-            <div class="actions">
-                <button class="btn btn-primary" type="submit">Submit for Approval</button>
-                <a class="btn btn-secondary" href="{{ url_for('general_resources_page') }}">Back to Resources</a>
-                <a class="btn btn-secondary" href="{{ url_for('my_resource_submissions') }}">My Submissions</a>
+        <section class="card history-card">
+            <div class="history-head">
+                <div>
+                    <h2 class="section-title" style="margin-bottom:4px;">Submission history</h2>
+                    <p class="subcopy" style="font-size:.9rem; max-width:none;">Track what is under review, what got approved, and where admin added a rejection note.</p>
+                </div>
             </div>
-        </form>
+
+            {% if submissions %}
+                <div class="history-wrap">
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Subject</th>
+                                <th>Program</th>
+                                <th>Submitted</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in submissions %}
+                                <tr>
+                                    <td>
+                                        <div class="history-title">{{ item.subject_name or 'No subject' }}</div>
+                                        <div class="history-meta">{{ item.title }}</div>
+                                    </td>
+                                    <td>{{ item.program_type|title }}</td>
+                                    <td>{{ item.created_at.strftime('%d %b %Y') if item.created_at else '' }}</td>
+                                    <td>
+                                        <span class="status-pill status-{{ item.status }}">
+                                            {% if item.status == 'pending' %}Under Review{% elif item.status == 'approved' %}Approved{% else %}Rejected{% endif %}
+                                        </span>
+                                        {% if item.status == 'rejected' and item.rejection_reason %}
+                                            <div class="status-note">{{ item.rejection_reason }}</div>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty">No submissions yet. Your first upload will show up here after you send it for review.</div>
+            {% endif %}
+        </section>
     </main>
 
     <script>

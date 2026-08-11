@@ -65,6 +65,17 @@ body {
     transition: color .16s, border-color .16s, background .16s;
 }
 .top-nav a:hover { color: var(--text); border-color: var(--border); background: var(--surface-2); }
+.top-nav a.cta-link {
+    color: #ffffff;
+    background: linear-gradient(135deg, #f97316, #ea580c);
+    border-color: rgba(234, 88, 12, 0.25);
+    box-shadow: 0 10px 20px rgba(249, 115, 22, 0.22);
+}
+.top-nav a.cta-link:hover {
+    color: #ffffff;
+    border-color: rgba(234, 88, 12, 0.28);
+    background: linear-gradient(135deg, #fb923c, #ea580c);
+}
 .theme-toggle { margin-left:auto; border:1px solid var(--border); border-radius:999px; padding:5px 10px; background:var(--surface-2); color:var(--text); font:inherit; font-size:.76rem; font-weight:700; cursor:pointer; white-space:nowrap; }
 .theme-toggle:hover { border-color:var(--accent); color:var(--accent); }
 body.dark-theme { --bg:#0f172a; --surface:#172033; --surface-2:#1e293b; --surface-3:#25245a; --card:#172033; --hover:#202b40; --border:#334155; --border-md:#475569; --text:#e5e7eb; --text-muted:#cbd5e1; --text-dim:#94a3b8; --accent:#818cf8; --accent-2:#60a5fa; --accent-soft:rgba(129,140,248,.18); --accent-weak:rgba(129,140,248,.12); }
@@ -73,6 +84,11 @@ body.dark-theme .tab-btn.active { color:#eef2ff; }
 body.dark-theme .resource-icon, body.dark-theme .tag-chip { border-color:#4f46e5; }
 body.dark-theme .filter-select option { color:var(--text); }
 body.dark-theme .admin-report-item { background:var(--surface); }
+body.dark-theme .top-nav a.cta-link {
+    color: #fff7ed;
+    background: linear-gradient(135deg, #f97316, #c2410c);
+    border-color: rgba(249, 115, 22, 0.32);
+}
 
 /* ── PAGE HEADER ─────────────────────────────── */
 .page-header {
@@ -104,6 +120,11 @@ body.dark-theme .admin-report-item { background:var(--surface); }
     transition: opacity .16s, box-shadow .16s, transform .16s; flex-shrink: 0;
 }
 .btn-add:hover { opacity: .92; transform: translateY(-1px); box-shadow: 0 12px 22px rgba(59,130,246,0.25); }
+.btn-add.cta-login {
+    background: linear-gradient(135deg, #f97316, #ea580c);
+    box-shadow: 0 12px 22px rgba(249, 115, 22, 0.24);
+}
+.btn-add.cta-login:hover { box-shadow: 0 12px 22px rgba(249, 115, 22, 0.3); }
 .admin-report-panel { margin-bottom:12px; padding:12px 14px; background:#fff7ed; border:1px solid #fed7aa; border-radius:var(--r-lg); }
 .admin-report-heading { display:flex; align-items:center; justify-content:space-between; gap:10px; }
 .admin-report-heading h2 { font-size:.95rem; color:#9a3412; }
@@ -551,14 +572,13 @@ body.dark-theme .page-header .active-filter {
     {% if admin_mode %}
         <a href="{{ url_for('admin_add_general_resource') }}">+ Add Resource</a>
         <a href="{{ url_for('admin_pending_resource_submissions') }}">Pending Submissions</a>
-        <a href="{{ url_for('admin_resource_subjects') }}">Manage Subjects</a>
     {% endif %}
     {% if current_user %}
-        <a href="{{ url_for('submit_general_resource') }}">Submit Resource</a>
-        <a href="{{ url_for('my_resource_submissions') }}">My Submissions</a>
+        <a href="{{ url_for('submit_general_resource') }}">Add Your Notes</a>
+        <a href="{{ url_for('my_resource_submissions') }}">Your Contributions</a>
         <a href="{{ url_for('user_logout') }}">Logout</a>
     {% else %}
-        <a href="{{ url_for('google_login', next=request.path) }}">Login</a>
+        <a class="cta-link" href="{{ url_for('google_login', next=request.path) }}">Login to Add Notes</a>
     {% endif %}
     <button class="theme-toggle" id="resourceThemeToggle" type="button" aria-label="Toggle theme">🌙 Dark mode</button>
 </nav>
@@ -595,10 +615,10 @@ body.dark-theme .page-header .active-filter {
             <svg width="11" height="11" viewBox="0 0 12 12" fill="currentColor">
                 <path d="M6.75 1.25a.75.75 0 0 0-1.5 0v4H1.25a.75.75 0 0 0 0 1.5h4v4a.75.75 0 0 0 1.5 0v-4h4a.75.75 0 0 0 0-1.5h-4v-4Z"/>
             </svg>
-            Submit Resource
+            Add Your Notes
         </a>
     {% else %}
-        <a class="btn-add" href="{{ url_for('google_login', next=request.path) }}">Login to Submit</a>
+        <a class="btn-add cta-login" href="{{ url_for('google_login', next=request.path) }}">Login to Add Notes</a>
     {% endif %}
     <div class="filter-zone">
         <div class="filter-bar">

@@ -154,7 +154,7 @@
                         </div>
                         <div class="review-box">
                             <div class="actions">
-                                <a class="btn" href="{{ item.resource_link }}" target="_blank" rel="noopener">Preview/Open</a>
+                                <a class="btn" href="{{ url_for('admin_preview_resource_submission', submission_id=item.id) }}" target="_blank" rel="noopener">Preview/Open</a>
                                 {% if item.status == 'pending' %}
                                     <form method="post" action="{{ url_for('admin_approve_resource_submission', submission_id=item.id) }}">
                                         <button class="approve" type="submit">Approve</button>
