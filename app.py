@@ -18,6 +18,29 @@ from datetime import datetime, timedelta
 from urllib.parse import urlparse, urlencode
 import requests
 
+def load_local_env():
+    """Load simple KEY=VALUE pairs from .env.local or .env for local runs."""
+    for file_name in ('.env.local', '.env'):
+        env_path = os.path.join(os.path.dirname(__file__), file_name)
+        if not os.path.exists(env_path):
+            continue
+        try:
+            with open(env_path, 'r', encoding='utf-8') as handle:
+                for raw_line in handle:
+                    line = raw_line.strip()
+                    if not line or line.startswith('#') or '=' not in line:
+                        continue
+                    key, value = line.split('=', 1)
+                    key = key.strip()
+                    value = value.strip().strip('"').strip("'")
+                    if key and key not in os.environ:
+                        os.environ[key] = value
+        except Exception as exc:
+            print(f"Warning: could not read {file_name}: {exc}")
+
+if not os.environ.get('RENDER'):
+    load_local_env()
+
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 

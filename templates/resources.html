@@ -89,6 +89,14 @@ body.dark-theme .top-nav a.cta-link {
     background: linear-gradient(135deg, #f97316, #c2410c);
     border-color: rgba(249, 115, 22, 0.32);
 }
+body.dark-theme .page-heading-status {
+    background: rgba(22, 101, 52, 0.25);
+    color: #bbf7d0;
+    border-color: #166534;
+}
+body.dark-theme .page-heading-status::before {
+    box-shadow: 0 0 0 4px rgba(22,163,74,0.16);
+}
 
 /* ── PAGE HEADER ─────────────────────────────── */
 .page-header {
@@ -103,6 +111,29 @@ body.dark-theme .top-nav a.cta-link {
     box-shadow: 0 12px 24px rgba(15,23,42,0.08);
 }
 .page-heading { flex: 0 0 auto; }
+.page-heading-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 8px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: #ecfdf3;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+.page-heading-status::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #16a34a;
+    box-shadow: 0 0 0 4px rgba(22,163,74,0.14);
+}
 .page-header h1 {
     font-family: 'DM Serif Display', serif;
     font-size: clamp(1.6rem, 3vw, 2rem);
@@ -588,6 +619,9 @@ body.dark-theme .page-header .active-filter {
     <div class="page-heading">
         <h1>General Resources</h1>
         <p>Shared learning materials by program type</p>
+        {% if admin_mode %}
+            <span class="page-heading-status">Admin Active</span>
+        {% endif %}
     </div>
     <div class="tab-strip" role="tablist">
         <button class="tab-btn" role="tab" aria-selected="false"
