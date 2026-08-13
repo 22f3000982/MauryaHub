@@ -1726,7 +1726,11 @@ def admin_resource_subjects():
 
     subjects_by_program = fetch_general_resource_subjects(conn)
     conn.close()
-    return render_template('admin_resource_subjects.html', subjects_by_program=subjects_by_program)
+    return render_template(
+        'admin_resource_subjects.html',
+        subjects_by_program=subjects_by_program,
+        admin_mode=session.get('admin_mode', False)
+    )
 
 @app.route('/admin/resource-subjects/delete/<int:subject_id>', methods=['POST'])
 def admin_delete_resource_subject(subject_id):

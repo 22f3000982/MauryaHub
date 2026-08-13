@@ -601,6 +601,9 @@ body.dark-theme .page-header .active-filter {
     <a href="{{ url_for('course_view') }}">Dashboard</a>
     <a href="{{ url_for('general_resources_page') }}">General Resources</a>
     {% if admin_mode %}
+        <a href="{{ url_for('admin_resource_subjects') }}">+ Add Subject</a>
+    {% endif %}
+    {% if admin_mode %}
         <a href="{{ url_for('admin_add_general_resource') }}">+ Add Resource</a>
         <a href="{{ url_for('admin_pending_resource_submissions') }}">Pending Submissions</a>
     {% endif %}
