@@ -84,6 +84,24 @@
             padding: 8px 10px;
         }
 
+        .title-preview {
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: #cbd5e1;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px dashed rgba(148, 163, 184, 0.35);
+            border-radius: 10px;
+            padding: 8px 10px;
+        }
+
+        .title-preview span {
+            display: block;
+            margin-top: 4px;
+            color: #f8fafc;
+            font-weight: 700;
+            word-break: break-word;
+        }
+
         .actions {
             display: flex;
             gap: 10px;
@@ -122,6 +140,10 @@
         <form method="post" enctype="multipart/form-data">
             <label for="title">Title</label>
             <input id="title" name="title" type="text" required>
+            <div class="title-preview" id="title_preview">
+                Final title preview (auto):
+                <span id="title_preview_value">Start typing title to see preview...</span>
+            </div>
 
             <label for="program_type">Program Type</label>
             <select id="program_type" name="program_type" required>
@@ -157,6 +179,42 @@
         const subjectsByProgram = {{ subjects_by_program | tojson }};
         const programSelect = document.getElementById('program_type');
         const subjectSelect = document.getElementById('subject_id');
+        const titleInput = document.getElementById('title');
+        const titlePreviewValue = document.getElementById('title_preview_value');
+        const submitForm = document.querySelector('form[method="post"]');
+        const currentUsername = {{ (current_username or '') | tojson }};
+
+        function escapeRegExp(value) {
+            return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        function removeUsernameSuffix(rawTitle) {
+            if (!rawTitle) return '';
+            const trimmed = rawTitle.trim();
+            if (!currentUsername) return trimmed;
+            const suffixPattern = new RegExp(`\\s*\\(${escapeRegExp(currentUsername)}\\)$`, 'i');
+            return trimmed.replace(suffixPattern, '').trim();
+        }
+
+        function buildFinalTitle(rawTitle) {
+            const cleanTitle = removeUsernameSuffix(rawTitle);
+            if (!cleanTitle) return '';
+            if (!currentUsername) return cleanTitle;
+            return `${cleanTitle} (${currentUsername})`;
+        }
+
+        function renderTitlePreview() {
+            const finalTitle = buildFinalTitle(titleInput.value || '');
+            if (finalTitle) {
+                titlePreviewValue.textContent = finalTitle;
+                return;
+            }
+            if (currentUsername) {
+                titlePreviewValue.textContent = `Your title will end with (${currentUsername})`;
+                return;
+            }
+            titlePreviewValue.textContent = 'Start typing title to see preview...';
+        }
 
         function populateSubjects(program) {
             const list = subjectsByProgram[program] || [];
@@ -168,6 +226,13 @@
         programSelect.addEventListener('change', () => {
             populateSubjects(programSelect.value);
         });
+
+        titleInput.addEventListener('input', renderTitlePreview);
+        submitForm.addEventListener('submit', () => {
+            titleInput.value = buildFinalTitle(titleInput.value || '');
+        });
+
+        renderTitlePreview();
     </script>
 </body>
 </html>

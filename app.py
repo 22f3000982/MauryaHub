@@ -1878,6 +1878,8 @@ def admin_add_general_resource():
     if not session.get('admin_mode'):
         return redirect(url_for('general_resources_page'))
 
+    current_username = (g.current_user.get('username') or '').strip() if getattr(g, 'current_user', None) else ''
+
     if request.method == 'POST':
         title = request.form.get('title', '').strip()
         program_type = request.form.get('program_type', '').strip().lower()
@@ -1885,6 +1887,11 @@ def admin_add_general_resource():
         resource_link = request.form.get('resource_link', '').strip()
         raw_tags = request.form.get('tags', '').strip()
         pdf_file = request.files.get('resource_pdf')
+
+        if title and current_username:
+            username_suffix = f'({current_username})'
+            if not title.lower().endswith(username_suffix.lower()):
+                title = f'{title} {username_suffix}'
 
         if not title or program_type not in ['diploma', 'degree']:
             flash('Please provide a valid title and program type.', 'error')
@@ -1992,13 +1999,19 @@ def admin_add_general_resource():
     subjects_by_program = fetch_general_resource_subjects(conn) if conn else {'diploma': [], 'degree': []}
     if conn:
         conn.close()
-    return render_template('admin_add_general_resource.html', subjects_by_program=subjects_by_program)
+    return render_template(
+        'admin_add_general_resource.html',
+        subjects_by_program=subjects_by_program,
+        current_username=current_username
+    )
 
 @app.route('/resources/submit', methods=['GET', 'POST'])
 def submit_general_resource():
     auth_redirect = login_required()
     if auth_redirect:
         return auth_redirect
+
+    current_username = (g.current_user.get('username') or '').strip() if getattr(g, 'current_user', None) else ''
 
     if request.method == 'POST':
         title = request.form.get('title', '').strip()
@@ -2008,6 +2021,12 @@ def submit_general_resource():
         description = request.form.get('description', '').strip()
         raw_tags = request.form.get('tags', '').strip()
         pdf_file = request.files.get('resource_pdf')
+
+        # Keep titles consistent by adding the contributor username once.
+        if title and current_username:
+            username_suffix = f'({current_username})'
+            if not title.lower().endswith(username_suffix.lower()):
+                title = f'{title} {username_suffix}'
 
         if not title or program_type not in ['diploma', 'degree']:
             flash('Please provide a valid title and program type.', 'error')
@@ -2146,6 +2165,7 @@ def submit_general_resource():
     return render_template(
         'submit_general_resource.html',
         subjects_by_program=subjects_by_program,
+        current_username=current_username,
         submissions=submissions,
         submission_stats=submission_stats
     )

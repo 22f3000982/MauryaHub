@@ -178,6 +178,23 @@
             color: var(--muted);
             font-size: .8rem;
         }
+        .title-preview {
+            margin-top: 10px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px dashed #dcc7b5;
+            background: #fff8f2;
+            color: #6b3f28;
+            font-size: .82rem;
+            font-weight: 700;
+        }
+        .title-preview span {
+            display: block;
+            margin-top: 5px;
+            color: #2b2019;
+            font-weight: 800;
+            word-break: break-word;
+        }
         .dropzone {
             position: relative;
             border: 1.5px dashed #dcc7b5;
@@ -373,6 +390,10 @@
                         <div class="field full">
                             <label for="title">Title <span class="req">*</span></label>
                             <input id="title" name="title" type="text" placeholder="For eg- DL Quiz-2 Cheatsheet (Your Name)" required>
+                            <div class="title-preview" id="title_preview">
+                                Final title preview (auto):
+                                <span id="title_preview_value">Start typing title to see preview...</span>
+                            </div>
                         </div>
                         <div class="field full">
                             <label for="resource_link">Direct link</label>
@@ -503,6 +524,42 @@
         const subjectsByProgram = {{ subjects_by_program | tojson }};
         const programSelect = document.getElementById('program_type');
         const subjectSelect = document.getElementById('subject_id');
+        const titleInput = document.getElementById('title');
+        const titlePreviewValue = document.getElementById('title_preview_value');
+        const submitForm = document.querySelector('form[method="post"]');
+        const currentUsername = {{ (current_username or '') | tojson }};
+
+        function escapeRegExp(value) {
+            return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        function removeUsernameSuffix(rawTitle) {
+            if (!rawTitle) return '';
+            const trimmed = rawTitle.trim();
+            if (!currentUsername) return trimmed;
+            const suffixPattern = new RegExp(`\\s*\\(${escapeRegExp(currentUsername)}\\)$`, 'i');
+            return trimmed.replace(suffixPattern, '').trim();
+        }
+
+        function buildFinalTitle(rawTitle) {
+            const cleanTitle = removeUsernameSuffix(rawTitle);
+            if (!cleanTitle) return '';
+            if (!currentUsername) return cleanTitle;
+            return `${cleanTitle} (${currentUsername})`;
+        }
+
+        function renderTitlePreview() {
+            const finalTitle = buildFinalTitle(titleInput.value || '');
+            if (finalTitle) {
+                titlePreviewValue.textContent = finalTitle;
+                return;
+            }
+            if (currentUsername) {
+                titlePreviewValue.textContent = `Your title will end with (${currentUsername})`;
+                return;
+            }
+            titlePreviewValue.textContent = 'Start typing title to see preview...';
+        }
 
         function populateSubjects(program) {
             const list = subjectsByProgram[program] || [];
@@ -512,6 +569,12 @@
         }
 
         programSelect.addEventListener('change', () => populateSubjects(programSelect.value));
+        titleInput.addEventListener('input', renderTitlePreview);
+        submitForm.addEventListener('submit', () => {
+            titleInput.value = buildFinalTitle(titleInput.value || '');
+        });
+
+        renderTitlePreview();
     </script>
 </body>
 </html>
