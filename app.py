@@ -10,6 +10,7 @@ import hashlib
 import math
 import mimetypes
 import secrets
+import re
 from werkzeug.utils import secure_filename
 import smtplib
 from email.mime.text import MIMEText
@@ -337,7 +338,7 @@ def fetch_user_by_id(user_id):
         cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cur.execute(
             '''
-            SELECT id, google_id, name, email, profile_picture, role, is_active
+            SELECT id, google_id, name, email, username, profile_picture, role, is_active
             FROM users
             WHERE id=%s AND is_active=TRUE
             ''',
@@ -443,7 +444,7 @@ def decorate_general_resources(rows):
         helpful_pct = (float(row[12] or 0) / 4.0) * 100 if helpful_total else 0
         decorated.append(tuple(row[:8]) + (
             avg_rating, rating_count, helpful_yes, helpful_total, helpful_pct,
-            score, bayesian, helpful, freshness, row[13], int(row[14] or 0)
+            score, bayesian, helpful, freshness, row[13], int(row[14] or 0), row[15]
         ))
     return decorated
 
@@ -1016,6 +1017,12 @@ def init_db():
             )
         ''')
         cur.execute('CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)')
+        cur.execute('ALTER TABLE users ADD COLUMN IF NOT EXISTS username TEXT')
+        cur.execute('''
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username
+            ON users (LOWER(username))
+            WHERE username IS NOT NULL AND username <> ''
+        ''')
 
         cur.execute('''
             CREATE TABLE IF NOT EXISTS pending_general_resources (
@@ -1372,7 +1379,7 @@ def google_login():
         flash('Google login is not configured yet. Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET on Render.', 'error')
         return redirect(url_for('general_resources_page'))
 
-    next_url = request.args.get('next') or url_for('general_resources_page')
+    next_url = request.values.get('next') or url_for('general_resources_page')
     state = secrets.token_urlsafe(24)
     session['google_oauth_state'] = state
     session['google_oauth_next'] = next_url
@@ -1438,10 +1445,10 @@ def google_callback():
         try:
             role = 'admin' if email in ADMIN_EMAILS else 'user'
             cur = conn.cursor()
-            cur.execute('SELECT id, role FROM users WHERE email=%s', (email,))
+            cur.execute('SELECT id, role, username FROM users WHERE email=%s', (email,))
             existing = cur.fetchone()
             if existing:
-                user_id, existing_role = existing
+                user_id, existing_role, username = existing
                 final_role = existing_role or role
                 if email in ADMIN_EMAILS:
                     final_role = 'admin'
@@ -1465,6 +1472,7 @@ def google_callback():
                 )
                 user_id = cur.fetchone()[0]
                 final_role = role
+                username = None
             conn.commit()
             cur.close()
         finally:
@@ -1478,12 +1486,59 @@ def google_callback():
             session['admin_mode'] = True
         session.pop('google_oauth_state', None)
         next_url = session.pop('google_oauth_next', None) or url_for('general_resources_page')
+        if not username:
+            return redirect(url_for('set_username', next=next_url))
         flash('Logged in successfully.', 'success')
         return redirect(next_url)
     except Exception as exc:
         print(f'Google login error: {exc}')
         flash('Google login failed. Please try again.', 'error')
         return redirect(url_for('general_resources_page'))
+
+@app.route('/set-username', methods=['GET', 'POST'])
+def set_username():
+    if not getattr(g, 'current_user', None):
+        return redirect(url_for('google_login', next=request.args.get('next') or url_for('general_resources_page')))
+
+    next_url = request.values.get('next') or url_for('general_resources_page')
+    if not next_url.startswith('/') or next_url.startswith('//'):
+        next_url = url_for('general_resources_page')
+
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip().lower()
+        if not re.fullmatch(r'[a-z0-9_]{3,24}', username):
+            flash('Username must be 3-24 characters using only letters, numbers, or underscores.', 'error')
+            return render_template('set_username.html', username=username, next_url=next_url)
+
+        conn = get_db_connection()
+        if not conn:
+            flash('Database connection failed. Please try again.', 'error')
+            return render_template('set_username.html', username=username, next_url=next_url)
+
+        try:
+            cur = conn.cursor()
+            cur.execute(
+                'UPDATE users SET username=%s, updated_at=CURRENT_TIMESTAMP WHERE id=%s',
+                (username, g.current_user['id'])
+            )
+            conn.commit()
+            cur.close()
+            session['user_name'] = g.current_user['name']
+            flash('Username saved successfully.', 'success')
+            return redirect(next_url)
+        except psycopg2.errors.UniqueViolation:
+            conn.rollback()
+            flash('That username is already taken. Please choose another.', 'error')
+        except Exception as exc:
+            conn.rollback()
+            print(f'Error saving username: {exc}')
+            flash('Could not save your username. Please try again.', 'error')
+        finally:
+            conn.close()
+
+        return render_template('set_username.html', username=username, next_url=next_url)
+
+    return render_template('set_username.html', username=g.current_user.get('username') or '', next_url=next_url)
 
 @app.route('/logout')
 def user_logout():
@@ -1545,9 +1600,11 @@ def general_resources_page():
                    s.name,
                    COALESCE(rf.avg_rating, 0), COALESCE(rf.rating_count, 0),
                    COALESCE(rf.helpful_yes, 0), COALESCE(rf.helpful_total, 0),
-                   COALESCE(rf.helpful_avg, 0), gr.updated_at, COALESCE(rv.recent_views, 0)
+                     COALESCE(rf.helpful_avg, 0), gr.updated_at, COALESCE(rv.recent_views, 0),
+                     u.username
             FROM general_resources gr
             LEFT JOIN general_resource_subjects s ON s.id = gr.subject_id
+                 LEFT JOIN users u ON u.id = gr.submitted_by
             LEFT JOIN (
                 SELECT resource_id, AVG(rating) FILTER (WHERE rating IS NOT NULL) AS avg_rating,
                        COUNT(rating) AS rating_count,
@@ -1586,9 +1643,11 @@ def general_resources_page():
                    s.name,
                    COALESCE(rf.avg_rating, 0), COALESCE(rf.rating_count, 0),
                    COALESCE(rf.helpful_yes, 0), COALESCE(rf.helpful_total, 0),
-                   COALESCE(rf.helpful_avg, 0), gr.updated_at, COALESCE(rv.recent_views, 0)
+                     COALESCE(rf.helpful_avg, 0), gr.updated_at, COALESCE(rv.recent_views, 0),
+                     u.username
             FROM general_resources gr
             LEFT JOIN general_resource_subjects s ON s.id = gr.subject_id
+                 LEFT JOIN users u ON u.id = gr.submitted_by
             LEFT JOIN (
                 SELECT resource_id, AVG(rating) FILTER (WHERE rating IS NOT NULL) AS avg_rating,
                        COUNT(rating) AS rating_count,

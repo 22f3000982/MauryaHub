@@ -265,6 +265,31 @@
             box-shadow: 0 12px 24px rgba(34, 211, 238, 0.35);
         }
 
+        .external-links-group {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.75rem;
+            max-width: 920px;
+            margin: 1.25rem auto 0;
+        }
+
+        .external-link-btn {
+            background: rgba(44, 44, 74, 0.9);
+            color: var(--text-light);
+            padding: 0.85rem 1rem;
+            border: 1px solid rgba(0, 191, 255, 0.45);
+            border-radius: 10px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+        }
+
+        .external-link-btn:hover {
+            background: rgba(0, 191, 255, 0.18);
+            border-color: var(--accent);
+            transform: translateY(-3px);
+        }
+
         /* Why Choose Us Section */
         .why-choose-us {
             padding: 2rem 0 1.5rem 0;
@@ -872,6 +897,9 @@
             .recent-content-section {
                 padding: 3rem 0;
             }
+            .external-links-group {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
         }
     </style>
 </head>
@@ -887,7 +915,7 @@
             </ul>
             <div class="nav-cta-group">
                 <a href="{{ url_for('course_view') }}" class="dashboard-btn">Access Dashboard</a>
-                <a href="{{ url_for('general_resources_page') }}" class="resources-btn">Explore Resources</a>
+                <a href="{{ url_for('general_resources_page') }}" class="resources-btn">Community Resources</a>
             </div>
         </div>
     </nav>
@@ -902,7 +930,13 @@
                 </p>
                 <div class="hero-cta-group">
                     <a href="{{ url_for('course_view') }}" class="cta-btn">Let's Get Started</a>
-                    <a href="{{ url_for('general_resources_page') }}" class="hero-resources-btn">Explore Resources</a>
+                    <a href="{{ url_for('general_resources_page') }}" class="hero-resources-btn">Community Resources</a>
+                </div>
+                <div class="external-links-group" aria-label="External study tools">
+                    <a href="https://docs.google.com/spreadsheets/d/1ndm0pg3620crYW1yyUigW6NPE5cvHLk65IvHErEv7f4/edit?gid=1789044591#gid=1789044591" class="external-link-btn" target="_blank" rel="noopener noreferrer">Degree Level PYQ</a>
+                    <a href="https://docs.google.com/spreadsheets/d/1aRiLp4dnZGGOnMoqj23KpPU_S2dvO5guj_L6L-JayiA/edit?gid=1015061363#gid=1015061363" class="external-link-btn" target="_blank" rel="noopener noreferrer">Diploma Level PYQ</a>
+                    <a href="https://docs.google.com/spreadsheets/d/1nVp8p_B2h3pjD9gR4zg--jMTH16BFZMw3VngkU7End4/edit?gid=1925477026#gid=1925477026" class="external-link-btn" target="_blank" rel="noopener noreferrer">Foundation Level PYQ</a>
+                    <a href="https://gradegenie.vercel.app/cgpa" class="external-link-btn" target="_blank" rel="noopener noreferrer">CGPA Calculator</a>
                 </div>
             </div>
         </section>
