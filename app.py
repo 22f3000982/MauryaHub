@@ -1025,6 +1025,37 @@ def init_db():
         ''')
 
         cur.execute('''
+            CREATE TABLE IF NOT EXISTS member_contributions (
+                username TEXT PRIMARY KEY,
+                contribution_count INTEGER NOT NULL DEFAULT 0 CHECK (contribution_count >= 0),
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        cur.executemany(
+            '''
+            INSERT INTO member_contributions (username, contribution_count)
+            VALUES (%s, %s)
+            ON CONFLICT (username) DO NOTHING
+            ''',
+            [
+                ('Anmol Kansal', 20),
+                ('Ashish Maurya', 11),
+                ('Optimus Prime', 9),
+                ('Sumit Gupta', 5),
+                ('Sanket Mishra', 3),
+                ('Code Synth', 3),
+                ('Abhay', 2),
+                ('Alok Tripathi', 2),
+                ('Kailash', 1),
+                ('Kshitij', 1),
+                ('Piush', 1),
+                ('Piyush Duggal', 1),
+                ('Prashasti Sarraf', 1),
+                ('Vinil', 1)
+            ]
+        )
+
+        cur.execute('''
             CREATE TABLE IF NOT EXISTS pending_general_resources (
                 id SERIAL PRIMARY KEY,
                 submitted_by INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -1563,6 +1594,9 @@ def course_view():
 
 @app.route('/resources')
 def general_resources_page():
+    if getattr(g, 'current_user', None) and not g.current_user.get('username'):
+        return redirect(url_for('set_username', next=request.full_path))
+
     sort_key = request.args.get('sort', 'recommended')
     if sort_key not in {'recommended', 'top-rated', 'most-helpful', 'latest', 'most-viewed'}:
         sort_key = 'recommended'
@@ -1579,11 +1613,20 @@ def general_resources_page():
             resource_sort=sort_key,
             subjects_by_program={'diploma': [], 'degree': []},
             has_unassigned={'diploma': False, 'degree': False},
-            reports=[]
+            reports=[],
+            top_contributors=[]
         )
 
     try:
         cur = conn.cursor()
+        cur.execute('''
+            SELECT username, contribution_count
+            FROM member_contributions
+            WHERE username IS NOT NULL AND username <> ''
+            ORDER BY contribution_count DESC, LOWER(username)
+            LIMIT 10
+        ''')
+        top_contributors = cur.fetchall()
         cache_key = 'general:diploma'
         diploma_cache = _resource_ranking_cache.get(cache_key)
         if diploma_cache and time.time() - diploma_cache['created'] < RESOURCE_RANKING_CACHE_SECONDS:
@@ -1695,6 +1738,7 @@ def general_resources_page():
         degree_resources = []
         subjects_by_program = {'diploma': [], 'degree': []}
         reports = []
+        top_contributors = []
     finally:
         conn.close()
 
@@ -1720,7 +1764,8 @@ def general_resources_page():
         resource_sort=sort_key,
         subjects_by_program=subjects_by_program,
         has_unassigned=has_unassigned,
-        reports=reports
+        reports=reports,
+        top_contributors=top_contributors
     )
 
 @app.route('/admin/resource-subjects', methods=['GET', 'POST'])
