@@ -76,8 +76,8 @@
         <form method="post">
             <input type="hidden" name="next" value="{{ next_url }}">
             <label for="username">Username</label>
-            <input id="username" name="username" value="{{ username }}" minlength="3" maxlength="24" pattern="[A-Za-z0-9_]{3,24}" autocomplete="username" required autofocus>
-            <p class="hint">Use 3-24 characters: letters, numbers, and underscores.</p>
+            <input id="username" name="username" value="{{ username }}" autocomplete="username" required autofocus>
+            <p class="hint">Choose any username you like. It only needs to be unique.</p>
             <button type="submit">Save username</button>
         </form>
     </main>

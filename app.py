@@ -10,7 +10,6 @@ import hashlib
 import math
 import mimetypes
 import secrets
-import re
 from werkzeug.utils import secure_filename
 import smtplib
 from email.mime.text import MIMEText
@@ -1536,9 +1535,9 @@ def set_username():
         next_url = url_for('general_resources_page')
 
     if request.method == 'POST':
-        username = request.form.get('username', '').strip().lower()
-        if not re.fullmatch(r'[a-z0-9_]{3,24}', username):
-            flash('Username must be 3-24 characters using only letters, numbers, or underscores.', 'error')
+        username = request.form.get('username', '').strip()
+        if not username:
+            flash('Please enter a username.', 'error')
             return render_template('set_username.html', username=username, next_url=next_url)
 
         conn = get_db_connection()
