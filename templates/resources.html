@@ -7,41 +7,47 @@
     <link rel="icon" href="data:,">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
     <style>
 /* ═══════════════════════════════════════════════
-   TOKENS
+   TOKENS — Warm Academic (cream / forest green / maroon)
 ═══════════════════════════════════════════════ */
 :root {
-    --bg:          #f8fafc;
-    --surface:     #ffffff;
-    --surface-2:   #f1f5f9;
-    --surface-3:   #eef2ff;
-    --card:        #ffffff;
-    --hover:       #f1f5f9;
-    --border:      #e2e8f0;
-    --border-md:   #cbd5f5;
-    --text:        #0f172a;
-    --text-muted:  #475569;
-    --text-dim:    #94a3b8;
-    --accent:      #6366f1;
-    --accent-2:    #3b82f6;
-    --accent-soft: rgba(99,102,241,0.12);
-    --accent-weak: rgba(99,102,241,0.08);
-    --danger:      #ef4444;
-    --danger-soft: rgba(239,68,68,0.12);
-    --success:     #16a34a;
-    --success-soft: rgba(22,163,74,0.12);
+    --bg:          #f6efe2;
+    --surface:     #fffdf8;
+    --surface-2:   #f1e7d4;
+    --surface-3:   #eee3d1;
+    --card:        #fffdf8;
+    --hover:       #f3ead8;
+    --border:      #ddccae;
+    --border-md:   #c9b487;
+    --text:        #2c2115;
+    --text-muted:  #5c4a34;
+    --text-dim:    #93805f;
+    --accent:      #1f4d3c;
+    --accent-2:    #6b1f2a;
+    --accent-soft: rgba(31,77,60,0.14);
+    --accent-weak: rgba(31,77,60,0.08);
+    --danger:      #8c2b2b;
+    --danger-soft: rgba(140,43,43,0.12);
+    --success:     #2f6b3a;
+    --success-soft: rgba(47,107,58,0.12);
+    --shadow-warm: rgba(66,46,20,0.14);
     --r-sm: 8px; --r: 12px; --r-lg: 18px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 body {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Source Sans 3', sans-serif;
     font-size: 14px;
     background: var(--bg);
     color: var(--text);
     min-height: 100vh;
-    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    background: linear-gradient(180deg, #f6efe2 0%, #efe4cc 100%);
+}
+:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 4px;
 }
 
 /* ── LAYOUT ─────────────────────────────────── */
@@ -55,7 +61,7 @@ body {
     background: var(--surface);
     backdrop-filter: blur(8px);
     margin-bottom: 12px;
-    box-shadow: 0 8px 18px rgba(15,23,42,0.08);
+    box-shadow: 0 8px 18px var(--shadow-warm);
 }
 .top-nav a {
     text-decoration: none; color: var(--text-muted);
@@ -66,55 +72,55 @@ body {
 }
 .top-nav a:hover { color: var(--text); border-color: var(--border); background: var(--surface-2); }
 .top-nav a.cta-link {
-    color: #ffffff;
-    background: linear-gradient(135deg, #f97316, #ea580c);
-    border-color: rgba(234, 88, 12, 0.25);
-    box-shadow: 0 10px 20px rgba(249, 115, 22, 0.22);
+    color: #fffdf8;
+    background: linear-gradient(135deg, #8a3a2a, #6b1f2a);
+    border-color: rgba(107, 31, 42, 0.28);
+    box-shadow: 0 10px 20px rgba(107, 31, 42, 0.22);
 }
 .top-nav a.cta-link:hover {
-    color: #ffffff;
-    border-color: rgba(234, 88, 12, 0.28);
-    background: linear-gradient(135deg, #fb923c, #ea580c);
+    color: #fffdf8;
+    border-color: rgba(107, 31, 42, 0.3);
+    background: linear-gradient(135deg, #9a4530, #6b1f2a);
 }
 .top-nav .contributors-link {
-    color: #075985;
-    background: #e0f2fe;
-    border-color: #bae6fd;
+    color: #1f4d3c;
+    background: #e4ede4;
+    border-color: #bfd6bd;
     cursor: pointer;
     font: inherit;
 }
-.top-nav .contributors-link:hover { color: #0c4a6e; background: #bae6fd; }
+.top-nav .contributors-link:hover { color: #16362a; background: #cfe0cd; }
 .top-contributors-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
-.top-contributors-heading h2 { font-size: 0.95rem; color: var(--text); }
+.top-contributors-heading h2 { font-size: 0.95rem; color: var(--text); font-family: 'Source Serif 4', serif; }
 .top-contributors-heading span { color: var(--text-dim); font-size: 0.7rem; }
 .top-contributors-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; margin-top: 9px; padding: 0; list-style: none; }
 .top-contributors-list li { display: flex; align-items: center; gap: 8px; min-width: 0; padding: 7px 9px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--r-sm); }
 .top-contributors-list strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .top-contributors-list li > span:last-child { margin-left: auto; color: var(--text-muted); font-size: 0.72rem; white-space: nowrap; }
-.contributor-rank { display: inline-grid; place-items: center; width: 21px; height: 21px; flex-shrink: 0; border-radius: 50%; color: #1e1b4b; background: var(--surface-3); font-size: 0.7rem; font-weight: 800; }
+.contributor-rank { display: inline-grid; place-items: center; width: 21px; height: 21px; flex-shrink: 0; border-radius: 50%; color: #2c2115; background: var(--surface-3); font-size: 0.7rem; font-weight: 800; }
 .top-contributors-empty { margin-top: 8px; color: var(--text-muted); font-size: 0.78rem; }
 .contributors-panel { height: auto; max-height: min(84vh, 750px); }
 .contributors-panel .top-contributors-list { max-height: 62vh; overflow: auto; }
 .theme-toggle { margin-left:auto; border:1px solid var(--border); border-radius:999px; padding:5px 10px; background:var(--surface-2); color:var(--text); font:inherit; font-size:.76rem; font-weight:700; cursor:pointer; white-space:nowrap; }
 .theme-toggle:hover { border-color:var(--accent); color:var(--accent); }
-body.dark-theme { --bg:#0f172a; --surface:#172033; --surface-2:#1e293b; --surface-3:#25245a; --card:#172033; --hover:#202b40; --border:#334155; --border-md:#475569; --text:#e5e7eb; --text-muted:#cbd5e1; --text-dim:#94a3b8; --accent:#818cf8; --accent-2:#60a5fa; --accent-soft:rgba(129,140,248,.18); --accent-weak:rgba(129,140,248,.12); }
-body.dark-theme { background:linear-gradient(180deg,#0f172a 0%,#111827 100%); }
-body.dark-theme .tab-btn.active { color:#eef2ff; }
-body.dark-theme .resource-icon, body.dark-theme .tag-chip { border-color:#4f46e5; }
+body.dark-theme { --bg:#1c1712; --surface:#26201a; --surface-2:#2e261e; --surface-3:#332a20; --card:#26201a; --hover:#332a20; --border:#4a3d2c; --border-md:#5c4c37; --text:#ede2cd; --text-muted:#cbb894; --text-dim:#93805f; --accent:#5fae8c; --accent-2:#c17b83; --accent-soft:rgba(95,174,140,.18); --accent-weak:rgba(95,174,140,.12); --shadow-warm: rgba(0,0,0,0.35); }
+body.dark-theme { background:linear-gradient(180deg,#1c1712 0%,#171310 100%); }
+body.dark-theme .tab-btn.active { color:#f1e7d4; }
+body.dark-theme .resource-icon, body.dark-theme .tag-chip { border-color:#5fae8c; }
 body.dark-theme .filter-select option { color:var(--text); }
 body.dark-theme .admin-report-item { background:var(--surface); }
 body.dark-theme .top-nav a.cta-link {
-    color: #fff7ed;
-    background: linear-gradient(135deg, #f97316, #c2410c);
-    border-color: rgba(249, 115, 22, 0.32);
+    color: #fdf2ef;
+    background: linear-gradient(135deg, #9a4530, #6b1f2a);
+    border-color: rgba(193, 123, 131, 0.32);
 }
 body.dark-theme .page-heading-status {
-    background: rgba(22, 101, 52, 0.25);
-    color: #bbf7d0;
-    border-color: #166534;
+    background: rgba(47, 107, 58, 0.22);
+    color: #bfe0c4;
+    border-color: #2f6b3a;
 }
 body.dark-theme .page-heading-status::before {
-    box-shadow: 0 0 0 4px rgba(22,163,74,0.16);
+    box-shadow: 0 0 0 4px rgba(47,107,58,0.18);
 }
 
 /* ── PAGE HEADER ─────────────────────────────── */
@@ -127,7 +133,7 @@ body.dark-theme .page-heading-status::before {
     border: 1px solid var(--border);
     border-radius: var(--r-lg);
     margin-bottom: 12px;
-    box-shadow: 0 12px 24px rgba(15,23,42,0.08);
+    box-shadow: 0 12px 24px var(--shadow-warm);
 }
 .page-heading { flex: 0 0 auto; }
 .page-heading-status {
@@ -137,9 +143,9 @@ body.dark-theme .page-heading-status::before {
     margin-top: 8px;
     padding: 5px 10px;
     border-radius: 999px;
-    background: #ecfdf3;
-    color: #166534;
-    border: 1px solid #bbf7d0;
+    background: #e7f0e5;
+    color: #1f4d3c;
+    border: 1px solid #bfd6bd;
     font-size: 0.72rem;
     font-weight: 800;
     letter-spacing: 0.04em;
@@ -150,55 +156,78 @@ body.dark-theme .page-heading-status::before {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #16a34a;
-    box-shadow: 0 0 0 4px rgba(22,163,74,0.14);
+    background: #2f6b3a;
+    box-shadow: 0 0 0 4px rgba(47,107,58,0.14);
 }
 .page-header h1 {
-    font-family: 'DM Serif Display', serif;
+    font-family: 'Playfair Display', 'Source Serif 4', serif;
     font-size: clamp(1.6rem, 3vw, 2rem);
     color: var(--text); letter-spacing: -0.01em; line-height: 1.2;
 }
-.page-header p { color: var(--text-muted); font-size: 0.78rem; margin-top: 2px; }
+.page-header p { color: var(--text-muted); font-size: 0.78rem; margin-top: 2px; font-style: italic; }
 .btn-add {
-    white-space: nowrap; background: linear-gradient(135deg, var(--accent), var(--accent-2));
-    color: #ffffff;
+    white-space: nowrap; background: linear-gradient(135deg, var(--accent), #2c6650);
+    color: #fffdf8;
     border: none; border-radius: var(--r-sm); padding: 7px 13px;
-    font-size: 0.78rem; font-weight: 700; font-family: 'Inter', sans-serif;
+    font-size: 0.78rem; font-weight: 700; font-family: 'Source Sans 3', sans-serif;
     cursor: pointer; text-decoration: none;
     display: inline-flex; align-items: center; gap: 5px;
     margin-left: auto;
     transition: opacity .16s, box-shadow .16s, transform .16s; flex-shrink: 0;
 }
-.btn-add:hover { opacity: .92; transform: translateY(-1px); box-shadow: 0 12px 22px rgba(59,130,246,0.25); }
+.btn-add:hover { opacity: .92; transform: translateY(-1px); box-shadow: 0 12px 22px rgba(31,77,60,0.28); }
 .btn-add.cta-login {
-    background: linear-gradient(135deg, #f97316, #ea580c);
-    box-shadow: 0 12px 22px rgba(249, 115, 22, 0.24);
+    background: linear-gradient(135deg, #8a3a2a, #6b1f2a);
+    box-shadow: 0 12px 22px rgba(107, 31, 42, 0.24);
 }
-.btn-add.cta-login:hover { box-shadow: 0 12px 22px rgba(249, 115, 22, 0.3); }
-.admin-report-panel { margin-bottom:12px; padding:12px 14px; background:#fff7ed; border:1px solid #fed7aa; border-radius:var(--r-lg); }
+.btn-add.cta-login:hover { box-shadow: 0 12px 22px rgba(107, 31, 42, 0.3); }
+.admin-report-panel { margin-bottom:12px; padding:12px 14px; background:#f7ede0; border:1px solid #e0c8a0; border-radius:var(--r-lg); }
 .admin-report-heading { display:flex; align-items:center; justify-content:space-between; gap:10px; }
-.admin-report-heading h2 { font-size:.95rem; color:#9a3412; }
-.admin-report-count { min-width:24px; padding:3px 8px; text-align:center; border-radius:999px; background:#ffedd5; color:#9a3412; font-weight:700; font-size:.75rem; }
+.admin-report-heading h2 { font-size:.95rem; color:#7a3f1d; font-family: 'Source Serif 4', serif; }
+.admin-report-count { min-width:24px; padding:3px 8px; text-align:center; border-radius:999px; background:#f0dcbb; color:#7a3f1d; font-weight:700; font-size:.75rem; }
 .admin-report-list { display:grid; gap:7px; margin-top:9px; max-height:260px; overflow:auto; }
-.admin-report-item { position:relative; padding:8px 38px 8px 10px; background:#fff; border:1px solid #fed7aa; border-radius:var(--r-sm); }
-.admin-report-dismiss { position:absolute; top:7px; right:8px; width:22px; height:22px; border:1px solid #fed7aa; border-radius:50%; background:#fff7ed; color:#9a3412; cursor:pointer; line-height:18px; font-size:14px; }
-.admin-report-dismiss:hover { background:#fee2e2; border-color:#fca5a5; color:#b91c1c; }
+.admin-report-item { position:relative; padding:8px 38px 8px 10px; background:#fffdf8; border:1px solid #e0c8a0; border-radius:var(--r-sm); }
+.admin-report-dismiss { position:absolute; top:7px; right:8px; width:22px; height:22px; border:1px solid #e0c8a0; border-radius:50%; background:#f7ede0; color:#7a3f1d; cursor:pointer; line-height:18px; font-size:14px; }
+.admin-report-dismiss:hover { background:#f6dede; border-color:#dba9a9; color:#8c2b2b; }
 .admin-report-item strong { font-size:.82rem; }
-.admin-report-meta, .admin-report-item small { display:block; color:#9a3412; font-size:.7rem; margin-top:3px; }
+.admin-report-meta, .admin-report-item small { display:block; color:#7a3f1d; font-size:.7rem; margin-top:3px; }
 .admin-report-item p { color:var(--text-muted); font-size:.78rem; margin-top:5px; word-break:break-word; }
-.resource-flash-messages { display:grid; gap:8px; margin:0 0 12px; }
-.resource-flash { display:flex; align-items:center; gap:8px; padding:10px 13px; border-radius:var(--r); border:1px solid; font-size:.82rem; font-weight:600; }
-.resource-flash-success { color:#166534; background:#f0fdf4; border-color:#bbf7d0; }
-.resource-flash-error { color:#991b1b; background:#fef2f2; border-color:#fecaca; }
-body.dark-theme .resource-flash-success { color:#bbf7d0; background:rgba(22,101,52,.22); border-color:#166534; }
-body.dark-theme .resource-flash-error { color:#fecaca; background:rgba(153,27,27,.22); border-color:#991b1b; }
+
+/* ── TOAST FLASH MESSAGES ─────────────────────── */
+.resource-flash-messages {
+    position: fixed; top: 16px; right: 16px; z-index: 1200;
+    display: flex; flex-direction: column; gap: 8px;
+    max-width: min(360px, 92vw);
+}
+.resource-flash {
+    position: relative;
+    display: flex; align-items: center; gap: 8px;
+    padding: 11px 34px 11px 14px; border-radius: var(--r); border: 1px solid;
+    font-size: .82rem; font-weight: 600;
+    box-shadow: 0 14px 30px var(--shadow-warm);
+    animation: toastIn .22s ease;
+}
+.resource-flash-success { color:#1f4d3c; background:#eef5ec; border-color:#bfd6bd; }
+.resource-flash-error { color:#7a2323; background:#faf0ee; border-color:#e0bcb4; }
+body.dark-theme .resource-flash-success { color:#bfe0c4; background:#1b2a20; border-color:#2f6b3a; }
+body.dark-theme .resource-flash-error { color:#e0bcb4; background:#2a1b18; border-color:#8c2b2b; }
+.resource-flash-close {
+    position: absolute; top: 7px; right: 7px;
+    width: 20px; height: 20px; border-radius: 50%;
+    border: none; background: rgba(44,33,21,0.08); color: inherit;
+    cursor: pointer; font-size: .68rem; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+}
+.resource-flash-close:hover { background: rgba(44,33,21,0.14); }
+@keyframes toastIn { from { opacity:0; transform: translateX(16px); } to { opacity:1; transform: translateX(0); } }
+@keyframes toastOut { from { opacity:1; transform: translateX(0); } to { opacity:0; transform: translateX(16px); } }
 
 /* ── TABS ────────────────────────────────────── */
 .tab-strip {
     display: flex; gap: 3px;
     background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--r); padding: 4px; margin-bottom: 0;
-    box-shadow: 0 10px 24px rgba(15,23,42,0.08);
+    box-shadow: 0 10px 24px var(--shadow-warm);
 }
 .page-header .tab-strip {
     flex: 0 1 360px;
@@ -215,39 +244,39 @@ body.dark-theme .resource-flash-error { color:#fecaca; background:rgba(153,27,27
 .page-header .filter-zone::before { display: none; }
 .page-header .filter-bar {
     justify-content: flex-start;
-    background: linear-gradient(135deg, #eff6ff 0%, #eef2ff 100%);
-    border-color: #bfdbfe;
-    box-shadow: inset 0 0 0 1px rgba(99,102,241,0.12);
+    background: linear-gradient(135deg, #f3ead8 0%, #eee3d1 100%);
+    border-color: #ddccae;
+    box-shadow: inset 0 0 0 1px rgba(31,77,60,0.12);
 }
 body.dark-theme .page-header .filter-bar {
-    background: linear-gradient(135deg, rgba(30,64,175,.22), rgba(67,56,202,.22));
-    border-color: #4f46e5;
+    background: linear-gradient(135deg, rgba(31,77,60,.22), rgba(107,31,42,.18));
+    border-color: #5fae8c;
 }
 .page-header .search-wrap,
 .page-header .filter-select {
-    background: #ffffff;
-    border-color: #93c5fd;
+    background: #fffdf8;
+    border-color: #c9b487;
 }
 .page-header .result-pill,
 .page-header .active-filter {
-    background: #dbeafe;
-    border-color: #bfdbfe;
-    color: #1e3a8a;
+    background: #e7ded0;
+    border-color: #ddccae;
+    color: #3d3018;
 }
 body.dark-theme .page-header .search-wrap,
 body.dark-theme .page-header .filter-select {
     background: var(--surface-2);
-    border-color: #4f46e5;
+    border-color: #5fae8c;
 }
 body.dark-theme .page-header .result-pill,
 body.dark-theme .page-header .active-filter {
-    background: rgba(79,70,229,.28);
-    border-color: #4f46e5;
-    color: #dbeafe;
+    background: rgba(95,174,140,.24);
+    border-color: #5fae8c;
+    color: #e7ded0;
 }
 .tab-btn {
     flex: 1; background: transparent; border: none;
-    color: var(--text-muted); font-family: 'Inter', sans-serif;
+    color: var(--text-muted); font-family: 'Source Sans 3', sans-serif;
     font-size: 0.82rem; font-weight: 600; padding: 7px 10px;
     border-radius: 6px; cursor: pointer;
     display: flex; align-items: center; justify-content: center; gap: 6px;
@@ -255,8 +284,8 @@ body.dark-theme .page-header .active-filter {
 }
 .tab-btn.active {
     background: var(--surface-3);
-    color: #1e1b4b;
-    box-shadow: inset 0 0 0 1px rgba(99,102,241,0.25);
+    color: #1f4d3c;
+    box-shadow: inset 0 0 0 1px rgba(31,77,60,0.25);
 }
 .tab-btn:hover:not(.active) { color: var(--text); background: var(--surface-2); }
 .tab-badge {
@@ -266,7 +295,7 @@ body.dark-theme .page-header .active-filter {
 }
 .tab-btn.active .tab-badge {
     background: var(--accent-soft); color: var(--accent);
-    border-color: rgba(99,102,241,0.3);
+    border-color: rgba(31,77,60,0.3);
 }
 
 /* ── STICKY FILTER ZONE ──────────────────────── */
@@ -282,32 +311,39 @@ body.dark-theme .page-header .active-filter {
     display: flex; gap: 10px; flex-wrap: wrap;
     padding: 10px 12px; background: var(--surface);
     border: 1px solid var(--border); border-radius: var(--r-lg);
-    box-shadow: 0 12px 22px rgba(15,23,42,0.08); align-items: center;
+    box-shadow: 0 12px 22px var(--shadow-warm); align-items: center;
     justify-content: center;
+    transition: box-shadow .18s ease;
 }
+.filter-zone.scrolled .filter-bar { box-shadow: 0 18px 34px var(--shadow-warm); }
 .search-wrap {
     display: flex; align-items: center; gap: 8px;
     background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--r-sm); padding: 6px 10px;
     flex: 1 1 520px; max-width: 640px;
 }
-.search-wrap svg { width: 15px; height: 15px; color: var(--text-dim); }
+.search-wrap svg { width: 15px; height: 15px; color: var(--text-dim); flex-shrink: 0; }
 .filter-input, .filter-select {
     background: transparent; border: 1px solid var(--border-md);
     color: var(--text); border-radius: var(--r-sm); padding: 5px 9px;
-    font-size: 0.8rem; font-family: 'Inter', sans-serif; outline: none;
+    font-size: 0.8rem; font-family: 'Source Sans 3', sans-serif; outline: none;
     transition: border-color .16s, box-shadow .16s; min-width: 0;
 }
 .filter-input { flex: 1 1 auto; border: none; padding: 0; }
 .filter-select { flex: 0 1 148px; background: var(--surface-2); }
 .filter-input::placeholder { color: var(--text-dim); }
 .filter-input:focus, .filter-select:focus {
-    border-color: rgba(99,102,241,0.5);
+    border-color: rgba(31,77,60,0.5);
     box-shadow: 0 0 0 3px var(--accent-soft);
 }
 .search-wrap:focus-within {
-    border-color: rgba(99,102,241,0.5);
+    border-color: rgba(31,77,60,0.5);
     box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.search-kbd {
+    flex-shrink: 0; font-size: .68rem; font-weight: 700; color: var(--text-dim);
+    border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px;
+    background: var(--surface-2); font-family: 'Source Sans 3', sans-serif;
 }
 .filter-select option { background: var(--surface-2); }
 .result-pill {
@@ -320,41 +356,33 @@ body.dark-theme .page-header .active-filter {
     padding: 3px 10px; border-radius: 999px; border: 1px dashed var(--border);
     background: var(--surface-2); white-space: nowrap;
 }
-.resource-rating-summary { color: var(--text-dim); font-size: 0.68rem; margin-top: 4px; }
 
 /* ── TAB PANELS ──────────────────────────────── */
 .tab-panel { display: none; }
 .tab-panel.active { display: block; }
 
-/* ── RESOURCE ROWS ───────────────────────────── */
+/* ── RESOURCE CARDS ──────────────────────────── */
 .resource-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
 
 .resource-item {
-    display: grid;
-    /* [num] [reorder] [body] [views] [actions] */
-    grid-template-columns: 24px auto minmax(0, 1fr) auto auto;
-    align-items: center; gap: 0 8px;
-    padding: 16px 18px;
+    display: flex; flex-direction: column; gap: 9px;
+    padding: 15px 16px;
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: var(--r);
     transition: transform .2s ease, box-shadow .2s ease, background .2s ease, border-color .2s ease;
-    min-height: 64px;
-    box-shadow: 0 10px 20px rgba(15,23,42,0.08);
+    box-shadow: 0 10px 20px var(--shadow-warm);
 }
 .resource-item:hover {
     border-color: var(--border-md);
     background: var(--hover);
     transform: translateY(-3px);
-    box-shadow: 0 16px 28px rgba(15,23,42,0.12);
+    box-shadow: 0 16px 28px var(--shadow-warm);
 }
 
-.row-num {
-    font-size: 0.7rem; font-weight: 600; color: var(--text-dim);
-    text-align: center; font-variant-numeric: tabular-nums;
-    line-height: 1; user-select: none;
-}
-.reorder-col { display: flex; flex-direction: column; gap: 2px; }
+.resource-top { display: flex; align-items: flex-start; gap: 10px; }
+
+.reorder-col { display: flex; flex-direction: column; gap: 2px; flex-shrink: 0; padding-top: 2px; }
 .reorder-col form { margin: 0; }
 .reorder-btn {
     background: var(--surface-3); color: var(--text-dim);
@@ -363,77 +391,105 @@ body.dark-theme .page-header .active-filter {
     display: flex; align-items: center; justify-content: center; padding: 0;
     transition: background .13s, color .13s;
 }
-.reorder-btn:hover { background: var(--accent-soft); color: var(--accent); border-color: rgba(79,70,229,0.3); }
-.no-reorder { display: inline-block; width: 18px; }
+.reorder-btn:hover { background: var(--accent-soft); color: var(--accent); border-color: rgba(31,77,60,0.3); }
 
-.resource-body { min-width: 0; }
-.resource-title-row { display: flex; align-items: center; gap: 8px; }
 .resource-icon {
-    width: 26px; height: 26px; border-radius: 8px;
+    width: 30px; height: 30px; border-radius: 8px;
     display: inline-flex; align-items: center; justify-content: center;
-    background: var(--surface-3); border: 1px solid #c7d2fe;
+    background: var(--surface-3); border: 1px solid #c9b487;
     color: var(--accent); flex-shrink: 0;
 }
-.resource-icon svg { width: 14px; height: 14px; }
-.badge-popular {
-    display: inline-flex; align-items: center; gap: 4px;
-    font-size: 0.7rem; font-weight: 600; color: #15803d;
-    padding: 2px 6px; border-radius: 999px;
-    background: #dcfce7; border: 1px solid #bbf7d0;
-}
-.badge-popular svg { width: 12px; height: 12px; }
+.resource-icon svg { width: 15px; height: 15px; }
+
+.resource-main { min-width: 0; flex: 1; }
 .resource-title {
-    min-width: 0;
-    font-weight: 600; font-size: 1.05rem; color: var(--text);
-    white-space: normal; overflow: visible; text-overflow: clip; line-height: 1.35;
-    word-break: break-word;
+    font-weight: 700; font-size: 1rem; color: var(--text);
+    line-height: 1.35; word-break: break-word;
+    font-family: 'Source Serif 4', serif;
 }
-.tag-row { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 3px; }
+.badge-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
 .tag-chip {
     font-size: 0.7rem; font-weight: 600; color: var(--text-muted);
-    padding: 2px 7px; border-radius: 999px;
-    background: var(--surface-3); border: 1px solid #c7d2fe; white-space: nowrap;
+    padding: 2px 8px; border-radius: 999px;
+    background: var(--surface-3); border: 1px solid #c9b487; white-space: nowrap;
 }
-
-.view-count {
-    font-size: 0.78rem; color: var(--text-muted); font-weight: 600;
-    white-space: nowrap; text-align: right; line-height: 1.2;
+.badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 0.7rem; font-weight: 700;
+    padding: 3px 8px; border-radius: 999px; border: 1px solid transparent; white-space: nowrap;
 }
-.view-count span { font-size: 0.63rem; display: block; text-transform: uppercase; letter-spacing: 0.05em; }
-.view-count .eye { display: inline-flex; align-items: center; gap: 4px; justify-content: flex-end; }
-.view-count .eye svg { width: 14px; height: 14px; color: var(--text-dim); }
+.badge svg { width: 12px; height: 12px; }
+.badge-amber  { background: #f4e2c2; color: #7a4a12; border-color: #d9a94f; }
+.badge-blue   { background: #dde6de; color: #1f4d3c; border-color: #a8c4a7; }
+.badge-green  { background: #dcead9; color: #1f4d3c; border-color: #9fc79c; }
+.badge-purple { background: #ecdfe1; color: #6b1f2a; border-color: #d3aeb2; }
 
-.actions-col { display: flex; align-items: center; justify-content: flex-end; gap: 3px; min-width: 0; flex-wrap: wrap; }
-.actions-col form { margin: 0; }
+.resource-meta-row { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; font-size: 0.78rem; }
+.stars-row { display: inline-flex; align-items: center; gap: 1px; }
+.star-ic { width: 13px; height: 13px; }
+.star-ic.filled { color: #b8792a; }
+.star-ic.empty { color: var(--border-md); }
+.stars-value { margin-left: 5px; font-weight: 700; color: var(--text); }
+.stars-count { font-weight: 500; color: var(--text-dim); }
+.no-rating { color: var(--text-dim); font-weight: 600; }
+
+.helpful-pill { display: inline-flex; align-items: center; gap: 4px; font-weight: 700; padding: 2px 9px; border-radius: 999px; font-size: 0.72rem; }
+.pill-green { background: #dcead9; color: #1f4d3c; }
+.pill-amber { background: #f4e2c2; color: #7a4a12; }
+.pill-red   { background: #f3dbd8; color: #7a2323; }
+
+.views-inline { display: inline-flex; align-items: center; gap: 4px; color: var(--text-dim); font-weight: 600; margin-left: auto; }
+.views-inline svg { width: 14px; height: 14px; }
+
+.tag-row { display: flex; flex-wrap: wrap; gap: 4px; }
+
+.resource-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.actions-primary { display: flex; gap: 6px; flex-wrap: wrap; }
 
 .act {
     display: inline-flex; align-items: center;
-    padding: 6px 10px; border-radius: 6px;
-    font-size: 0.78rem; font-weight: 600; font-family: 'Inter', sans-serif;
+    padding: 6px 11px; border-radius: 7px;
+    font-size: 0.78rem; font-weight: 600; font-family: 'Source Sans 3', sans-serif;
     cursor: pointer; text-decoration: none; border: 1px solid transparent;
-    white-space: nowrap; transition: background .13s, border-color .13s, color .13s; line-height: 1.5;
+    white-space: nowrap; transition: background .13s, border-color .13s, color .13s, box-shadow .13s; line-height: 1.5;
     gap: 6px;
 }
 .act svg { width: 14px; height: 14px; }
-.act-open    { color: #f8fafc;  background: linear-gradient(135deg, var(--accent), var(--accent-2));  border-color: transparent; }
-.act-open:hover  { filter: brightness(1.05); box-shadow: 0 10px 18px rgba(99,102,241,0.25); }
+.act-open    { color: #fffdf8;  background: linear-gradient(135deg, var(--accent), #2c6650);  border-color: transparent; }
+.act-open:hover  { filter: brightness(1.06); box-shadow: 0 10px 18px rgba(31,77,60,0.28); }
 .act-preview { color: var(--text);   background: var(--surface-2);    border-color: var(--border); }
 .act-preview:hover  { background: var(--surface-3); border-color: var(--border); }
-.act-download { width: 34px; height: 34px; justify-content: center; padding: 0; color: #166534; background: #f0fdf4; border-color: #bbf7d0; }
-.act-download:hover { background: #dcfce7; border-color: #86efac; }
-.act-rate { color: #92400e; background: #fef3c7; border-color: #fbbf24; }
-.act-rate:hover { background: #fde68a; border-color: #f59e0b; }
-.act-edit    { color: var(--accent); background: transparent;  border-color: rgba(99,102,241,0.4); }
-.act-edit:hover  { background: var(--accent-weak); border-color: rgba(99,102,241,0.6); }
-.act-delete  { color: #fca5a5;       background: transparent;  border-color: rgba(239,68,68,0.35); }
-.act-delete:hover  { background: var(--danger-soft); border-color: rgba(239,68,68,0.6); }
-.act-edit,
-.act-delete {
-    width: 34px;
-    height: 34px;
-    justify-content: center;
-    padding: 0;
+.act-rate { color: #7a4a12; background: #f4e2c2; border-color: #d9a94f; }
+.act-rate:hover { background: #eed7a8; border-color: #b8792a; }
+
+/* ── ADMIN "MORE" KEBAB MENU ─────────────────── */
+.actions-more { position: relative; flex-shrink: 0; }
+.kebab-btn {
+    width: 32px; height: 32px; border-radius: 7px;
+    border: 1px solid var(--border); background: var(--surface-2); color: var(--text-muted);
+    display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
+    transition: background .13s, color .13s, border-color .13s;
 }
+.kebab-btn svg { width: 16px; height: 16px; }
+.kebab-btn:hover, .kebab-btn[aria-expanded="true"] { background: var(--surface-3); color: var(--accent); border-color: rgba(31,77,60,0.35); }
+.kebab-menu {
+    display: none; flex-direction: column; gap: 2px;
+    position: absolute; right: 0; top: calc(100% + 6px);
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    box-shadow: 0 16px 34px var(--shadow-warm); min-width: 156px; padding: 5px; z-index: 60;
+}
+.kebab-menu.open { display: flex; }
+.kebab-menu form { margin: 0; width: 100%; }
+.kebab-item {
+    display: flex; align-items: center; gap: 7px; width: 100%; text-align: left;
+    padding: 7px 9px; border-radius: 6px; border: none; background: transparent;
+    font: inherit; font-size: 0.8rem; font-weight: 600; color: var(--text);
+    text-decoration: none; cursor: pointer; transition: background .12s;
+}
+.kebab-item svg { width: 14px; height: 14px; flex-shrink: 0; }
+.kebab-item:hover { background: var(--surface-2); }
+.kebab-item.kebab-danger { color: #8c2b2b; }
+.kebab-item.kebab-danger:hover { background: var(--danger-soft); }
 
 /* ── PAGINATION BAR ──────────────────────────── */
 .pagination {
@@ -442,19 +498,19 @@ body.dark-theme .page-header .active-filter {
     padding: 10px 12px; margin-top: 8px;
     background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--r); flex-wrap: wrap;
-    box-shadow: 0 10px 20px rgba(15,23,42,0.08);
+    box-shadow: 0 10px 20px var(--shadow-warm);
 }
 .page-controls { display: flex; align-items: center; gap: 3px; flex-wrap: wrap; }
 .pg-btn {
     background: var(--surface); border: 1px solid var(--border);
-    color: var(--text-muted); font-family: 'Inter', sans-serif;
+    color: var(--text-muted); font-family: 'Source Sans 3', sans-serif;
     font-size: 0.76rem; font-weight: 600; padding: 4px 9px;
     border-radius: 999px; cursor: pointer;
     transition: background .14s, color .14s, border-color .14s;
     min-width: 30px; text-align: center;
 }
 .pg-btn:hover:not(:disabled):not(.active) { background: var(--surface-2); color: var(--text); }
-.pg-btn.active { background: var(--surface-3); color: #1e1b4b; border-color: #c7d2fe; cursor: default; }
+.pg-btn.active { background: var(--surface-3); color: #1f4d3c; border-color: #c9b487; cursor: default; }
 .pg-btn:disabled { opacity: .32; cursor: not-allowed; }
 .pg-btn.arrow { font-size: 0.88rem; padding: 4px 8px; }
 .pg-ellipsis { color: var(--text-dim); font-size: 0.76rem; padding: 0 2px; user-select: none; }
@@ -463,10 +519,10 @@ body.dark-theme .page-header .active-filter {
 .page-info { font-size: 0.73rem; color: var(--text-muted); white-space: nowrap; }
 .perpage-select {
     background: var(--surface); border: 1px solid var(--border);
-    color: var(--text-muted); font-family: 'Inter', sans-serif;
+    color: var(--text-muted); font-family: 'Source Sans 3', sans-serif;
     font-size: 0.73rem; padding: 3px 6px; border-radius: 5px; outline: none; cursor: pointer;
 }
-.perpage-select:focus { border-color: rgba(99,102,241,0.35); }
+.perpage-select:focus { border-color: rgba(31,77,60,0.35); }
 .perpage-select option { background: var(--surface-2); }
 
 /* ── EMPTY / NO-RESULTS ──────────────────────── */
@@ -474,13 +530,13 @@ body.dark-theme .page-header .active-filter {
     text-align: center; padding: 32px 20px; color: var(--text-dim);
     font-size: 0.82rem; border: 1px dashed var(--border);
     border-radius: var(--r); background: var(--surface); margin-top: 4px;
-    box-shadow: 0 8px 18px rgba(15,23,42,0.06);
+    box-shadow: 0 8px 18px rgba(66,46,20,0.10);
 }
 .empty-state svg { display: block; margin: 0 auto 8px; opacity: .28; }
 .no-results-msg {
     display: none; text-align: center; padding: 28px; color: var(--text-muted);
     font-size: 0.82rem; border: 1px dashed var(--border); border-radius: var(--r); margin-top: 4px;
-    box-shadow: 0 8px 18px rgba(15,23,42,0.06);
+    box-shadow: 0 8px 18px rgba(66,46,20,0.10);
 }
 
 /* ── SUBJECT GRID ───────────────────────────── */
@@ -490,13 +546,14 @@ body.dark-theme .page-header .active-filter {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--r-lg);
-    box-shadow: 0 10px 22px rgba(15,23,42,0.08);
+    box-shadow: 0 10px 22px var(--shadow-warm);
 }
 .subject-zone h3 {
     font-size: 0.9rem;
     color: var(--text-muted);
     margin-bottom: 8px;
     font-weight: 700;
+    font-family: 'Source Serif 4', serif;
 }
 .subject-grid {
     display: grid;
@@ -521,22 +578,22 @@ body.dark-theme .page-header .active-filter {
 .subject-card:hover {
     transform: translateY(-2px);
     border-color: var(--border-md);
-    box-shadow: 0 10px 18px rgba(15,23,42,0.12);
+    box-shadow: 0 10px 18px var(--shadow-warm);
 }
 .subject-card.active {
-    border-color: rgba(99,102,241,0.5);
+    border-color: rgba(31,77,60,0.5);
     background: var(--accent-soft);
-    color: #1e1b4b;
+    color: #1f4d3c;
 }
 .subject-card small {
-    font-size: 0.7rem;
+    font-size: 0.85rem;
     color: var(--text-dim);
-    font-weight: 600;
+    font-weight: 700;
 }
 
 /* ── PREVIEW MODAL ───────────────────────────── */
 .preview-modal {
-    position: fixed; inset: 0; background: rgba(15,23,42,0.45);
+    position: fixed; inset: 0; background: rgba(44,33,21,0.5);
     display: none; align-items: center; justify-content: center;
     z-index: 1000; padding: 14px; backdrop-filter: blur(5px);
 }
@@ -545,7 +602,7 @@ body.dark-theme .page-header .active-filter {
     width: min(960px, 96vw); height: min(84vh, 750px);
     background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--r-lg); display: flex; flex-direction: column;
-    box-shadow: 0 20px 60px rgba(15,23,42,0.25); overflow: hidden;
+    box-shadow: 0 20px 60px rgba(44,33,21,0.32); overflow: hidden;
 }
 .preview-header {
     display: flex; align-items: center; justify-content: space-between;
@@ -563,15 +620,15 @@ body.dark-theme .page-header .active-filter {
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     transition: background .14s, color .14s;
 }
-.preview-close:hover { background: var(--danger-soft); color: #b91c1c; }
-.preview-frame { flex: 1; border: none; width: 100%; background: #ffffff; }
+.preview-close:hover { background: var(--danger-soft); color: #8c2b2b; }
+.preview-frame { flex: 1; border: none; width: 100%; background: #fffdf8; }
 .preview-modal.feedback-only .preview-panel { height: auto; max-height: min(84vh, 750px); }
 .preview-modal.feedback-only .preview-frame { display: none; }
 .preview-modal.feedback-only .feedback-strip { border-top: 0; }
 .feedback-strip { padding: 8px 12px; border-top: 1px solid var(--border); background: var(--surface-2); display: flex; align-items: center; gap: 7px; flex-wrap: wrap; font-size: .76rem; }
 .feedback-strip button { border: 1px solid var(--border); background: var(--surface); color: var(--text-muted); border-radius: 6px; padding: 4px 7px; cursor: pointer; }
 .feedback-strip button.selected { color: var(--accent); border-color: var(--accent); }
-.feedback-submit { background: var(--accent) !important; color: #fff !important; border-color: var(--accent) !important; }
+.feedback-submit { background: var(--accent) !important; color: #fffdf8 !important; border-color: var(--accent) !important; }
 .feedback-message { color: var(--text-muted); }
 .feedback-review { flex: 1 0 100%; min-height: 44px; max-height: 90px; resize: vertical; border: 1px solid var(--border); border-radius: 6px; padding: 7px; font: inherit; font-size: .76rem; color: var(--text); background: var(--surface); }
 .feedback-review::placeholder { color: var(--text-dim); }
@@ -581,10 +638,10 @@ body.dark-theme .page-header .active-filter {
 .review-helpful.voted { color: var(--accent) !important; border-color: var(--accent) !important; }
 .feedback-tags { flex: 1 0 100%; display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
 .feedback-tags button { font-size: .7rem; padding: 4px 7px; }
-.feedback-tags button.positive { border-color: #bbf7d0; color: #15803d; background: #f0fdf4; }
-.feedback-tags button.negative { border-color: #fecaca; color: #b91c1c; background: #fef2f2; }
-.feedback-tags button.selected.positive { color: #166534; border-color: #16a34a; background: #dcfce7; }
-.feedback-tags button.selected.negative { color: #991b1b; border-color: #dc2626; background: #fee2e2; }
+.feedback-tags button.positive { border-color: #bfd6bd; color: #1f4d3c; background: #eef5ec; }
+.feedback-tags button.negative { border-color: #e0bcb4; color: #7a2323; background: #faf0ee; }
+.feedback-tags button.selected.positive { color: #1f4d3c; border-color: #2f6b3a; background: #dcead9; }
+.feedback-tags button.selected.negative { color: #7a2323; border-color: #8c2b2b; background: #f3dbd8; }
 .report-zone { flex: 1 0 100%; border-top: 1px solid var(--border); padding-top: 6px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 .report-zone select, .report-zone input { border: 1px solid var(--border); border-radius: 6px; padding: 5px 7px; font: inherit; font-size: .72rem; color: var(--text); background: var(--surface); }
 .report-zone input { flex: 1 1 180px; }
@@ -596,41 +653,21 @@ body.dark-theme .page-header .active-filter {
     .page-header { flex-direction: column; align-items: stretch; gap: 8px; }
     .page-header .tab-strip { min-width: 0; width: 100%; flex-basis: auto; }
     .btn-add { margin-left: 0; justify-content: center; }
-    .resource-item {
-        grid-template-columns: auto auto 1fr;
-        grid-template-rows: auto auto; gap: 5px 7px; padding: 9px;
-    }
-    .row-num { display: none; }
-    .view-count { display: none; }
-    .actions-col { grid-column: 3; grid-row: 2; flex-wrap: wrap; gap: 4px; }
-    .resource-body { grid-column: 3; grid-row: 1; }
-    .reorder-col { grid-column: 1; grid-row: 1 / 3; align-self: center; }
+    .resource-item { padding: 12px; }
     .search-wrap { flex: 1 1 100%; max-width: none; }
+    .search-kbd { display: none; }
     .filter-select { flex: 1 1 100%; }
     .pagination { gap: 6px; }
     .page-meta { width: 100%; justify-content: space-between; }
+    .views-inline { margin-left: 0; }
+    .resource-flash-messages { left: 12px; right: 12px; max-width: none; }
 }
 
 @media (min-width: 1100px) {
     .resource-list {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 6px 10px;
-    }
-
-    .resource-item {
-        min-height: 44px;
-        grid-template-columns: 24px auto minmax(150px, 1fr) auto auto;
-    }
-
-    .resource-item.admin-resource-item {
-        grid-template-rows: auto auto;
-    }
-
-    .resource-item.admin-resource-item .actions-col {
-        grid-column: 1 / -1;
-        grid-row: 2;
-        justify-content: flex-end;
+        gap: 10px;
     }
 }
     </style>
@@ -709,6 +746,7 @@ body.dark-theme .page-header .active-filter {
                 </svg>
                 <input class="filter-input" id="resourceSearch" type="text"
                        placeholder="Search title or tag" autocomplete="off">
+                <span class="search-kbd">Ctrl K</span>
             </div>
             <select class="filter-select" id="subjectFilter">
                 <option value="">All subjects</option>
@@ -734,7 +772,7 @@ body.dark-theme .page-header .active-filter {
 
 {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
-        <div class="resource-flash-messages" role="status" aria-live="polite">
+        <div class="resource-flash-messages" id="resourceFlashMessages" role="status" aria-live="polite">
             {% for category, message in messages %}
                 <div class="resource-flash resource-flash-{{ category }}">
                     <span aria-hidden="true">{% if category == 'success' %}✓{% else %}!{% endif %}</span>
@@ -781,99 +819,125 @@ body.dark-theme .page-header .active-filter {
     {% if diploma_resources %}
         <ul class="resource-list" id="list-diploma">
             {% for resource in diploma_resources %}{% set lv = resource[2] or '' %}
-            <li class="resource-item{% if admin_mode %} admin-resource-item{% endif %}"
+            <li class="resource-item"
                 data-title="{{ resource[1] | lower }}"
                 data-tags="{{ resource[5] | default('') | lower }}"
                 data-program="diploma"
                 data-subject-id="{{ resource[6] or '' }}"
                 data-subject-name="{{ resource[7] | default('unassigned') | lower }}">
-                <span class="row-num"></span>
-                {% if admin_mode %}
-                <div class="reorder-col">
-                    <form method="post" action="{{ url_for('admin_move_general_resource', resource_id=resource[0], direction='up') }}">
-                        <button class="reorder-btn" type="submit" title="Move Up">▲</button>
-                    </form>
-                    <form method="post" action="{{ url_for('admin_move_general_resource', resource_id=resource[0], direction='down') }}">
-                        <button class="reorder-btn" type="submit" title="Move Down">▼</button>
-                    </form>
-                </div>
-                {% else %}<span class="no-reorder"></span>{% endif %}
-                <div class="resource-body">
-                    <div class="resource-title-row">
-                        <span class="resource-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z" />
-                                <path d="M14 3v6h6" />
-                            </svg>
-                        </span>
-                        <div class="resource-title" title="{{ resource[1] }}{% if resource[19] %} ({{ resource[19] }}){% endif %}">{{ resource[1] }}{% if resource[19] %} ({{ resource[19] }}){% endif %}</div>
-                        {% if resource[20] %}
-                            <span class="badge-popular">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.6-4.9-2.6-4.9 2.6.9-5.6-4-3.9 5.5-.8z" />
-                                </svg>
-                                {{ resource[20] }}
-                            </span>
-                        {% endif %}
+                <div class="resource-top">
+                    {% if admin_mode %}
+                    <div class="reorder-col">
+                        <form method="post" action="{{ url_for('admin_move_general_resource', resource_id=resource[0], direction='up') }}">
+                            <button class="reorder-btn" type="submit" title="Move Up">▲</button>
+                        </form>
+                        <form method="post" action="{{ url_for('admin_move_general_resource', resource_id=resource[0], direction='down') }}">
+                            <button class="reorder-btn" type="submit" title="Move Down">▼</button>
+                        </form>
                     </div>
-                    {% if resource[7] %}<div class="tag-row"><span class="tag-chip">Subject: {{ resource[7] }}</span></div>{% endif %}
-                    {% if resource[5] %}<div class="tag-row">{% for tag in resource[5].split(',') %}{% if tag.strip() %}<span class="tag-chip">{{ tag.strip() }}</span>{% endif %}{% endfor %}</div>{% endif %}
-                    <div class="resource-rating-summary">{% if resource[9] %}⭐ {{ '%.1f'|format(resource[8]) }} ({{ resource[9] }}){% else %}No ratings yet{% endif %}{% if resource[11] %} · 👍 {{ '%.0f'|format(resource[12]) }}% helpful{% endif %}</div>
+                    {% endif %}
+                    <span class="resource-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z" />
+                            <path d="M14 3v6h6" />
+                        </svg>
+                    </span>
+                    <div class="resource-main">
+                        <div class="resource-title" title="{{ resource[1] }}{% if resource[19] %} ({{ resource[19] }}){% endif %}">{{ resource[1] }}{% if resource[19] %} ({{ resource[19] }}){% endif %}</div>
+                        <div class="badge-row">
+                            {% if resource[7] %}<span class="tag-chip">Subject: {{ resource[7] }}</span>{% endif %}
+                            {% if resource[20] %}
+                                {% set badge_text = resource[20] %}
+                                {% if 'Exam' in badge_text %}
+                                    <span class="badge badge-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.6-4.9-2.6-4.9 2.6.9-5.6-4-3.9 5.5-.8z" /></svg>{{ badge_text }}</span>
+                                {% elif 'Trend' in badge_text %}
+                                    <span class="badge badge-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8" /><path d="M15 7h6v6" /></svg>{{ badge_text }}</span>
+                                {% elif 'New' in badge_text %}
+                                    <span class="badge badge-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8" /></svg>{{ badge_text }}</span>
+                                {% else %}
+                                    <span class="badge badge-purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.6-4.9-2.6-4.9 2.6.9-5.6-4-3.9 5.5-.8z" /></svg>{{ badge_text }}</span>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
-                <div class="view-count">
-                    <div class="eye">
+
+                <div class="resource-meta-row">
+                    <span class="stars-row" aria-label="Rating">
+                        {% if resource[9] %}
+                            {% set rating_val = resource[8] or 0 %}
+                            {% set rounded = rating_val|round(0,'common')|int %}
+                            {% for i in range(1,6) %}
+                                {% if i <= rounded %}
+                                <svg class="star-ic filled" viewBox="0 0 20 20" fill="currentColor"><path d="M10 1.5l2.6 5.6 6.1.8-4.5 4.2 1.2 6-5.4-3-5.4 3 1.2-6-4.5-4.2 6.1-.8z"/></svg>
+                                {% else %}
+                                <svg class="star-ic empty" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M10 1.5l2.6 5.6 6.1.8-4.5 4.2 1.2 6-5.4-3-5.4 3 1.2-6-4.5-4.2 6.1-.8z"/></svg>
+                                {% endif %}
+                            {% endfor %}
+                            <span class="stars-value">{{ '%.1f'|format(rating_val) }} <span class="stars-count">({{ resource[9] }})</span></span>
+                        {% else %}
+                            <span class="no-rating">No ratings yet</span>
+                        {% endif %}
+                    </span>
+                    {% if resource[11] %}
+                        {% set helpful_val = resource[12] or 0 %}
+                        {% if helpful_val >= 90 %}{% set hclass = 'pill-green' %}{% elif helpful_val >= 70 %}{% set hclass = 'pill-amber' %}{% else %}{% set hclass = 'pill-red' %}{% endif %}
+                        <span class="helpful-pill {{ hclass }}">👍 {{ '%.0f'|format(helpful_val) }}% helpful</span>
+                    {% endif %}
+                    <span class="views-inline">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M1.5 12s4.5-7 10.5-7 10.5 7 10.5 7-4.5 7-10.5 7S1.5 12 1.5 12z" />
                             <circle cx="12" cy="12" r="3.5" />
                         </svg>
-                        <span>{{ resource[4] or 0 }}</span>
-                    </div>
-                    <span>views</span>
+                        {% if resource[4] and resource[4] >= 1000 %}{{ '%.1f'|format(resource[4]/1000) }}k{% else %}{{ resource[4] or 0 }}{% endif %} views
+                    </span>
                 </div>
-                <div class="actions-col">
-                    <button class="act act-rate" type="button" data-resource-id="{{ resource[0] }}" data-title="{{ resource[1] | e }}" onclick="openFeedbackFromCard(this)">Rate</button>
-                    <a class="act act-open" href="{{ url_for('open_general_resource', resource_id=resource[0]) }}" target="_blank" data-resource-id="{{ resource[0] }}" data-title="{{ resource[1] | e }}" onclick="openFeedbackAfterOpen(this)">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M14 3h7v7" />
-                            <path d="M10 14L21 3" />
-                            <path d="M21 14v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6" />
-                        </svg>
-                        Open
-                    </a>
-                    {% if lv.startswith('/static/uploads/general_resources/') or lv.lower().endswith('.pdf') or lv.lower().endswith('.html') or lv.lower().endswith('.htm') %}
-                        <button class="act act-preview" type="button" data-link="{{ lv | e }}" data-title="{{ resource[1] | e }}" data-resource-id="{{ resource[0] }}" onclick="openPreviewFromButton(this)">
+
+                {% if resource[5] %}<div class="tag-row">{% for tag in resource[5].split(',') %}{% if tag.strip() %}<span class="tag-chip">{{ tag.strip() }}</span>{% endif %}{% endfor %}</div>{% endif %}
+
+                <div class="resource-footer">
+                    <div class="actions-primary">
+                        <button class="act act-rate" type="button" data-resource-id="{{ resource[0] }}" data-title="{{ resource[1] | e }}" onclick="openFeedbackFromCard(this)">Rate</button>
+                        <a class="act act-open" href="{{ url_for('open_general_resource', resource_id=resource[0]) }}" target="_blank" data-resource-id="{{ resource[0] }}" data-title="{{ resource[1] | e }}" onclick="openFeedbackAfterOpen(this)">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M1.5 12s4.5-7 10.5-7 10.5 7 10.5 7-4.5 7-10.5 7S1.5 12 1.5 12z" />
-                                <circle cx="12" cy="12" r="3.5" />
+                                <path d="M14 3h7v7" />
+                                <path d="M10 14L21 3" />
+                                <path d="M21 14v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6" />
                             </svg>
-                            Preview
-                        </button>
-                    {% endif %}
-                    {% if admin_mode %}
-                        <a class="act act-download" href="{{ lv }}" download title="Download resource" aria-label="Download resource">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 3v12" />
-                                <path d="m7 10 5 5 5-5" />
-                                <path d="M5 21h14" />
-                            </svg>
+                            Open
                         </a>
-                        <a class="act act-edit" href="{{ url_for('admin_edit_general_resource', resource_id=resource[0]) }}" title="Edit resource" aria-label="Edit resource">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 20h9" />
-                                <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
-                            </svg>
-                        </a>
-                        <form method="post" action="{{ url_for('admin_delete_general_resource', resource_id=resource[0]) }}" onsubmit="return confirm('Delete this resource?');">
-                            <button class="act act-delete" type="submit" title="Delete resource" aria-label="Delete resource">
+                        {% if lv.startswith('/static/uploads/general_resources/') or lv.lower().endswith('.pdf') or lv.lower().endswith('.html') or lv.lower().endswith('.htm') %}
+                            <button class="act act-preview" type="button" data-link="{{ lv | e }}" data-title="{{ resource[1] | e }}" data-resource-id="{{ resource[0] }}" onclick="openPreviewFromButton(this)">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M3 6h18" />
-                                    <path d="M8 6V4h8v2" />
-                                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                                    <path d="M10 11v6" />
-                                    <path d="M14 11v6" />
+                                    <path d="M1.5 12s4.5-7 10.5-7 10.5 7 10.5 7-4.5 7-10.5 7S1.5 12 1.5 12z" />
+                                    <circle cx="12" cy="12" r="3.5" />
                                 </svg>
+                                Preview
                             </button>
-                        </form>
+                        {% endif %}
+                    </div>
+                    {% if admin_mode %}
+                        <div class="actions-more">
+                            <button class="kebab-btn" type="button" aria-haspopup="true" aria-expanded="false" title="More actions" onclick="toggleKebab(this)">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
+                            </button>
+                            <div class="kebab-menu">
+                                <a class="kebab-item" href="{{ lv }}" download>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12" /><path d="m7 10 5 5 5-5" /><path d="M5 21h14" /></svg>
+                                    Download
+                                </a>
+                                <a class="kebab-item" href="{{ url_for('admin_edit_general_resource', resource_id=resource[0]) }}">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" /></svg>
+                                    Edit
+                                </a>
+                                <form method="post" action="{{ url_for('admin_delete_general_resource', resource_id=resource[0]) }}" onsubmit="return confirm('Delete this resource?');">
+                                    <button class="kebab-item kebab-danger" type="submit">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18" /><path d="M8 6V4h8v2" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6" /><path d="M14 11v6" /></svg>
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
                     {% endif %}
                 </div>
             </li>
@@ -901,99 +965,125 @@ body.dark-theme .page-header .active-filter {
     {% if degree_resources %}
         <ul class="resource-list" id="list-degree">
             {% for resource in degree_resources %}{% set lv = resource[2] or '' %}
-            <li class="resource-item{% if admin_mode %} admin-resource-item{% endif %}"
+            <li class="resource-item"
                 data-title="{{ resource[1] | lower }}"
                 data-tags="{{ resource[5] | default('') | lower }}"
                 data-program="degree"
                 data-subject-id="{{ resource[6] or '' }}"
                 data-subject-name="{{ resource[7] | default('unassigned') | lower }}">
-                <span class="row-num"></span>
-                {% if admin_mode %}
-                <div class="reorder-col">
-                    <form method="post" action="{{ url_for('admin_move_general_resource', resource_id=resource[0], direction='up') }}">
-                        <button class="reorder-btn" type="submit" title="Move Up">▲</button>
-                    </form>
-                    <form method="post" action="{{ url_for('admin_move_general_resource', resource_id=resource[0], direction='down') }}">
-                        <button class="reorder-btn" type="submit" title="Move Down">▼</button>
-                    </form>
-                </div>
-                {% else %}<span class="no-reorder"></span>{% endif %}
-                <div class="resource-body">
-                    <div class="resource-title-row">
-                        <span class="resource-icon" aria-hidden="true">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z" />
-                                <path d="M14 3v6h6" />
-                            </svg>
-                        </span>
-                        <div class="resource-title" title="{{ resource[1] }}{% if resource[19] %} ({{ resource[19] }}){% endif %}">{{ resource[1] }}{% if resource[19] %} ({{ resource[19] }}){% endif %}</div>
-                        {% if resource[20] %}
-                            <span class="badge-popular">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.6-4.9-2.6-4.9 2.6.9-5.6-4-3.9 5.5-.8z" />
-                                </svg>
-                                {{ resource[20] }}
-                            </span>
-                        {% endif %}
+                <div class="resource-top">
+                    {% if admin_mode %}
+                    <div class="reorder-col">
+                        <form method="post" action="{{ url_for('admin_move_general_resource', resource_id=resource[0], direction='up') }}">
+                            <button class="reorder-btn" type="submit" title="Move Up">▲</button>
+                        </form>
+                        <form method="post" action="{{ url_for('admin_move_general_resource', resource_id=resource[0], direction='down') }}">
+                            <button class="reorder-btn" type="submit" title="Move Down">▼</button>
+                        </form>
                     </div>
-                    {% if resource[7] %}<div class="tag-row"><span class="tag-chip">Subject: {{ resource[7] }}</span></div>{% endif %}
-                    {% if resource[5] %}<div class="tag-row">{% for tag in resource[5].split(',') %}{% if tag.strip() %}<span class="tag-chip">{{ tag.strip() }}</span>{% endif %}{% endfor %}</div>{% endif %}
-                    <div class="resource-rating-summary">{% if resource[9] %}⭐ {{ '%.1f'|format(resource[8]) }} ({{ resource[9] }}){% else %}No ratings yet{% endif %}{% if resource[11] %} · 👍 {{ '%.0f'|format(resource[12]) }}% helpful{% endif %}</div>
+                    {% endif %}
+                    <span class="resource-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9z" />
+                            <path d="M14 3v6h6" />
+                        </svg>
+                    </span>
+                    <div class="resource-main">
+                        <div class="resource-title" title="{{ resource[1] }}{% if resource[19] %} ({{ resource[19] }}){% endif %}">{{ resource[1] }}{% if resource[19] %} ({{ resource[19] }}){% endif %}</div>
+                        <div class="badge-row">
+                            {% if resource[7] %}<span class="tag-chip">Subject: {{ resource[7] }}</span>{% endif %}
+                            {% if resource[20] %}
+                                {% set badge_text = resource[20] %}
+                                {% if 'Exam' in badge_text %}
+                                    <span class="badge badge-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.6-4.9-2.6-4.9 2.6.9-5.6-4-3.9 5.5-.8z" /></svg>{{ badge_text }}</span>
+                                {% elif 'Trend' in badge_text %}
+                                    <span class="badge badge-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8" /><path d="M15 7h6v6" /></svg>{{ badge_text }}</span>
+                                {% elif 'New' in badge_text %}
+                                    <span class="badge badge-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8" /></svg>{{ badge_text }}</span>
+                                {% else %}
+                                    <span class="badge badge-purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.5 5 5.5.8-4 3.9.9 5.6-4.9-2.6-4.9 2.6.9-5.6-4-3.9 5.5-.8z" /></svg>{{ badge_text }}</span>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
                 </div>
-                <div class="view-count">
-                    <div class="eye">
+
+                <div class="resource-meta-row">
+                    <span class="stars-row" aria-label="Rating">
+                        {% if resource[9] %}
+                            {% set rating_val = resource[8] or 0 %}
+                            {% set rounded = rating_val|round(0,'common')|int %}
+                            {% for i in range(1,6) %}
+                                {% if i <= rounded %}
+                                <svg class="star-ic filled" viewBox="0 0 20 20" fill="currentColor"><path d="M10 1.5l2.6 5.6 6.1.8-4.5 4.2 1.2 6-5.4-3-5.4 3 1.2-6-4.5-4.2 6.1-.8z"/></svg>
+                                {% else %}
+                                <svg class="star-ic empty" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M10 1.5l2.6 5.6 6.1.8-4.5 4.2 1.2 6-5.4-3-5.4 3 1.2-6-4.5-4.2 6.1-.8z"/></svg>
+                                {% endif %}
+                            {% endfor %}
+                            <span class="stars-value">{{ '%.1f'|format(rating_val) }} <span class="stars-count">({{ resource[9] }})</span></span>
+                        {% else %}
+                            <span class="no-rating">No ratings yet</span>
+                        {% endif %}
+                    </span>
+                    {% if resource[11] %}
+                        {% set helpful_val = resource[12] or 0 %}
+                        {% if helpful_val >= 90 %}{% set hclass = 'pill-green' %}{% elif helpful_val >= 70 %}{% set hclass = 'pill-amber' %}{% else %}{% set hclass = 'pill-red' %}{% endif %}
+                        <span class="helpful-pill {{ hclass }}">👍 {{ '%.0f'|format(helpful_val) }}% helpful</span>
+                    {% endif %}
+                    <span class="views-inline">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M1.5 12s4.5-7 10.5-7 10.5 7 10.5 7-4.5 7-10.5 7S1.5 12 1.5 12z" />
                             <circle cx="12" cy="12" r="3.5" />
                         </svg>
-                        <span>{{ resource[4] or 0 }}</span>
-                    </div>
-                    <span>views</span>
+                        {% if resource[4] and resource[4] >= 1000 %}{{ '%.1f'|format(resource[4]/1000) }}k{% else %}{{ resource[4] or 0 }}{% endif %} views
+                    </span>
                 </div>
-                <div class="actions-col">
-                    <button class="act act-rate" type="button" data-resource-id="{{ resource[0] }}" data-title="{{ resource[1] | e }}" onclick="openFeedbackFromCard(this)">Rate</button>
-                    <a class="act act-open" href="{{ url_for('open_general_resource', resource_id=resource[0]) }}" target="_blank" data-resource-id="{{ resource[0] }}" data-title="{{ resource[1] | e }}" onclick="openFeedbackAfterOpen(this)">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M14 3h7v7" />
-                            <path d="M10 14L21 3" />
-                            <path d="M21 14v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6" />
-                        </svg>
-                        Open
-                    </a>
-                    {% if lv.startswith('/static/uploads/general_resources/') or lv.lower().endswith('.pdf') or lv.lower().endswith('.html') or lv.lower().endswith('.htm') %}
-                        <button class="act act-preview" type="button" data-link="{{ lv | e }}" data-title="{{ resource[1] | e }}" data-resource-id="{{ resource[0] }}" onclick="openPreviewFromButton(this)">
+
+                {% if resource[5] %}<div class="tag-row">{% for tag in resource[5].split(',') %}{% if tag.strip() %}<span class="tag-chip">{{ tag.strip() }}</span>{% endif %}{% endfor %}</div>{% endif %}
+
+                <div class="resource-footer">
+                    <div class="actions-primary">
+                        <button class="act act-rate" type="button" data-resource-id="{{ resource[0] }}" data-title="{{ resource[1] | e }}" onclick="openFeedbackFromCard(this)">Rate</button>
+                        <a class="act act-open" href="{{ url_for('open_general_resource', resource_id=resource[0]) }}" target="_blank" data-resource-id="{{ resource[0] }}" data-title="{{ resource[1] | e }}" onclick="openFeedbackAfterOpen(this)">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M1.5 12s4.5-7 10.5-7 10.5 7 10.5 7-4.5 7-10.5 7S1.5 12 1.5 12z" />
-                                <circle cx="12" cy="12" r="3.5" />
+                                <path d="M14 3h7v7" />
+                                <path d="M10 14L21 3" />
+                                <path d="M21 14v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6" />
                             </svg>
-                            Preview
-                        </button>
-                    {% endif %}
-                    {% if admin_mode %}
-                        <a class="act act-download" href="{{ lv }}" download title="Download resource" aria-label="Download resource">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 3v12" />
-                                <path d="m7 10 5 5 5-5" />
-                                <path d="M5 21h14" />
-                            </svg>
+                            Open
                         </a>
-                        <a class="act act-edit" href="{{ url_for('admin_edit_general_resource', resource_id=resource[0]) }}" title="Edit resource" aria-label="Edit resource">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 20h9" />
-                                <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" />
-                            </svg>
-                        </a>
-                        <form method="post" action="{{ url_for('admin_delete_general_resource', resource_id=resource[0]) }}" onsubmit="return confirm('Delete this resource?');">
-                            <button class="act act-delete" type="submit" title="Delete resource" aria-label="Delete resource">
+                        {% if lv.startswith('/static/uploads/general_resources/') or lv.lower().endswith('.pdf') or lv.lower().endswith('.html') or lv.lower().endswith('.htm') %}
+                            <button class="act act-preview" type="button" data-link="{{ lv | e }}" data-title="{{ resource[1] | e }}" data-resource-id="{{ resource[0] }}" onclick="openPreviewFromButton(this)">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M3 6h18" />
-                                    <path d="M8 6V4h8v2" />
-                                    <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-                                    <path d="M10 11v6" />
-                                    <path d="M14 11v6" />
+                                    <path d="M1.5 12s4.5-7 10.5-7 10.5 7 10.5 7-4.5 7-10.5 7S1.5 12 1.5 12z" />
+                                    <circle cx="12" cy="12" r="3.5" />
                                 </svg>
+                                Preview
                             </button>
-                        </form>
+                        {% endif %}
+                    </div>
+                    {% if admin_mode %}
+                        <div class="actions-more">
+                            <button class="kebab-btn" type="button" aria-haspopup="true" aria-expanded="false" title="More actions" onclick="toggleKebab(this)">
+                                <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/></svg>
+                            </button>
+                            <div class="kebab-menu">
+                                <a class="kebab-item" href="{{ lv }}" download>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12" /><path d="m7 10 5 5 5-5" /><path d="M5 21h14" /></svg>
+                                    Download
+                                </a>
+                                <a class="kebab-item" href="{{ url_for('admin_edit_general_resource', resource_id=resource[0]) }}">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z" /></svg>
+                                    Edit
+                                </a>
+                                <form method="post" action="{{ url_for('admin_delete_general_resource', resource_id=resource[0]) }}" onsubmit="return confirm('Delete this resource?');">
+                                    <button class="kebab-item kebab-danger" type="submit">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18" /><path d="M8 6V4h8v2" /><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" /><path d="M10 11v6" /><path d="M14 11v6" /></svg>
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
                     {% endif %}
                 </div>
             </li>
@@ -1117,21 +1207,8 @@ function renderPage(id) {
     const end   = start + s.perPage;
     const pageSet = new Set(filt.slice(start, end));
 
-    const visible = filt.slice(start, end);
-    const isTwoCol = window.matchMedia('(min-width: 1100px)').matches;
-
-    let idx = 0;
     all.forEach(item => {
-        const show = pageSet.has(item);
-        item.style.display = show ? '' : 'none';
-        if (show) {
-            const el = item.querySelector('.row-num');
-            if (el) {
-                const number = isTwoCol ? Math.floor(idx / 2) + 1 : idx + 1;
-                el.textContent = number;
-            }
-            idx += 1;
-        }
+        item.style.display = pageSet.has(item) ? '' : 'none';
     });
     renderPagination(id);
     updateResultCount();
@@ -1249,7 +1326,11 @@ function updateActiveFilters() {
     activeFilters.textContent = parts.length ? parts.join(' | ') : 'All resources';
 }
 
-searchInput.addEventListener('input', applyFilters);
+let searchDebounceTimer = null;
+searchInput.addEventListener('input', () => {
+    clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = setTimeout(applyFilters, 150);
+});
 subjectFilter.addEventListener('change', applyFilters);
 tagFilter.addEventListener('change', applyFilters);
 
@@ -1301,6 +1382,59 @@ function restoreResourceViewState() {
 
 /* INIT */
 restoreResourceViewState();
+
+/* ════════════════════════════════════════════════
+   TOAST FLASH MESSAGES
+════════════════════════════════════════════════ */
+function dismissToast(el) {
+    el.style.animation = 'toastOut .2s ease forwards';
+    setTimeout(() => el.remove(), 200);
+}
+document.querySelectorAll('.resource-flash').forEach(el => {
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'resource-flash-close';
+    closeBtn.innerHTML = '✕';
+    closeBtn.type = 'button';
+    closeBtn.setAttribute('aria-label', 'Dismiss message');
+    closeBtn.onclick = () => dismissToast(el);
+    el.appendChild(closeBtn);
+    setTimeout(() => { if (document.body.contains(el)) dismissToast(el); }, 4500);
+});
+
+/* ════════════════════════════════════════════════
+   KEYBOARD SHORTCUTS + SCROLL SHADOW
+════════════════════════════════════════════════ */
+document.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        searchInput.focus();
+        searchInput.select();
+    }
+});
+const filterZoneEl = document.querySelector('.filter-zone');
+window.addEventListener('scroll', () => {
+    if (filterZoneEl) filterZoneEl.classList.toggle('scrolled', window.scrollY > 40);
+}, { passive: true });
+
+/* ════════════════════════════════════════════════
+   ADMIN KEBAB MENU
+════════════════════════════════════════════════ */
+function toggleKebab(btn) {
+    const menu = btn.nextElementSibling;
+    const isOpen = menu.classList.contains('open');
+    document.querySelectorAll('.kebab-menu.open').forEach(m => m.classList.remove('open'));
+    document.querySelectorAll('.kebab-btn[aria-expanded="true"]').forEach(b => b.setAttribute('aria-expanded', 'false'));
+    if (!isOpen) {
+        menu.classList.add('open');
+        btn.setAttribute('aria-expanded', 'true');
+    }
+}
+document.addEventListener('click', e => {
+    if (!e.target.closest('.actions-more')) {
+        document.querySelectorAll('.kebab-menu.open').forEach(m => m.classList.remove('open'));
+        document.querySelectorAll('.kebab-btn[aria-expanded="true"]').forEach(b => b.setAttribute('aria-expanded', 'false'));
+    }
+});
 
 /* ════════════════════════════════════════════════
    PREVIEW MODAL
@@ -1370,7 +1504,7 @@ function renderRecentReviews(data) {
         ? '<strong>Recent reviews</strong>' + data.reviews.map(item => {
             const voteLabel = item.viewerHelpful ? '👎 Remove vote' : '👍 Helpful';
             const votedClass = item.viewerHelpful ? ' voted' : '';
-            return `<div class="recent-review">“${escapeHtml(item.review)}”${item.tags && item.tags.length ? ` · ${item.tags.map(escapeHtml).join(', ')}` : ''}${item.date ? ` · ${item.date}` : ''} <button type="button" class="review-helpful${votedClass}" onclick="toggleReviewHelpful(${Number(item.id)}, this)">${voteLabel} · ${Number(item.helpfulCount || 0)}</button></div>`;
+            return `<div class="recent-review">"${escapeHtml(item.review)}"${item.tags && item.tags.length ? ` · ${item.tags.map(escapeHtml).join(', ')}` : ''}${item.date ? ` · ${item.date}` : ''} <button type="button" class="review-helpful${votedClass}" onclick="toggleReviewHelpful(${Number(item.id)}, this)">${voteLabel} · ${Number(item.helpfulCount || 0)}</button></div>`;
         }).join('')
         : '';
 }
@@ -1549,7 +1683,7 @@ function renderSubjectGrid(program) {
         return `
             <div class="subject-card${isActive ? ' active' : ''}" data-subject="${item.id}">
                 <span>${item.name}</span>
-                <small>View</small>
+                <small>${isActive ? '●' : '›'}</small>
             </div>
         `;
     }).join('');
