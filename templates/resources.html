@@ -167,6 +167,35 @@ body.dark-theme .tab-strip, body.dark-theme .subject-zone {
     box-shadow: none;
 }
 
+/* Top nav links get a neon pill outline like the reference screenshot */
+body.dark-theme .top-nav a {
+    border: 1px solid rgba(0, 229, 255, 0.35);
+    color: #b8fff2;
+    background: rgba(0, 229, 255, 0.04);
+}
+body.dark-theme .top-nav a:hover {
+    border-color: #00e5ff;
+    color: #eafffb;
+    background: rgba(0, 229, 255, 0.12);
+    box-shadow: 0 0 14px rgba(0, 229, 255, 0.3);
+}
+body.dark-theme .top-nav .contributors-link {
+    border: 1px solid rgba(0, 255, 68, 0.4);
+    color: #baffcf;
+    background: rgba(0, 255, 68, 0.06);
+}
+body.dark-theme .top-nav .contributors-link:hover {
+    border-color: #00ff44;
+    box-shadow: 0 0 14px rgba(0, 255, 68, 0.3);
+    background: rgba(0, 255, 68, 0.12);
+}
+body.dark-theme .theme-toggle {
+    border: 1px solid rgba(0, 229, 255, 0.35);
+    background: rgba(0, 229, 255, 0.05);
+    color: #d8fffa;
+}
+body.dark-theme .theme-toggle:hover { border-color: #00e5ff; box-shadow: 0 0 12px rgba(0, 229, 255, 0.3); }
+
 /* Filter bar styling */
 body.dark-theme .filter-bar {
     background: rgba(0, 5, 10, 0.8);
@@ -179,16 +208,25 @@ body.dark-theme .filter-bar {
 body.dark-theme .filter-input, body.dark-theme .filter-select {
     color: #e0fcf5;
 }
+body.dark-theme .filter-select {
+    border: 1px solid rgba(0, 229, 255, 0.4);
+    background: rgba(0, 229, 255, 0.05);
+}
 body.dark-theme .filter-select option { 
     background: #010610; 
     color: #00e5ff; 
 }
+body.dark-theme .result-pill, body.dark-theme .active-filter {
+    border: 1px solid rgba(0, 229, 255, 0.35);
+    background: rgba(0, 229, 255, 0.05);
+    color: #b8fff2;
+}
 
-/* Resource Cards & Subject Cards */
+/* Resource Cards & Subject Cards — resting glow kept subdued, full glow reserved for hover */
 body.dark-theme .resource-item, body.dark-theme .subject-card {
     background: rgba(0, 5, 10, 0.7);
-    border: 1px solid #00e5ff;
-    box-shadow: 0 0 12px rgba(0, 229, 255, 0.15), inset 0 0 15px rgba(0, 229, 255, 0.05);
+    border: 1px solid rgba(0, 229, 255, 0.55);
+    box-shadow: 0 0 6px rgba(0, 229, 255, 0.08), inset 0 0 8px rgba(0, 229, 255, 0.03);
     transition: all 0.25s ease;
     border-radius: 12px;
 }
@@ -199,6 +237,43 @@ body.dark-theme .resource-item:hover, body.dark-theme .subject-card:hover {
     border-color: #00e5ff;
     box-shadow: 0 0 20px rgba(0, 229, 255, 0.3), inset 0 0 15px rgba(0, 229, 255, 0.1);
     transform: translateY(-2px);
+}
+
+/* Card title — bigger and brighter so it reads as the primary element */
+body.dark-theme .resource-title {
+    font-size: 1.14rem;
+    color: #f2fffb;
+    text-shadow: 0 0 10px rgba(0, 255, 68, 0.55);
+}
+
+/* ── Subject pill / dropdown-style filter row ── */
+body.dark-theme .subject-zone h3 { color: #8cd9d9; text-shadow: none; }
+body.dark-theme .subject-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 14px;
+}
+body.dark-theme .subject-card {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 0.86rem;
+    background: rgba(0, 10, 20, 0.65);
+    border: 1px solid rgba(0, 229, 255, 0.4);
+    box-shadow: 0 0 6px rgba(0, 229, 255, 0.06);
+}
+body.dark-theme .subject-card span { color: #eafffb; }
+body.dark-theme .subject-card small {
+    font-size: 0.78rem;
+    color: #00e5ff;
+    font-weight: 800;
+}
+body.dark-theme .subject-card:hover {
+    border-color: #00e5ff;
+    box-shadow: 0 0 18px rgba(0, 229, 255, 0.35);
 }
 
 /* Neon Green for Active Subjects */
@@ -220,19 +295,21 @@ body.dark-theme .act {
     transition: all 0.2s ease;
 }
 body.dark-theme .act-rate {
-    border: 1px solid #00ff44 !important;
+    border: 1px solid rgba(0, 255, 68, 0.75) !important;
     color: #00ff44 !important;
 }
 body.dark-theme .act-rate:hover {
+    border-color: #00ff44 !important;
     box-shadow: 0 0 15px rgba(0, 255, 68, 0.4) !important;
     background: rgba(0, 255, 68, 0.1) !important;
 }
 
 body.dark-theme .act-open {
-    border: 1px solid #00e5ff !important;
+    border: 1px solid rgba(0, 229, 255, 0.75) !important;
     color: #00e5ff !important;
 }
 body.dark-theme .act-open:hover {
+    border-color: #00e5ff !important;
     box-shadow: 0 0 15px rgba(0, 229, 255, 0.4) !important;
     background: rgba(0, 229, 255, 0.1) !important;
 }
@@ -249,18 +326,92 @@ body.dark-theme .top-nav a.cta-link:hover {
     background: rgba(255, 0, 51, 0.15);
 }
 
-/* Badges & Chips */
-body.dark-theme .tag-chip, body.dark-theme .badge, body.dark-theme .helpful-pill {
-    background: transparent;
-    border: 1px solid rgba(0, 229, 255, 0.5);
-    color: #00e5ff;
+/* Add-resource / add-notes button glow */
+body.dark-theme .btn-add {
+    background: rgba(0, 255, 68, 0.06) !important;
+    border: 1px solid #00ff44 !important;
+    color: #baffcf !important;
+    box-shadow: 0 0 14px rgba(0, 255, 68, 0.25) !important;
 }
+body.dark-theme .btn-add:hover {
+    box-shadow: 0 0 22px rgba(0, 255, 68, 0.45) !important;
+    background: rgba(0, 255, 68, 0.14) !important;
+}
+body.dark-theme .btn-add.cta-login {
+    background: rgba(255, 0, 51, 0.08) !important;
+    border: 1px solid #ff0033 !important;
+    color: #ffcccc !important;
+    box-shadow: 0 0 14px rgba(255, 0, 51, 0.25) !important;
+}
+body.dark-theme .btn-add.cta-login:hover {
+    box-shadow: 0 0 22px rgba(255, 0, 51, 0.45) !important;
+}
+
+/* Tab strip glow */
+body.dark-theme .tab-btn { color: #8cd9d9; }
+body.dark-theme .tab-btn.active {
+    background: rgba(0, 255, 68, 0.08);
+    color: #baffcf;
+    box-shadow: inset 0 0 0 1px rgba(0, 255, 68, 0.5), 0 0 14px rgba(0, 255, 68, 0.25);
+}
+body.dark-theme .tab-btn:hover:not(.active) { background: rgba(0, 229, 255, 0.08); color: #eafffb; }
+body.dark-theme .tab-badge { background: rgba(0, 229, 255, 0.08); border-color: rgba(0, 229, 255, 0.35); color: #b8fff2; }
+body.dark-theme .tab-btn.active .tab-badge { background: rgba(0, 255, 68, 0.12); border-color: rgba(0, 255, 68, 0.5); color: #baffcf; }
+
+/* Badges & Chips */
+/* Subject tag-chip = secondary info, kept quiet/muted so it doesn't compete with the title */
+body.dark-theme .tag-chip {
+    background: transparent;
+    border: 1px solid rgba(0, 229, 255, 0.22);
+    color: #5f9999;
+    box-shadow: none;
+}
+/* "Exam Favorite" / "Top Rated" style badges = distinct amber/gold glow to pop out of the cyan sea */
+body.dark-theme .badge {
+    background: rgba(255, 179, 0, 0.08);
+    border: 1px solid #ffb300;
+    color: #ffd479;
+    box-shadow: 0 0 10px rgba(255, 179, 0, 0.25);
+}
+/* Rating / helpful % = kept bright cyan since it's a key decision signal */
+body.dark-theme .helpful-pill {
+    background: transparent;
+    border: 1px solid rgba(0, 229, 255, 0.55);
+    color: #00e5ff;
+    box-shadow: 0 0 8px rgba(0, 229, 255, 0.18);
+}
+body.dark-theme .stars-value { color: #f2fffb; }
+body.dark-theme .stars-count { color: #6fb8b8; }
 
 body.dark-theme .resource-icon {
     border-color: #00e5ff;
     color: #00e5ff;
     background: rgba(0, 229, 255, 0.05);
 }
+
+/* Kebab "more actions" button — otherwise invisible against the dark background */
+body.dark-theme .kebab-btn {
+    background: rgba(0, 229, 255, 0.05);
+    border: 1px solid rgba(0, 229, 255, 0.4);
+    color: #8cd9d9;
+    box-shadow: 0 0 6px rgba(0, 229, 255, 0.12);
+}
+body.dark-theme .kebab-btn:hover,
+body.dark-theme .kebab-btn[aria-expanded="true"] {
+    background: rgba(0, 229, 255, 0.12);
+    border-color: #00e5ff;
+    color: #eafffb;
+    box-shadow: 0 0 14px rgba(0, 229, 255, 0.35);
+}
+body.dark-theme .kebab-menu {
+    background: rgba(0, 5, 10, 0.96);
+    border: 1px solid rgba(0, 229, 255, 0.4);
+    box-shadow: 0 0 18px rgba(0, 229, 255, 0.2);
+}
+body.dark-theme .kebab-item { color: #d8fffa; }
+body.dark-theme .kebab-item:hover { background: rgba(0, 229, 255, 0.1); }
+body.dark-theme .kebab-item.kebab-danger { color: #ff8080; }
+body.dark-theme .kebab-item.kebab-danger:hover { background: rgba(255, 0, 51, 0.12); }
 
 /* Status Pill Glow */
 @keyframes neonPulse {
@@ -1830,7 +1981,7 @@ function renderSubjectGrid(program) {
         return `
             <div class="subject-card${isActive ? ' active' : ''}" data-subject="${item.id}">
                 <span>${item.name}</span>
-                <small>${isActive ? '●' : '›'}</small>
+                <small>${isActive ? '●' : '▾'}</small>
             </div>
         `;
     }).join('');
