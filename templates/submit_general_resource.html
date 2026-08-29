@@ -224,6 +224,22 @@
         }
         .drop-title { font-weight: 800; font-size: 1rem; }
         .drop-sub { margin-top: 5px; color: var(--muted); font-size: .84rem; }
+        .selected-file {
+            margin-top: 14px;
+            display: none;
+            padding: 8px 12px;
+            border-radius: 12px;
+            background: #f3efe9;
+            border: 1px solid #e6d7c7;
+            color: #4a3528;
+            font-size: 0.82rem;
+            font-weight: 800;
+            text-align: left;
+            word-break: break-word;
+        }
+        .selected-file.visible {
+            display: block;
+        }
         .submit-btn {
             width: 100%;
             margin-top: 16px;
@@ -415,6 +431,7 @@
                                 <div class="drop-icon">+</div>
                                 <div class="drop-title">Drop your file here or click to browse</div>
                                 <div class="drop-sub">PDF and HTML files are accepted up to 5 MB. Bigger files should be shared through a Google Drive link.</div>
+                                <div id="resource_pdf_name" class="selected-file">No file selected</div>
                             </div>
                         </div>
                     </div>
@@ -527,6 +544,8 @@
         const titleInput = document.getElementById('title');
         const titlePreviewValue = document.getElementById('title_preview_value');
         const submitForm = document.querySelector('form[method="post"]');
+        const fileInput = document.getElementById('resource_pdf');
+        const selectedFileName = document.getElementById('resource_pdf_name');
         const currentUsername = {{ (current_username or '') | tojson }};
 
         function escapeRegExp(value) {
@@ -568,13 +587,26 @@
             subjectSelect.innerHTML = options;
         }
 
+        function updateSelectedFileDisplay() {
+            const file = fileInput.files && fileInput.files[0];
+            if (!file) {
+                selectedFileName.textContent = 'No file selected';
+                selectedFileName.classList.remove('visible');
+                return;
+            }
+            selectedFileName.textContent = `Selected file: ${file.name}`;
+            selectedFileName.classList.add('visible');
+        }
+
         programSelect.addEventListener('change', () => populateSubjects(programSelect.value));
         titleInput.addEventListener('input', renderTitlePreview);
+        fileInput.addEventListener('change', updateSelectedFileDisplay);
         submitForm.addEventListener('submit', () => {
             titleInput.value = buildFinalTitle(titleInput.value || '');
         });
 
         renderTitlePreview();
+        updateSelectedFileDisplay();
     </script>
 </body>
 </html>

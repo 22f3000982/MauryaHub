@@ -84,6 +84,23 @@
             padding: 8px 10px;
         }
 
+        .selected-file {
+            margin-top: 10px;
+            display: none;
+            padding: 8px 10px;
+            border-radius: 8px;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            color: #f8fafc;
+            font-size: 0.8rem;
+            font-weight: 600;
+            word-break: break-word;
+        }
+
+        .selected-file.visible {
+            display: block;
+        }
+
         .title-preview {
             margin-top: 8px;
             font-size: 0.8rem;
@@ -165,6 +182,7 @@
 
             <label for="resource_pdf">Upload PDF/HTML (optional if link provided)</label>
             <input id="resource_pdf" name="resource_pdf" type="file" accept=".pdf,application/pdf,.html,.htm,text/html">
+            <div id="resource_pdf_name" class="selected-file">No file selected</div>
 
             <div class="hint">At least one field is required: either direct link or PDF/HTML file.</div>
 
@@ -182,6 +200,8 @@
         const titleInput = document.getElementById('title');
         const titlePreviewValue = document.getElementById('title_preview_value');
         const submitForm = document.querySelector('form[method="post"]');
+        const fileInput = document.getElementById('resource_pdf');
+        const selectedFileName = document.getElementById('resource_pdf_name');
         const currentUsername = {{ (current_username or '') | tojson }};
 
         function escapeRegExp(value) {
@@ -223,16 +243,29 @@
             subjectSelect.innerHTML = options;
         }
 
+        function updateSelectedFileDisplay() {
+            const file = fileInput.files && fileInput.files[0];
+            if (!file) {
+                selectedFileName.textContent = 'No file selected';
+                selectedFileName.classList.remove('visible');
+                return;
+            }
+            selectedFileName.textContent = `Selected file: ${file.name}`;
+            selectedFileName.classList.add('visible');
+        }
+
         programSelect.addEventListener('change', () => {
             populateSubjects(programSelect.value);
         });
 
         titleInput.addEventListener('input', renderTitlePreview);
+        fileInput.addEventListener('change', updateSelectedFileDisplay);
         submitForm.addEventListener('submit', () => {
             titleInput.value = buildFinalTitle(titleInput.value || '');
         });
 
         renderTitlePreview();
+        updateSelectedFileDisplay();
     </script>
 </body>
 </html>
