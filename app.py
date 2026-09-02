@@ -1406,7 +1406,7 @@ def google_redirect_uri():
 @app.route('/auth/google')
 def google_login():
     if not GOOGLE_CLIENT_ID or not GOOGLE_CLIENT_SECRET:
-        flash('Google login is not configured yet. Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET on Render.', 'error')
+        flash('Google login is not configured yet. Add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET to .env.local (local) or Render environment variables.', 'error')
         return redirect(url_for('general_resources_page'))
 
     next_url = request.values.get('next') or url_for('general_resources_page')
@@ -1619,9 +1619,32 @@ def general_resources_page():
     try:
         cur = conn.cursor()
         cur.execute('''
+            WITH starting_scores AS (
+                SELECT username, contribution_count
+                FROM member_contributions
+                WHERE username IS NOT NULL AND username <> ''
+            ), approved_submissions AS (
+                SELECT u.username, COUNT(*) AS approved_count
+                FROM general_resources gr
+                JOIN users u ON u.id = gr.submitted_by
+                WHERE gr.submitted_by IS NOT NULL
+                  AND COALESCE(gr.is_published, TRUE) = TRUE
+                GROUP BY u.username
+            ), combined AS (
+                SELECT s.username,
+                       s.contribution_count + COALESCE(a.approved_count, 0) AS contribution_count
+                FROM starting_scores s
+                LEFT JOIN approved_submissions a ON LOWER(a.username) = LOWER(s.username)
+                UNION ALL
+                SELECT a.username, a.approved_count
+                FROM approved_submissions a
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM starting_scores s
+                    WHERE LOWER(s.username) = LOWER(a.username)
+                )
+            )
             SELECT username, contribution_count
-            FROM member_contributions
-            WHERE username IS NOT NULL AND username <> ''
+            FROM combined
             ORDER BY contribution_count DESC, LOWER(username)
             LIMIT 10
         ''')

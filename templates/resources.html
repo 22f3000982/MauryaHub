@@ -828,6 +828,12 @@ body.dark-theme .filter-zone.scrolled .filter-bar {
 .act-open:hover  { filter: brightness(1.07); box-shadow: 0 10px 20px rgba(31,77,60,0.32); transform: translateY(-1px); }
 .act-rate { color: #6e4210; background: #f6e6c8; border-color: #d9a94f; }
 .act-rate:hover { background: #efd9a6; border-color: #b8792a; box-shadow: 0 6px 14px rgba(184,121,42,0.24); transform: translateY(-1px); }
+.act-share { color: #174f63; background: #dff1f5; border-color: #79bdc9; }
+.act-share:hover { background: #c9e8ee; border-color: #368e9d; box-shadow: 0 6px 14px rgba(54,142,157,0.2); transform: translateY(-1px); }
+.act-share.shared { color: #14532d; background: #d9f4df; border-color: #78c98c; }
+body.dark-theme .act-share { color: #eaffff; background: rgba(0, 229, 255, 0.13); border-color: #00b8cc; box-shadow: 0 0 7px rgba(0, 229, 255, 0.16); }
+body.dark-theme .act-share:hover { color: #ffffff; background: rgba(0, 229, 255, 0.25); border-color: #00e5ff; box-shadow: 0 0 14px rgba(0, 229, 255, 0.35); }
+body.dark-theme .act-share.shared { color: #d9ffe4; background: rgba(0, 255, 68, 0.15); border-color: #00ff44; }
 
 /* ── ADMIN "MORE" KEBAB MENU ─────────────────── */
 .actions-more { position: relative; flex-shrink: 0; }
@@ -1050,13 +1056,13 @@ body.dark-theme .filter-zone.scrolled .filter-bar {
 }
 @media (min-width: 1100px) {
     .resource-list {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 }
 
 @media (min-width: 1680px) {
     .resource-list {
-        grid-template-columns: repeat(5, minmax(0, 1fr));
+        grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 }
     </style>
@@ -1277,6 +1283,9 @@ body.dark-theme .filter-zone.scrolled .filter-bar {
                 <div class="resource-footer">
                     <div class="actions-primary">
                         <button class="act act-rate" type="button" data-resource-id="{{ resource[0] }}" data-title="{{ resource[1] | e }}" onclick="openFeedbackFromCard(this)">Rate</button>
+                        <button class="act act-share" type="button" data-title="{{ resource[1] | e }}" data-share-url="{{ url_for('open_general_resource', resource_id=resource[0], _external=True) }}" onclick="shareResource(this)" title="Share resource" aria-label="Share resource">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.5-4.4M8.2 13.2l7.5 4.4"/></svg>
+                        </button>
                         <a class="act act-open" href="{{ url_for('open_general_resource', resource_id=resource[0]) }}" target="_blank" data-resource-id="{{ resource[0] }}" data-title="{{ resource[1] | e }}" onclick="openFeedbackAfterOpen(this)">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M14 3h7v7" />
@@ -1404,6 +1413,9 @@ body.dark-theme .filter-zone.scrolled .filter-bar {
                 <div class="resource-footer">
                     <div class="actions-primary">
                         <button class="act act-rate" type="button" data-resource-id="{{ resource[0] }}" data-title="{{ resource[1] | e }}" onclick="openFeedbackFromCard(this)">Rate</button>
+                        <button class="act act-share" type="button" data-title="{{ resource[1] | e }}" data-share-url="{{ url_for('open_general_resource', resource_id=resource[0], _external=True) }}" onclick="shareResource(this)" title="Share resource" aria-label="Share resource">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.5-4.4M8.2 13.2l7.5 4.4"/></svg>
+                        </button>
                         <a class="act act-open" href="{{ url_for('open_general_resource', resource_id=resource[0]) }}" target="_blank" data-resource-id="{{ resource[0] }}" data-title="{{ resource[1] | e }}" onclick="openFeedbackAfterOpen(this)">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M14 3h7v7" />
@@ -1794,6 +1806,32 @@ function toggleKebab(btn) {
         }
     }
 }
+
+async function shareResource(button) {
+    const title = button.dataset.title || 'MauryaHub resource';
+    const url = button.dataset.shareUrl || window.location.href;
+    try {
+        if (navigator.share) {
+            await navigator.share({ title, text: `Check out: ${title}`, url });
+        } else if (navigator.clipboard) {
+            await navigator.clipboard.writeText(url);
+            const originalTitle = button.title;
+            button.classList.add('shared');
+            button.title = 'Link copied';
+            setTimeout(() => {
+                if (button.isConnected) {
+                    button.classList.remove('shared');
+                    button.title = originalTitle;
+                }
+            }, 1600);
+        } else {
+            window.prompt('Copy this resource link:', url);
+        }
+    } catch (error) {
+        if (error && error.name !== 'AbortError') console.warn('Could not share resource:', error);
+    }
+}
+
 document.addEventListener('click', e => {
     if (!e.target.closest('.actions-more')) {
         document.querySelectorAll('.kebab-menu.open').forEach(m => m.classList.remove('open'));
