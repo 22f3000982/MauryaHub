@@ -10,12 +10,14 @@ import hashlib
 import math
 import mimetypes
 import secrets
+import re
+from difflib import SequenceMatcher
 from werkzeug.utils import secure_filename
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
-from urllib.parse import urlparse, urlencode
+from urllib.parse import urlparse, urlencode, unquote
 import requests
 
 def load_local_env():
@@ -97,6 +99,39 @@ def get_resource_content_type(filename, fallback):
 def get_resource_content_disposition(filename):
     safe_name = secure_filename(filename)
     return f'inline; filename="{safe_name}"'
+
+def get_resource_download_disposition(filename):
+    safe_name = secure_filename(filename) or 'resource'
+    return f'attachment; filename="{safe_name}"'
+
+def normalize_contributor_name(value):
+    return re.sub(r'[^a-z0-9]', '', (value or '').lower())
+
+def contributor_name_similarity(username, title):
+    normalized_username = normalize_contributor_name(username)
+    normalized_title = normalize_contributor_name(title)
+    if not normalized_username or not normalized_title:
+        return 0
+    if normalized_username in normalized_title:
+        return 1
+
+    title_words = re.findall(r'[a-z0-9]+', (title or '').lower())
+    candidates = [normalized_title]
+    for start in range(len(title_words)):
+        for end in range(start + 1, min(len(title_words), start + 4) + 1):
+            candidates.append(normalize_contributor_name(' '.join(title_words[start:end])))
+    return max(SequenceMatcher(None, normalized_username, candidate).ratio() for candidate in candidates)
+
+def match_contributor_from_title(title, usernames):
+    matches = [
+        (contributor_name_similarity(username, title), username)
+        for username in usernames
+        if username
+    ]
+    if not matches:
+        return None
+    score, username = max(matches, key=lambda item: (item[0], len(normalize_contributor_name(item[1]))))
+    return username if score >= 0.5 else None
 
 def uploaded_file_size(file_storage):
     if not file_storage or not getattr(file_storage, 'stream', None):
@@ -1619,36 +1654,37 @@ def general_resources_page():
     try:
         cur = conn.cursor()
         cur.execute('''
-            WITH starting_scores AS (
-                SELECT username, contribution_count
-                FROM member_contributions
-                WHERE username IS NOT NULL AND username <> ''
-            ), approved_submissions AS (
-                SELECT u.username, COUNT(*) AS approved_count
-                FROM general_resources gr
-                JOIN users u ON u.id = gr.submitted_by
-                WHERE gr.submitted_by IS NOT NULL
-                  AND COALESCE(gr.is_published, TRUE) = TRUE
-                GROUP BY u.username
-            ), combined AS (
-                SELECT s.username,
-                       s.contribution_count + COALESCE(a.approved_count, 0) AS contribution_count
-                FROM starting_scores s
-                LEFT JOIN approved_submissions a ON LOWER(a.username) = LOWER(s.username)
-                UNION ALL
-                SELECT a.username, a.approved_count
-                FROM approved_submissions a
-                WHERE NOT EXISTS (
-                    SELECT 1 FROM starting_scores s
-                    WHERE LOWER(s.username) = LOWER(a.username)
-                )
-            )
             SELECT username, contribution_count
-            FROM combined
-            ORDER BY contribution_count DESC, LOWER(username)
-            LIMIT 10
+            FROM member_contributions
+            WHERE username IS NOT NULL AND username <> ''
         ''')
-        top_contributors = cur.fetchall()
+        contributor_scores = {
+            row[0]: row[1] or 0
+            for row in cur.fetchall()
+        }
+        cur.execute('''
+            SELECT username
+            FROM users
+            WHERE username IS NOT NULL AND username <> ''
+        ''')
+        for (username,) in cur.fetchall():
+            contributor_scores.setdefault(username, 0)
+        cur.execute('''
+            SELECT gr.title, u.username
+            FROM general_resources gr
+            LEFT JOIN users u ON u.id = gr.submitted_by
+            WHERE COALESCE(gr.is_published, TRUE) = TRUE
+        ''')
+        for title, submitted_username in cur.fetchall():
+            contributor = submitted_username or match_contributor_from_title(
+                title, contributor_scores.keys()
+            )
+            if contributor:
+                contributor_scores[contributor] += 1
+        top_contributors = sorted(
+            contributor_scores.items(),
+            key=lambda item: (-item[1], item[0].lower())
+        )[:10]
         cache_key = 'general:diploma'
         diploma_cache = _resource_ranking_cache.get(cache_key)
         if diploma_cache and time.time() - diploma_cache['created'] < RESOURCE_RANKING_CACHE_SECONDS:
@@ -1789,6 +1825,48 @@ def general_resources_page():
         reports=reports,
         top_contributors=top_contributors
     )
+
+@app.route('/api/contributors/<path:username>/resources')
+def contributor_resources(username):
+    username = username.strip()
+    if not username:
+        return jsonify({'username': '', 'resources': []})
+
+    conn = get_db_connection()
+    if not conn:
+        return jsonify({'error': 'Database connection failed'}), 503
+
+    try:
+        cur = conn.cursor()
+        cur.execute('''
+            SELECT gr.id, gr.title, gr.program_type, gr.resource_link,
+                   s.name, u.username
+            FROM general_resources gr
+            LEFT JOIN general_resource_subjects s ON s.id = gr.subject_id
+            LEFT JOIN users u ON u.id = gr.submitted_by
+            WHERE COALESCE(gr.is_published, TRUE) = TRUE
+            ORDER BY gr.program_type, COALESCE(s.name, ''), gr.title
+        ''')
+        resources = []
+        for resource_id, title, program_type, resource_link, subject_name, submitted_username in cur.fetchall():
+            matched = submitted_username and submitted_username.lower() == username.lower()
+            if not matched and not submitted_username:
+                matched = match_contributor_from_title(title, [username]) == username
+            if matched:
+                resources.append({
+                    'id': resource_id,
+                    'title': title,
+                    'program': program_type,
+                    'subject': subject_name or 'Unassigned',
+                    'open_url': url_for('open_general_resource', resource_id=resource_id),
+                    'download_url': url_for('download_general_resource', resource_id=resource_id)
+                })
+        cur.close()
+        return jsonify({'username': username, 'resources': resources})
+    except Exception:
+        return jsonify({'error': 'Could not load contributor resources'}), 500
+    finally:
+        conn.close()
 
 @app.route('/admin/resource-subjects', methods=['GET', 'POST'])
 def admin_resource_subjects():
@@ -2685,6 +2763,65 @@ def open_general_resource(resource_id):
         return render_html_resource_preview(link)
     except Exception:
         return "Resource link not found"
+    finally:
+        conn.close()
+
+@app.route('/download_general_resource/<int:resource_id>')
+def download_general_resource(resource_id):
+    conn = get_db_connection()
+    if not conn:
+        return 'Resource link not found', 404
+
+    try:
+        cur = conn.cursor()
+        cur.execute(
+            'SELECT title, resource_link FROM general_resources WHERE id=%s',
+            (resource_id,)
+        )
+        row = cur.fetchone()
+        cur.close()
+        if not row or not row[1]:
+            return 'Resource link not found', 404
+
+        title, link = row
+        link = link.strip()
+        parsed_link = urlparse(link)
+        stored_filename = secure_filename(os.path.basename(unquote(parsed_link.path)))
+        extension = os.path.splitext(stored_filename)[1].lower()
+        filename = secure_filename(title) or 'resource'
+
+        if link.startswith('/'):
+            local_path = os.path.join(app.root_path, link.lstrip('/').replace('/', os.sep))
+            if os.path.isfile(local_path):
+                content_type = mimetypes.guess_type(local_path)[0] or 'application/octet-stream'
+                if not extension:
+                    extension = mimetypes.guess_extension(content_type) or ''
+                return send_file(
+                    local_path,
+                    as_attachment=True,
+                    download_name=f'{filename}{extension}' if extension and not filename.lower().endswith(extension) else filename,
+                    mimetype=content_type
+                )
+            return 'Resource file not found', 404
+
+        response = requests.get(ensure_url_scheme(link), timeout=20)
+        response.raise_for_status()
+        content_type = response.headers.get('Content-Type', '').split(';', 1)[0].strip()
+        if not content_type:
+            content_type = get_resource_content_type(stored_filename, 'application/octet-stream')
+        if not extension:
+            extension = mimetypes.guess_extension(content_type) or ''
+        if extension and not filename.lower().endswith(extension):
+            filename = f'{filename}{extension}'
+        download_headers = {
+            'Content-Disposition': get_resource_download_disposition(filename),
+            'Content-Type': content_type
+        }
+        return Response(response.content, status=200, headers=download_headers)
+    except requests.RequestException:
+        return 'Resource download failed', 502
+    except Exception:
+        return 'Resource download failed', 500
     finally:
         conn.close()
 
