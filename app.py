@@ -1654,12 +1654,12 @@ def general_resources_page():
     try:
         cur = conn.cursor()
         cur.execute('''
-            SELECT username, contribution_count
+            SELECT username
             FROM member_contributions
             WHERE username IS NOT NULL AND username <> ''
         ''')
         contributor_scores = {
-            row[0]: row[1] or 0
+            row[0]: 0
             for row in cur.fetchall()
         }
         cur.execute('''
