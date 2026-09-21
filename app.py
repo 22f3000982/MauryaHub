@@ -1330,7 +1330,6 @@ def google_verification():
 def sitemap():
     public_urls = [
         request.url_root,
-        url_for('course_view', _external=True),
         url_for('general_resources_page', _external=True),
     ]
     conn = get_db_connection()
