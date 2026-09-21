@@ -44,7 +44,7 @@ if not os.environ.get('RENDER'):
     load_local_env()
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'
+app.secret_key = os.environ.get('SECRET_KEY', 'local-development-secret-key')
 
 # Upload configuration
 UPLOAD_FOLDER = 'static/uploads'
@@ -1316,6 +1316,14 @@ def get_recent_content():
 def landing_page():
     recent_content = get_recent_content()
     return render_template('landing.html', recent_content=recent_content)
+
+@app.route('/google3c05c71b252e3c7e.html')
+def google_verification():
+    return send_from_directory(
+        app.root_path,
+        'google3c05c71b252e3c7e.html',
+        mimetype='text/plain'
+    )
 
 # Submit feedback route
 @app.route('/submit-feedback', methods=['POST'])
