@@ -51,6 +51,14 @@
         })();
     </script>
 
+    {# AdSense loads only on public pages; a page opts in with
+       {% set show_ads = true %} (admin and account pages stay ad-free). #}
+    {% if show_ads %}
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-541494611294190"
+        crossorigin="anonymous"></script>
+    {% endif %}
+    {% block head_extra %}{% endblock %}
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">

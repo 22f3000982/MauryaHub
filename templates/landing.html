@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% set show_ads = true %}
 {% set hide_sidebar = true %}
 
 {% block title %}MauryaHub — Academic Resource Portal{% endblock %}
@@ -177,6 +178,10 @@
 {% endblock %}
 
 {% block header_search %}{% endblock %}
+
+{% block head_extra %}
+<meta name="google-adsense-account" content="ca-pub-5414194611294198">
+{% endblock %}
 
 {% block content %}
 

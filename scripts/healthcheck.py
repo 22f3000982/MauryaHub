@@ -196,6 +196,7 @@ PUBLIC_ROUTES = [
     ("/about", 200), ("/contact", 200), ("/settings", 200),
     ("/static/css/app.css", 200), ("/static/js/app.js", 200),
     ("/static/img/logo-mark.png", 200), ("/favicon.ico", 200),
+    ("/sitemap.xml", 200), ("/robots.txt", 200), ("/google3c05c71b252e3c7e.html", 200),
     ("/this-route-does-not-exist", 404),
 ]
 
@@ -263,6 +264,19 @@ def check_routes(base_url: str) -> None:
         record(FAIL, "shell missing on some pages", "\n".join(shell_bad))
     else:
         record(PASS, "header / sidebar / footer render on sampled pages")
+
+    # AdSense belongs on public pages only, never on admin screens.
+    ad_bad = []
+    for path in ("/", "/dashboard", "/resources", "/course/1"):
+        if "adsbygoogle" not in s.get(base_url + path, timeout=10).text:
+            ad_bad.append(f"{path}: AdSense missing")
+    for path in ("/admin/analytics", "/admin/backup"):
+        if "adsbygoogle" in s.get(base_url + path, timeout=10).text:
+            ad_bad.append(f"{path}: AdSense should not load on admin pages")
+    if ad_bad:
+        record(FAIL, "AdSense placement wrong", "\n".join(ad_bad))
+    else:
+        record(PASS, "AdSense on public pages only")
 
 
 # ---------------------------------------------------------------------------

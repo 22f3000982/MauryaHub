@@ -18,6 +18,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
 from urllib.parse import urlparse, urlencode, unquote
+from xml.sax.saxutils import escape
 import requests
 
 def load_local_env():
@@ -44,7 +45,7 @@ if not os.environ.get('RENDER'):
     load_local_env()
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'
+app.secret_key = os.environ.get('SECRET_KEY', 'local-development-secret-key')
 
 # Upload configuration
 UPLOAD_FOLDER = 'static/uploads'
@@ -1344,6 +1345,54 @@ def landing_page():
     # three queries get_recent_content() runs are no longer needed here. The
     # helper is kept for whenever that block comes back.
     return render_template('landing.html')
+
+@app.route('/google3c05c71b252e3c7e.html')
+def google_verification():
+    return send_from_directory(
+        app.root_path,
+        'google3c05c71b252e3c7e.html',
+        mimetype='text/plain'
+    )
+
+@app.route('/sitemap.xml')
+def sitemap():
+    public_urls = [
+        request.url_root,
+        url_for('general_resources_page', _external=True),
+    ]
+    conn = get_db_connection()
+    if conn:
+        try:
+            cur = conn.cursor()
+            cur.execute('SELECT id FROM courses ORDER BY id')
+            public_urls.extend(
+                url_for('course_detail', course_id=course_id, _external=True)
+                for (course_id,) in cur.fetchall()
+            )
+            cur.close()
+        except Exception as exc:
+            print(f'Error generating sitemap: {exc}')
+        finally:
+            conn.close()
+
+    url_entries = ''.join(
+        f'<url><loc>{escape(public_url)}</loc></url>'
+        for public_url in dict.fromkeys(public_urls)
+    )
+    sitemap_xml = (
+        '<?xml version="1.0" encoding="UTF-8"?>'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+        f'{url_entries}'
+        '</urlset>'
+    )
+    return Response(sitemap_xml, mimetype='application/xml')
+
+@app.route('/robots.txt')
+def robots_txt():
+    return Response(
+        f'User-agent: *\nAllow: /\nSitemap: {url_for("sitemap", _external=True)}\n',
+        mimetype='text/plain'
+    )
 
 # Submit feedback route
 @app.route('/submit-feedback', methods=['POST'])
