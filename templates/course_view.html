@@ -60,8 +60,7 @@
         margin-top: auto;
         padding-top: var(--sp-4);
     }
-    /* Only draw the divider when the footer actually has content. */
-    .course-card-footer:not(:empty) { border-top: 1px solid var(--border); }
+    .course-card-footer { border-top: 1px solid var(--border); }
 
     /* Stretched link keeps the whole card clickable without nesting <a>s. */
     .course-card { position: relative; }
@@ -168,8 +167,8 @@
                         </span>
                     </div>
 
+                    {% if session.get('admin_mode') %}
                     <div class="course-card-footer">
-                        {% if session.get('admin_mode') %}
                             {% if course[1]|lower|trim == 'business analytics' %}
                                 <a class="btn btn-ghost btn-sm" target="_blank" rel="noopener noreferrer"
                                    href="https://ba-quiz-calculator.vercel.app/">
@@ -197,8 +196,8 @@
                                     </svg>
                                 </a>
                             </div>
-                        {% endif %}
                     </div>
+                    {% endif %}
                 </article>
             {% endfor %}
         </div>

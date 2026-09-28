@@ -177,7 +177,7 @@ def check_assets() -> None:
 
     # Logo / icon assets
     required = [
-        "img/logo-mark.png", "img/logo-lockup.png", "img/favicon.ico",
+        "img/logo-mark.png", "img/logo-lockup.png", "img/logo-lockup-dark.png", "img/favicon.ico",
         "img/favicon-32.png", "img/favicon-16.png", "img/apple-touch-icon.png",
     ]
     missing = [p for p in required if not (STATIC / p).exists()]

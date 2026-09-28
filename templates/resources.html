@@ -32,7 +32,9 @@ body { min-height: 100vh; overflow-x: hidden; }
 }
 
 /* ── LAYOUT ─────────────────────────────────── */
-.page { max-width: 1900px; margin: 0 auto; padding: 6px 12px 30px; width: min(98vw, 1900px); position: relative; }
+/* Wider than the default page for this dense list. Width is relative to the
+   main column, not the viewport: `vw` ignores the sidebar and overflowed by it. */
+.page { max-width: 1900px; margin: 0 auto; padding: 6px 12px 30px; width: 100%; position: relative; }
 
 /* ── TOP CONTRIBUTORS TRIGGER (moved from the old top-nav into the page header) ── */
 .contributors-link {
