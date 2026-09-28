@@ -1,75 +1,49 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit {{ item_type|capitalize }}</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f2f2f2;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
+{% extends "base.html" %}
 
-        .container {
-            background-color: #fff;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            width: 90%;
-            max-width: 400px;
-        }
+{% set type_labels = {'quiz1': 'Quiz-1', 'quiz2': 'Quiz-2', 'endterm': 'End Term', 'resources': 'Resource'} %}
+{% set type_label = type_labels.get(item_type, item_type|capitalize) %}
 
-        h1 {
-            font-size: 22px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
+{% block title %}Edit {{ type_label }} · MauryaHub{% endblock %}
 
-        input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
+{% block content %}
+<div class="page page-narrow" data-reveal-page>
 
-        button {
-            width: 100%;
-            padding: 10px;
-            font-size: 16px;
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
+    <nav class="breadcrumb">
+        <a href="{{ url_for('course_view') }}">Courses</a>
+        <span class="breadcrumb-sep">/</span>
+        <a href="{{ url_for('course_detail', course_id=course_id) }}">Course</a>
+        <span class="breadcrumb-sep">/</span>
+        <span>Edit {{ type_label }}</span>
+    </nav>
 
-        button:hover {
-            background-color: #0056b3;
-        }
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Edit {{ type_label }}</h1>
+            <p class="page-subtitle">Update this item's title or link.</p>
+        </div>
+    </div>
 
-        @media (max-width: 480px) {
-            .container {
-                padding: 20px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Edit {{ item_type|capitalize }}</h1>
+    <div class="card card-pad">
         <form method="post">
-            <input type="text" name="title" value="{{ item.title }}" placeholder="Title" required>
-            <input type="text" name="link" value="{{ item.link }}" placeholder="YouTube Link">
-            <button type="submit">Save Changes</button>
+            <div class="form-group">
+                <label class="form-label" for="title">Title <span class="required">*</span></label>
+                <input class="form-control" type="text" id="title" name="title"
+                       value="{{ item.title }}" required autofocus>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="link">Link</label>
+                <input class="form-control" type="url" id="link" name="link"
+                       value="{{ item.link }}" placeholder="https://youtu.be/…">
+                <p class="form-hint">Optional. A YouTube link here enables watch-count tracking.</p>
+            </div>
+
+            <div class="form-actions">
+                <button class="btn btn-primary" type="submit">Save changes</button>
+                <a class="btn btn-ghost" href="{{ url_for('course_detail', course_id=course_id) }}">Cancel</a>
+            </div>
         </form>
     </div>
-</body>
-</html>
+
+</div>
+{% endblock %}

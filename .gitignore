@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# Local environment / secrets
+.env
+.env.local
+
+# Local databases & dumps
+*.db
+*.sql
+# ...except the read snapshot the deployment needs.
+!static_data.db
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Uploads written at runtime
+static/uploads/
+
+# Local dev server output
+flask.log
+import*.log

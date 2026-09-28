@@ -1,50 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>General Resources</title>
-    <link rel="icon" href="data:,">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
-    <style>
-/* ═══════════════════════════════════════════════
-   TOKENS — Warm Academic (Light Mode)
-═══════════════════════════════════════════════ */
+{% extends "base.html" %}
+
+{% block title %}General Resources · MauryaHub{% endblock %}
+
+{# This page has its own live-filtering search below the tabs, so the
+   shared header search (a full page reload with no filtering here) would
+   just be a confusing second search box stacked above it. #}
+{% block header_search %}{% endblock %}
+
+{% block page_css %}
+<style>
+/* Page-specific aliases onto the shared design tokens from app.css.
+   Everything else (--bg, --surface, --text, --border, --accent, ...)
+   is intentionally left undeclared here so it inherits the shared
+   values -- light/dark theme included. */
 :root {
-    --bg:          #f6efe2;
-    --surface:     #fffdf8;
-    --surface-2:   #f1e7d4;
-    --surface-3:   #eee3d1;
-    --card:        #fffdf8;
-    --hover:       #f3ead8;
-    --border:      #ddccae;
-    --border-md:   #c9b487;
-    --text:        #2c2115;
-    --text-muted:  #5c4a34;
-    --text-dim:    #93805f;
-    --accent:      #1f4d3c;
-    --accent-2:    #6b1f2a;
-    --accent-soft: rgba(31,77,60,0.14);
-    --accent-weak: rgba(31,77,60,0.08);
-    --danger:      #8c2b2b;
-    --danger-soft: rgba(140,43,43,0.12);
-    --success:     #2f6b3a;
-    --success-soft: rgba(47,107,58,0.12);
-    --shadow-warm: rgba(66,46,20,0.14);
-    --r-sm: 8px; --r: 12px; --r-lg: 18px;
+    --card:        var(--surface);
+    --hover:       var(--surface-hover);
+    --border-md:   var(--border-strong);
+    --text-dim:    var(--text-soft);
+    --accent-2:    var(--accent-hover);
+    --accent-weak: var(--accent-softer);
+    --shadow-warm: var(--shadow);
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body {
-    font-family: 'Source Sans 3', sans-serif;
-    font-size: 14px;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    background: linear-gradient(180deg, #f6efe2 0%, #efe4cc 100%);
-    overflow-x: hidden;
-}
+*,*::before,*::after{box-sizing:border-box}
+body { min-height: 100vh; overflow-x: hidden; }
 :focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
@@ -54,46 +33,20 @@ body {
 /* ── LAYOUT ─────────────────────────────────── */
 .page { max-width: 1900px; margin: 0 auto; padding: 6px 12px 30px; width: min(98vw, 1900px); position: relative; }
 
-/* ── TOP NAV ─────────────────────────────────── */
-.top-nav {
-    display: flex; gap: 5px; flex-wrap: wrap;
-    padding: 6px 8px; border-radius: var(--r);
-    border: 1px solid var(--border);
-    background: var(--surface);
-    backdrop-filter: blur(8px);
-    margin-bottom: 12px;
-    box-shadow: 0 8px 18px var(--shadow-warm);
-    position: relative;
-}
-.top-nav a {
-    text-decoration: none; color: var(--text-muted);
-    padding: 5px 10px; border-radius: 999px;
-    font-size: 0.8rem; font-weight: 600;
-    border: 1px solid transparent;
+/* ── TOP CONTRIBUTORS TRIGGER (moved from the old top-nav into the page header) ── */
+.contributors-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    text-decoration: none; color: var(--accent);
+    padding: 6px 12px; border-radius: var(--r-full, 999px);
+    font: inherit; font-size: 0.8rem; font-weight: 600;
+    border: 1px solid var(--accent-border);
+    background: var(--accent-soft);
+    cursor: pointer;
     transition: color .16s, border-color .16s, background .16s;
 }
-.top-nav a:hover { color: var(--text); border-color: var(--border); background: var(--surface-2); }
-.top-nav a.cta-link {
-    color: #fffdf8;
-    background: linear-gradient(135deg, #8a3a2a, #6b1f2a);
-    border-color: rgba(107, 31, 42, 0.28);
-    box-shadow: 0 10px 20px rgba(107, 31, 42, 0.22);
-}
-.top-nav a.cta-link:hover {
-    color: #fffdf8;
-    border-color: rgba(107, 31, 42, 0.3);
-    background: linear-gradient(135deg, #9a4530, #6b1f2a);
-}
-.top-nav .contributors-link {
-    color: #1f4d3c;
-    background: #e4ede4;
-    border-color: #bfd6bd;
-    cursor: pointer;
-    font: inherit;
-}
-.top-nav .contributors-link:hover { color: #16362a; background: #cfe0cd; }
+.contributors-link:hover { background: var(--accent-softer); border-color: var(--accent); }
 .top-contributors-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
-.top-contributors-heading h2 { font-size: 0.95rem; color: var(--text); font-family: 'Source Serif 4', serif; }
+.top-contributors-heading h2 { font-size: 0.95rem; color: var(--text); }
 .top-contributors-heading span { color: var(--text-dim); font-size: 0.7rem; }
 .top-contributors-list {
     column-count: 2;
@@ -154,12 +107,14 @@ body {
 }
 .contributor-rank {
     display: inline-grid; place-items: center; width: 26px; height: 26px; flex-shrink: 0; border-radius: 50%;
-    color: #2c2115; background: var(--surface-3); font-size: 0.72rem; font-weight: 800;
-    box-shadow: inset 0 0 0 1px rgba(44, 33, 21, 0.08);
+    color: var(--text); background: var(--surface-3); font-size: 0.72rem; font-weight: 800;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
 }
-.top-contributors-list li:nth-child(1) .contributor-rank { background: linear-gradient(135deg, #f7d154, #d89f00); }
-.top-contributors-list li:nth-child(2) .contributor-rank { background: linear-gradient(135deg, #e4e8eb, #b7bcc2); }
-.top-contributors-list li:nth-child(3) .contributor-rank { background: linear-gradient(135deg, #e7c19b, #bc7f3d); }
+/* Medal colors stay fixed gold/silver/bronze in both themes; their text stays
+   dark since the medal backgrounds are always light. */
+.top-contributors-list li:nth-child(1) .contributor-rank { background: linear-gradient(135deg, #f7d154, #d89f00); color: #2c2115; }
+.top-contributors-list li:nth-child(2) .contributor-rank { background: linear-gradient(135deg, #e4e8eb, #b7bcc2); color: #2c2115; }
+.top-contributors-list li:nth-child(3) .contributor-rank { background: linear-gradient(135deg, #e7c19b, #bc7f3d); color: #2c2115; }
 .top-contributors-empty { margin-top: 8px; color: var(--text-muted); font-size: 0.78rem; }
 .contributors-panel { height: auto; max-height: min(84vh, 750px); }
 .contributors-panel .top-contributors-list { max-height: 62vh; overflow: auto; }
@@ -174,341 +129,6 @@ body {
 .contributor-resource-list small { color: var(--text-dim); font-size: .68rem; margin-top: 3px; }
 .contributor-resource-list li > span { display: flex; gap: 8px; flex-shrink: 0; }
 .contributor-resource-list a { color: var(--accent); font-size: .7rem; font-weight: 700; }
-.theme-toggle { margin-left:auto; border:1px solid var(--border); border-radius:999px; padding:5px 10px; background:var(--surface-2); color:var(--text); font:inherit; font-size:.76rem; font-weight:700; cursor:pointer; white-space:nowrap; }
-.theme-toggle:hover { border-color:var(--accent); color:var(--accent); }
-
-/* ═══════════════════════════════════════════════
-   DARK MODE — Crisp Cyberpunk Neon Theme
-═══════════════════════════════════════════════ */
-body.dark-theme { 
-    --bg: #010610; 
-    --surface: rgba(0, 10, 20, 0.6); 
-    --surface-2: rgba(0, 229, 255, 0.05); 
-    --surface-3: rgba(0, 229, 255, 0.1); 
-    --card: rgba(0, 5, 12, 0.8); 
-    --hover: rgba(0, 229, 255, 0.1); 
-    --border: #004d66; 
-    --border-md: rgba(0, 229, 255, 0.4); 
-    --text: #e0fcf5; 
-    --text-muted: #8cd9d9; 
-    --text-dim: #4d9999; 
-    --accent: #00e5ff; 
-    --accent-2: #00ff44; 
-    --accent-soft: rgba(0, 229, 255, 0.15); 
-    --accent-weak: rgba(0, 229, 255, 0.08); 
-    --shadow-warm: rgba(0, 0, 0, 0.5); 
-    
-    background: radial-gradient(circle at 50% 0%, #001f33 0%, #000205 100%); 
-    font-family: 'Source Sans 3', sans-serif;
-}
-
-/* Restrict intense text glow to headers to save eye strain */
-body.dark-theme h1, body.dark-theme h2, body.dark-theme h3, 
-body.dark-theme .resource-title {
-    color: #ccffeb;
-    text-shadow: 0 0 15px rgba(0, 255, 68, 0.8);
-    letter-spacing: 0.02em;
-}
-
-/* Full Width Glowing Laser Lines */
-body.dark-theme .page-header::after,
-body.dark-theme .filter-zone::after,
-body.dark-theme .subject-zone::before,
-body.dark-theme .subject-zone::after {
-    content: '';
-    position: absolute;
-    left: calc(-50vw + 50%);
-    width: 100vw;
-    height: 1px;
-    background: #00e5ff;
-    box-shadow: 0 0 10px 2px rgba(0, 229, 255, 0.5);
-    z-index: -1;
-    pointer-events: none;
-}
-body.dark-theme .page-header::after { bottom: -12px; }
-body.dark-theme .filter-zone::after { top: 50%; }
-body.dark-theme .subject-zone::before { top: -10px; }
-body.dark-theme .subject-zone::after { bottom: -10px; }
-
-/* Structural blocks - Removed harsh backgrounds */
-body.dark-theme .page-header, body.dark-theme .top-nav, 
-body.dark-theme .tab-strip, body.dark-theme .subject-zone {
-    background: transparent;
-    border: none;
-    box-shadow: none;
-}
-
-/* Top nav links get a neon pill outline like the reference screenshot */
-body.dark-theme .top-nav a {
-    border: 1px solid rgba(0, 229, 255, 0.35);
-    color: #b8fff2;
-    background: rgba(0, 229, 255, 0.04);
-}
-body.dark-theme .top-nav a:hover {
-    border-color: #00e5ff;
-    color: #eafffb;
-    background: rgba(0, 229, 255, 0.12);
-    box-shadow: 0 0 14px rgba(0, 229, 255, 0.3);
-}
-body.dark-theme .top-nav .contributors-link {
-    border: 1px solid rgba(0, 255, 68, 0.4);
-    color: #baffcf;
-    background: rgba(0, 255, 68, 0.06);
-}
-body.dark-theme .top-nav .contributors-link:hover {
-    border-color: #00ff44;
-    box-shadow: 0 0 14px rgba(0, 255, 68, 0.3);
-    background: rgba(0, 255, 68, 0.12);
-}
-body.dark-theme .theme-toggle {
-    border: 1px solid rgba(0, 229, 255, 0.35);
-    background: rgba(0, 229, 255, 0.05);
-    color: #d8fffa;
-}
-body.dark-theme .theme-toggle:hover { border-color: #00e5ff; box-shadow: 0 0 12px rgba(0, 229, 255, 0.3); }
-
-/* Filter bar styling */
-body.dark-theme .filter-bar {
-    background: rgba(0, 5, 10, 0.8);
-    border: 1px solid #00e5ff;
-    box-shadow: 0 0 15px rgba(0, 229, 255, 0.15);
-    border-radius: 999px;
-    padding: 8px 16px;
-}
-
-body.dark-theme .filter-input, body.dark-theme .filter-select {
-    color: #e0fcf5;
-}
-body.dark-theme .filter-select {
-    border: 1px solid rgba(0, 229, 255, 0.4);
-    background: rgba(0, 229, 255, 0.05);
-}
-body.dark-theme .filter-select option { 
-    background: #010610; 
-    color: #00e5ff; 
-}
-body.dark-theme .result-pill, body.dark-theme .active-filter {
-    border: 1px solid rgba(0, 229, 255, 0.35);
-    background: rgba(0, 229, 255, 0.05);
-    color: #b8fff2;
-}
-
-/* Resource Cards & Subject Cards — resting glow kept subdued, full glow reserved for hover */
-body.dark-theme .resource-item, body.dark-theme .subject-card {
-    background: rgba(0, 5, 10, 0.7);
-    border: 1px solid rgba(0, 229, 255, 0.55);
-    box-shadow: 0 0 6px rgba(0, 229, 255, 0.08), inset 0 0 8px rgba(0, 229, 255, 0.03);
-    transition: all 0.25s ease;
-    border-radius: 12px;
-}
-body.dark-theme .resource-item::before { display: none; } /* Remove side gradient bar */
-
-body.dark-theme .resource-item:hover, body.dark-theme .subject-card:hover {
-    background: rgba(0, 229, 255, 0.05);
-    border-color: #00e5ff;
-    box-shadow: 0 0 20px rgba(0, 229, 255, 0.3), inset 0 0 15px rgba(0, 229, 255, 0.1);
-    transform: translateY(-2px);
-}
-
-/* Card title — bigger and brighter so it reads as the primary element */
-body.dark-theme .resource-title {
-    font-size: 1.14rem;
-    color: #f2fffb;
-    text-shadow: 0 0 10px rgba(0, 255, 68, 0.55);
-}
-
-/* ── Subject pill / dropdown-style filter row ── */
-body.dark-theme .subject-zone h3 { color: #8cd9d9; text-shadow: none; }
-body.dark-theme .subject-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px 14px;
-}
-body.dark-theme .subject-card {
-    flex: 0 0 auto;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 18px;
-    border-radius: 999px;
-    font-size: 0.86rem;
-    background: rgba(0, 10, 20, 0.65);
-    border: 1px solid rgba(0, 229, 255, 0.4);
-    box-shadow: 0 0 6px rgba(0, 229, 255, 0.06);
-}
-body.dark-theme .subject-card span { color: #eafffb; }
-body.dark-theme .subject-card small {
-    font-size: 0.78rem;
-    color: #00e5ff;
-    font-weight: 800;
-}
-body.dark-theme .subject-card:hover {
-    border-color: #00e5ff;
-    box-shadow: 0 0 18px rgba(0, 229, 255, 0.35);
-}
-
-/* Neon Green for Active Subjects */
-body.dark-theme .subject-card.active {
-    border-color: #00ff44;
-    box-shadow: 0 0 15px rgba(0, 255, 68, 0.4), inset 0 0 15px rgba(0, 255, 68, 0.1);
-    background: rgba(0, 255, 68, 0.05);
-}
-body.dark-theme .subject-card.active span, body.dark-theme .subject-card.active small {
-    color: #00ff44;
-    text-shadow: 0 0 8px rgba(0, 255, 68, 0.5);
-}
-
-/* Button Styling (Rate = Green, Open = Cyan) */
-body.dark-theme .act {
-    background: transparent !important;
-    border-radius: 6px;
-    box-shadow: none !important;
-    transition: all 0.2s ease;
-}
-body.dark-theme .act-rate {
-    border: 1px solid rgba(0, 255, 68, 0.75) !important;
-    color: #00ff44 !important;
-}
-body.dark-theme .act-rate:hover {
-    border-color: #00ff44 !important;
-    box-shadow: 0 0 15px rgba(0, 255, 68, 0.4) !important;
-    background: rgba(0, 255, 68, 0.1) !important;
-}
-
-body.dark-theme .act-open {
-    border: 1px solid rgba(0, 229, 255, 0.75) !important;
-    color: #00e5ff !important;
-}
-body.dark-theme .act-open:hover {
-    border-color: #00e5ff !important;
-    box-shadow: 0 0 15px rgba(0, 229, 255, 0.4) !important;
-    background: rgba(0, 229, 255, 0.1) !important;
-}
-
-/* Top Right Login Button (Danger Red) */
-body.dark-theme .top-nav a.cta-link {
-    background: #1a0005;
-    border: 1px solid #ff0033;
-    color: #ffcccc;
-    box-shadow: 0 0 8px rgba(255, 0, 51, 0.3);
-}
-body.dark-theme .top-nav a.cta-link:hover {
-    box-shadow: 0 0 20px rgba(255, 0, 51, 0.6);
-    background: rgba(255, 0, 51, 0.15);
-}
-
-/* Add-resource / add-notes button glow */
-body.dark-theme .btn-add {
-    background: rgba(0, 255, 68, 0.06) !important;
-    border: 1px solid #00ff44 !important;
-    color: #baffcf !important;
-    box-shadow: 0 0 14px rgba(0, 255, 68, 0.25) !important;
-}
-body.dark-theme .btn-add:hover {
-    box-shadow: 0 0 22px rgba(0, 255, 68, 0.45) !important;
-    background: rgba(0, 255, 68, 0.14) !important;
-}
-body.dark-theme .btn-add.cta-login {
-    background: rgba(255, 0, 51, 0.08) !important;
-    border: 1px solid #ff0033 !important;
-    color: #ffcccc !important;
-    box-shadow: 0 0 14px rgba(255, 0, 51, 0.25) !important;
-}
-body.dark-theme .btn-add.cta-login:hover {
-    box-shadow: 0 0 22px rgba(255, 0, 51, 0.45) !important;
-}
-
-/* Tab strip glow */
-body.dark-theme .tab-btn { color: #8cd9d9; }
-body.dark-theme .tab-btn.active {
-    background: rgba(0, 255, 68, 0.08);
-    color: #baffcf;
-    box-shadow: inset 0 0 0 1px rgba(0, 255, 68, 0.5), 0 0 14px rgba(0, 255, 68, 0.25);
-}
-body.dark-theme .tab-btn:hover:not(.active) { background: rgba(0, 229, 255, 0.08); color: #eafffb; }
-body.dark-theme .tab-badge { background: rgba(0, 229, 255, 0.08); border-color: rgba(0, 229, 255, 0.35); color: #b8fff2; }
-body.dark-theme .tab-btn.active .tab-badge { background: rgba(0, 255, 68, 0.12); border-color: rgba(0, 255, 68, 0.5); color: #baffcf; }
-
-/* Badges & Chips */
-/* Subject tag-chip = secondary info, kept quiet/muted so it doesn't compete with the title */
-body.dark-theme .tag-chip {
-    background: transparent;
-    border: 1px solid rgba(0, 229, 255, 0.22);
-    color: #5f9999;
-    box-shadow: none;
-}
-/* "Exam Favorite" / "Top Rated" style badges = distinct amber/gold glow to pop out of the cyan sea */
-body.dark-theme .badge {
-    background: rgba(255, 179, 0, 0.08);
-    border: 1px solid #ffb300;
-    color: #ffd479;
-    box-shadow: 0 0 10px rgba(255, 179, 0, 0.25);
-}
-/* Rating / helpful % = kept bright cyan since it's a key decision signal */
-body.dark-theme .helpful-pill {
-    background: transparent;
-    border: 1px solid rgba(0, 229, 255, 0.55);
-    color: #00e5ff;
-    box-shadow: 0 0 8px rgba(0, 229, 255, 0.18);
-}
-body.dark-theme .stars-value { color: #f2fffb; }
-body.dark-theme .stars-count { color: #6fb8b8; }
-
-body.dark-theme .resource-icon {
-    border-color: #00e5ff;
-    color: #00e5ff;
-    background: rgba(0, 229, 255, 0.05);
-}
-
-/* Kebab "more actions" button — otherwise invisible against the dark background */
-body.dark-theme .kebab-btn {
-    background: rgba(0, 229, 255, 0.05);
-    border: 1px solid rgba(0, 229, 255, 0.4);
-    color: #8cd9d9;
-    box-shadow: 0 0 6px rgba(0, 229, 255, 0.12);
-}
-body.dark-theme .kebab-btn:hover,
-body.dark-theme .kebab-btn[aria-expanded="true"] {
-    background: rgba(0, 229, 255, 0.12);
-    border-color: #00e5ff;
-    color: #eafffb;
-    box-shadow: 0 0 14px rgba(0, 229, 255, 0.35);
-}
-body.dark-theme .kebab-menu {
-    background: rgba(0, 5, 10, 0.96);
-    border: 1px solid rgba(0, 229, 255, 0.4);
-    box-shadow: 0 0 18px rgba(0, 229, 255, 0.2);
-}
-body.dark-theme .kebab-item { color: #d8fffa; }
-body.dark-theme .kebab-item:hover { background: rgba(0, 229, 255, 0.1); }
-body.dark-theme .kebab-item.kebab-danger { color: #ff8080; }
-body.dark-theme .kebab-item.kebab-danger:hover { background: rgba(255, 0, 51, 0.12); }
-
-/* Status Pill Glow */
-@keyframes neonPulse {
-    from { box-shadow: 0 0 5px rgba(0, 255, 68, 0.1); border-color: rgba(0, 255, 68, 0.4); }
-    to { box-shadow: 0 0 12px rgba(0, 255, 68, 0.4); border-color: #00ff44; }
-}
-body.dark-theme .page-heading-status {
-    background: rgba(0, 255, 68, 0.05);
-    color: #00ff44;
-    border: 1px solid rgba(0, 255, 68, 0.5);
-    animation: neonPulse 2s infinite alternate ease-in-out;
-}
-body.dark-theme .page-heading-status::before {
-    background: #00ff44;
-    box-shadow: 0 0 8px #00ff44;
-}
-
-body.dark-theme .search-wrap {
-    border-color: transparent;
-    background: transparent;
-}
-body.dark-theme .filter-zone.scrolled .filter-bar {
-    box-shadow: 0 0 25px rgba(0, 229, 255, 0.3);
-    background: rgba(0, 5, 10, 0.95);
-}
-
 
 /* ── PAGE HEADER ─────────────────────────────── */
 .page-header {
@@ -531,9 +151,9 @@ body.dark-theme .filter-zone.scrolled .filter-bar {
     margin-top: 8px;
     padding: 5px 10px;
     border-radius: 999px;
-    background: #e7f0e5;
-    color: #1f4d3c;
-    border: 1px solid #bfd6bd;
+    background: var(--success-soft);
+    color: var(--success);
+    border: 1px solid var(--success);
     font-size: 0.72rem;
     font-weight: 800;
     letter-spacing: 0.04em;
@@ -544,42 +164,41 @@ body.dark-theme .filter-zone.scrolled .filter-bar {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #2f6b3a;
-    box-shadow: 0 0 0 4px rgba(47,107,58,0.14);
+    background: var(--success);
+    box-shadow: 0 0 0 4px rgba(22,121,74,0.14);
 }
 .page-header h1 {
-    font-family: 'Playfair Display', 'Source Serif 4', serif;
     font-weight: 700;
     font-size: clamp(1.7rem, 3.2vw, 2.15rem);
     color: var(--text); letter-spacing: -0.015em; line-height: 1.2;
 }
 .page-header p { color: var(--text-muted); font-size: 0.78rem; margin-top: 2px; font-style: italic; }
 .btn-add {
-    white-space: nowrap; background: linear-gradient(135deg, var(--accent), #2c6650);
-    color: #fffdf8;
+    white-space: nowrap; background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+    color: var(--on-accent);
     border: none; border-radius: var(--r-sm); padding: 7px 13px;
-    font-size: 0.78rem; font-weight: 700; font-family: 'Source Sans 3', sans-serif;
+    font-size: 0.78rem; font-weight: 700;
     cursor: pointer; text-decoration: none;
     display: inline-flex; align-items: center; gap: 5px;
     margin-left: auto;
     transition: opacity .16s, box-shadow .16s, transform .16s; flex-shrink: 0;
 }
-.btn-add:hover { opacity: .92; transform: translateY(-1px); box-shadow: 0 12px 22px rgba(31,77,60,0.28); }
+.btn-add:hover { opacity: .92; transform: translateY(-1px); box-shadow: 0 12px 22px rgba(109,74,255,0.28); }
 .btn-add.cta-login {
-    background: linear-gradient(135deg, #8a3a2a, #6b1f2a);
-    box-shadow: 0 12px 22px rgba(107, 31, 42, 0.24);
+    background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+    box-shadow: 0 12px 22px rgba(109,74,255,0.24);
 }
-.btn-add.cta-login:hover { box-shadow: 0 12px 22px rgba(107, 31, 42, 0.3); }
-.admin-report-panel { margin-bottom:12px; padding:12px 14px; background:#f7ede0; border:1px solid #e0c8a0; border-radius:var(--r-lg); }
+.btn-add.cta-login:hover { box-shadow: 0 12px 22px rgba(109,74,255,0.32); }
+.admin-report-panel { margin-bottom:12px; padding:12px 14px; background: var(--warning-soft); border: 1px solid var(--warning); border-radius:var(--r-lg); }
 .admin-report-heading { display:flex; align-items:center; justify-content:space-between; gap:10px; }
-.admin-report-heading h2 { font-size:.95rem; color:#7a3f1d; font-family: 'Source Serif 4', serif; }
-.admin-report-count { min-width:24px; padding:3px 8px; text-align:center; border-radius:999px; background:#f0dcbb; color:#7a3f1d; font-weight:700; font-size:.75rem; }
+.admin-report-heading h2 { font-size:.95rem; color: var(--warning); }
+.admin-report-count { min-width:24px; padding:3px 8px; text-align:center; border-radius:999px; background: var(--warning-soft); color: var(--warning); font-weight:700; font-size:.75rem; }
 .admin-report-list { display:grid; gap:7px; margin-top:9px; max-height:260px; overflow:auto; }
-.admin-report-item { position:relative; padding:8px 38px 8px 10px; background:#fffdf8; border:1px solid #e0c8a0; border-radius:var(--r-sm); }
-.admin-report-dismiss { position:absolute; top:7px; right:8px; width:22px; height:22px; border:1px solid #e0c8a0; border-radius:50%; background:#f7ede0; color:#7a3f1d; cursor:pointer; line-height:18px; font-size:14px; }
-.admin-report-dismiss:hover { background:#f6dede; border-color:#dba9a9; color:#8c2b2b; }
+.admin-report-item { position:relative; padding:8px 38px 8px 10px; background: var(--surface); border: 1px solid var(--warning); border-radius:var(--r-sm); }
+.admin-report-dismiss { position:absolute; top:7px; right:8px; width:22px; height:22px; border: 1px solid var(--warning); border-radius:50%; background: var(--warning-soft); color: var(--warning); cursor:pointer; line-height:18px; font-size:14px; }
+.admin-report-dismiss:hover { background: var(--danger-soft); border-color: var(--danger); color: var(--danger); }
 .admin-report-item strong { font-size:.82rem; }
-.admin-report-meta, .admin-report-item small { display:block; color:#7a3f1d; font-size:.7rem; margin-top:3px; }
+.admin-report-meta, .admin-report-item small { display:block; color: var(--warning); font-size:.7rem; margin-top:3px; }
 .admin-report-item p { color:var(--text-muted); font-size:.78rem; margin-top:5px; word-break:break-word; }
 
 /* ── TOAST FLASH MESSAGES ─────────────────────── */
@@ -596,16 +215,16 @@ body.dark-theme .filter-zone.scrolled .filter-bar {
     box-shadow: 0 14px 30px var(--shadow-warm);
     animation: toastIn .22s ease;
 }
-.resource-flash-success { color:#1f4d3c; background:#eef5ec; border-color:#bfd6bd; }
-.resource-flash-error { color:#7a2323; background:#faf0ee; border-color:#e0bcb4; }
+.resource-flash-success { color: var(--success); background: var(--success-soft); border-color: var(--success); }
+.resource-flash-error { color: var(--danger); background: var(--danger-soft); border-color: var(--danger); }
 .resource-flash-close {
     position: absolute; top: 7px; right: 7px;
     width: 20px; height: 20px; border-radius: 50%;
-    border: none; background: rgba(44,33,21,0.08); color: inherit;
+    border: none; background: rgba(0,0,0,0.08); color: inherit;
     cursor: pointer; font-size: .68rem; line-height: 1;
     display: flex; align-items: center; justify-content: center;
 }
-.resource-flash-close:hover { background: rgba(44,33,21,0.14); }
+.resource-flash-close:hover { background: rgba(0,0,0,0.14); }
 @keyframes toastIn { from { opacity:0; transform: translateX(16px); } to { opacity:1; transform: translateX(0); } }
 @keyframes toastOut { from { opacity:1; transform: translateX(0); } to { opacity:0; transform: translateX(16px); } }
 
@@ -631,24 +250,18 @@ body.dark-theme .filter-zone.scrolled .filter-bar {
 .page-header .filter-zone::before { display: none; }
 .page-header .filter-bar {
     justify-content: flex-start;
-    background: linear-gradient(135deg, #f3ead8 0%, #eee3d1 100%);
-    border-color: #ddccae;
-    box-shadow: inset 0 0 0 1px rgba(31,77,60,0.12);
+    background: var(--surface-2);
+    border-color: var(--border);
+    box-shadow: none;
 }
 .page-header .search-wrap,
 .page-header .filter-select {
-    background: #fffdf8;
-    border-color: #c9b487;
-}
-.page-header .result-pill,
-.page-header .active-filter {
-    background: #e7ded0;
-    border-color: #ddccae;
-    color: #3d3018;
+    background: var(--surface);
+    border-color: var(--border-md);
 }
 .tab-btn {
     flex: 1; background: transparent; border: none;
-    color: var(--text-muted); font-family: 'Source Sans 3', sans-serif;
+    color: var(--text-muted);
     font-size: 0.82rem; font-weight: 600; padding: 7px 10px;
     border-radius: 6px; cursor: pointer;
     display: flex; align-items: center; justify-content: center; gap: 6px;
@@ -656,8 +269,8 @@ body.dark-theme .filter-zone.scrolled .filter-bar {
 }
 .tab-btn.active {
     background: var(--surface-3);
-    color: #1f4d3c;
-    box-shadow: inset 0 0 0 1px rgba(31,77,60,0.25);
+    color: var(--accent);
+    box-shadow: inset 0 0 0 1px var(--accent-border);
 }
 .tab-btn:hover:not(.active) { color: var(--text); background: var(--surface-2); }
 .tab-badge {
@@ -667,7 +280,7 @@ body.dark-theme .filter-zone.scrolled .filter-bar {
 }
 .tab-btn.active .tab-badge {
     background: var(--accent-soft); color: var(--accent);
-    border-color: rgba(31,77,60,0.3);
+    border-color: var(--accent-border);
 }
 
 /* ── STICKY FILTER ZONE ──────────────────────── */
@@ -698,36 +311,26 @@ body.dark-theme .filter-zone.scrolled .filter-bar {
 .filter-input, .filter-select {
     background: transparent; border: 1px solid var(--border-md);
     color: var(--text); border-radius: var(--r-sm); padding: 5px 9px;
-    font-size: 0.8rem; font-family: 'Source Sans 3', sans-serif; outline: none;
+    font-size: 0.8rem; outline: none;
     transition: border-color .16s, box-shadow .16s; min-width: 0;
 }
 .filter-input { flex: 1 1 auto; border: none; padding: 0; }
 .filter-select { flex: 0 1 148px; background: var(--surface-2); }
 .filter-input::placeholder { color: var(--text-dim); }
 .filter-input:focus, .filter-select:focus {
-    border-color: rgba(31,77,60,0.5);
+    border-color: var(--accent);
     box-shadow: 0 0 0 3px var(--accent-soft);
 }
 .search-wrap:focus-within {
-    border-color: rgba(31,77,60,0.5);
+    border-color: var(--accent);
     box-shadow: 0 0 0 3px var(--accent-soft);
 }
 .search-kbd {
     flex-shrink: 0; font-size: .68rem; font-weight: 700; color: var(--text-dim);
     border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px;
-    background: var(--surface-2); font-family: 'Source Sans 3', sans-serif;
+    background: var(--surface-2);
 }
 .filter-select option { background: var(--surface-2); }
-.result-pill {
-    font-size: 0.74rem; font-weight: 600; color: var(--text-muted);
-    padding: 3px 9px; background: var(--surface-2);
-    border: 1px solid var(--border); border-radius: 999px; white-space: nowrap; flex-shrink: 0;
-}
-.active-filter {
-    font-size: 0.74rem; font-weight: 600; color: var(--text-dim);
-    padding: 3px 10px; border-radius: 999px; border: 1px dashed var(--border);
-    background: var(--surface-2); white-space: nowrap;
-}
 
 /* ── TAB PANELS ──────────────────────────────── */
 .tab-panel { display: none; }
@@ -744,7 +347,7 @@ body.dark-theme .filter-zone.scrolled .filter-bar {
     border: 1px solid var(--border);
     border-radius: var(--r);
     transition: transform .22s cubic-bezier(.2,.8,.3,1), box-shadow .22s ease, background .22s ease, border-color .22s ease;
-    box-shadow: 0 1px 2px rgba(66,46,20,0.06), 0 12px 24px var(--shadow-warm);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06), 0 12px 24px var(--shadow-warm);
 }
 .resource-item::before {
     content: '';
@@ -759,7 +362,7 @@ body.dark-theme .filter-zone.scrolled .filter-bar {
     border-color: var(--border-md);
     background: var(--hover);
     transform: translateY(-4px);
-    box-shadow: 0 4px 10px rgba(66,46,20,0.10), 0 22px 38px var(--shadow-warm);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.10), 0 22px 38px var(--shadow-warm);
 }
 .resource-item:hover::before { opacity: 1; transform: translateX(0); }
 
@@ -768,7 +371,7 @@ body.dark-theme .filter-zone.scrolled .filter-bar {
 .resource-icon {
     width: 30px; height: 30px; border-radius: 8px;
     display: inline-flex; align-items: center; justify-content: center;
-    background: var(--surface-3); border: 1px solid #c9b487;
+    background: var(--surface-3); border: 1px solid var(--border-md);
     color: var(--accent); flex-shrink: 0;
 }
 .resource-icon svg { width: 15px; height: 15px; }
@@ -777,7 +380,6 @@ body.dark-theme .filter-zone.scrolled .filter-bar {
 .resource-title {
     font-weight: 700; font-size: 1.06rem; color: var(--text);
     line-height: 1.35; word-break: break-word; letter-spacing: -0.005em;
-    font-family: 'Source Serif 4', serif;
 }
 .badge-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 8px; }
 .tag-chip {
@@ -791,13 +393,13 @@ body.dark-theme .filter-zone.scrolled .filter-bar {
     font-size: 0.7rem; font-weight: 800;
     padding: 3px 9px; border-radius: 999px; border: 1px solid transparent; white-space: nowrap;
     letter-spacing: 0.01em;
-    box-shadow: 0 1px 3px rgba(66,46,20,0.10);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.10);
 }
 .badge svg { width: 12px; height: 12px; }
-.badge-amber  { background: #f6e6c8; color: #6e4210; border-color: #d9a94f; }
-.badge-blue   { background: #d9e6da; color: #17392c; border-color: #8fb590; }
-.badge-green  { background: #d3e7cf; color: #17392c; border-color: #86bb83; }
-.badge-purple { background: #e9d6da; color: #591824; border-color: #c790a0; }
+.badge-amber  { background: var(--warning-soft); color: var(--warning); border-color: var(--warning); }
+.badge-blue   { background: var(--info-soft); color: var(--info); border-color: var(--info); }
+.badge-green  { background: var(--success-soft); color: var(--success); border-color: var(--success); }
+.badge-purple { background: var(--accent-soft); color: var(--accent); border-color: var(--accent-border); }
 
 .resource-meta-row {
     display: flex; align-items: center; flex-wrap: wrap; gap: 13px; font-size: 0.78rem;
@@ -805,7 +407,7 @@ body.dark-theme .filter-zone.scrolled .filter-bar {
 }
 .stars-row { display: inline-flex; align-items: center; gap: 1px; }
 .star-ic { width: 13px; height: 13px; }
-.star-ic.filled { color: #b8792a; }
+.star-ic.filled { color: var(--warning); }
 .star-ic.empty { color: var(--border-md); }
 .stars-value { margin-left: 5px; font-weight: 700; color: var(--text); }
 .stars-count { font-weight: 500; color: var(--text-dim); }
@@ -814,10 +416,10 @@ body.dark-theme .filter-zone.scrolled .filter-bar {
     font-size: 0.74rem; letter-spacing: 0.01em;
 }
 
-.helpful-pill { display: inline-flex; align-items: center; gap: 4px; font-weight: 700; padding: 3px 10px; border-radius: 999px; font-size: 0.72rem; box-shadow: 0 1px 3px rgba(66,46,20,0.08); }
-.pill-green { background: #d3e7cf; color: #17392c; }
-.pill-amber { background: #f6e6c8; color: #6e4210; }
-.pill-red   { background: #f0d4d0; color: #6e1e1e; }
+.helpful-pill { display: inline-flex; align-items: center; gap: 4px; font-weight: 700; padding: 3px 10px; border-radius: 999px; font-size: 0.72rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.pill-green { background: var(--success-soft); color: var(--success); }
+.pill-amber { background: var(--warning-soft); color: var(--warning); }
+.pill-red   { background: var(--danger-soft); color: var(--danger); }
 
 .views-inline { display: inline-flex; align-items: center; gap: 4px; color: var(--text-dim); font-weight: 600; margin-left: auto; }
 .views-inline svg { width: 14px; height: 14px; }
@@ -833,23 +435,20 @@ body.dark-theme .filter-zone.scrolled .filter-bar {
 .act {
     display: inline-flex; align-items: center;
     padding: 7px 14px; border-radius: 8px;
-    font-size: 0.79rem; font-weight: 700; font-family: 'Source Sans 3', sans-serif;
+    font-size: 0.79rem; font-weight: 700;
     cursor: pointer; text-decoration: none; border: 1px solid transparent;
     white-space: nowrap; transition: background .15s, border-color .15s, color .15s, box-shadow .15s, transform .15s; line-height: 1.5;
     gap: 6px; letter-spacing: 0.01em;
 }
 .act:active { transform: translateY(1px); }
 .act svg { width: 14px; height: 14px; }
-.act-open    { color: #fffdf8;  background: linear-gradient(135deg, var(--accent), #2c6650);  border-color: transparent; box-shadow: 0 4px 10px rgba(31,77,60,0.22); }
-.act-open:hover  { filter: brightness(1.07); box-shadow: 0 10px 20px rgba(31,77,60,0.32); transform: translateY(-1px); }
-.act-rate { color: #6e4210; background: #f6e6c8; border-color: #d9a94f; }
-.act-rate:hover { background: #efd9a6; border-color: #b8792a; box-shadow: 0 6px 14px rgba(184,121,42,0.24); transform: translateY(-1px); }
-.act-share { color: #174f63; background: #dff1f5; border-color: #79bdc9; }
-.act-share:hover { background: #c9e8ee; border-color: #368e9d; box-shadow: 0 6px 14px rgba(54,142,157,0.2); transform: translateY(-1px); }
-.act-share.shared { color: #14532d; background: #d9f4df; border-color: #78c98c; }
-body.dark-theme .act-share { color: #eaffff; background: rgba(0, 229, 255, 0.13); border-color: #00b8cc; box-shadow: 0 0 7px rgba(0, 229, 255, 0.16); }
-body.dark-theme .act-share:hover { color: #ffffff; background: rgba(0, 229, 255, 0.25); border-color: #00e5ff; box-shadow: 0 0 14px rgba(0, 229, 255, 0.35); }
-body.dark-theme .act-share.shared { color: #d9ffe4; background: rgba(0, 255, 68, 0.15); border-color: #00ff44; }
+.act-open    { color: var(--on-accent);  background: linear-gradient(135deg, var(--accent), var(--accent-hover));  border-color: transparent; box-shadow: 0 4px 10px rgba(109,74,255,0.22); }
+.act-open:hover  { filter: brightness(1.07); box-shadow: 0 10px 20px rgba(109,74,255,0.32); transform: translateY(-1px); }
+.act-rate { color: var(--warning); background: var(--warning-soft); border-color: var(--warning); }
+.act-rate:hover { filter: brightness(0.96); box-shadow: 0 6px 14px rgba(154,95,5,0.24); transform: translateY(-1px); }
+.act-share { color: var(--info); background: var(--info-soft); border-color: var(--info); }
+.act-share:hover { filter: brightness(0.96); box-shadow: 0 6px 14px rgba(12,106,158,0.2); transform: translateY(-1px); }
+.act-share.shared { color: var(--success); background: var(--success-soft); border-color: var(--success); }
 
 /* ── ADMIN "MORE" KEBAB MENU ─────────────────── */
 .actions-more { position: relative; flex-shrink: 0; }
@@ -858,15 +457,15 @@ body.dark-theme .act-share.shared { color: #d9ffe4; background: rgba(0, 255, 68,
     border: 1px solid var(--border); background: var(--surface); color: var(--text-muted);
     display: inline-flex; align-items: center; justify-content: center; cursor: pointer;
     transition: background .15s, color .15s, border-color .15s, box-shadow .15s;
-    box-shadow: 0 1px 2px rgba(66,46,20,0.06);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.06);
 }
 .kebab-btn svg { width: 16px; height: 16px; }
-.kebab-btn:hover, .kebab-btn[aria-expanded="true"] { background: var(--surface-3); color: var(--accent); border-color: rgba(31,77,60,0.4); box-shadow: 0 4px 10px rgba(31,77,60,0.14); }
+.kebab-btn:hover, .kebab-btn[aria-expanded="true"] { background: var(--surface-3); color: var(--accent); border-color: rgba(109,74,255,0.4); box-shadow: 0 4px 10px rgba(109,74,255,0.14); }
 .kebab-menu {
     display: none; flex-direction: column; gap: 2px;
     position: absolute; right: 0; top: calc(100% + 6px);
     background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
-    box-shadow: 0 4px 8px rgba(66,46,20,0.10), 0 20px 38px var(--shadow-warm); min-width: 162px; padding: 6px; z-index: 60;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.10), 0 20px 38px var(--shadow-warm); min-width: 162px; padding: 6px; z-index: 60;
 }
 .kebab-menu.open { display: flex; }
 .kebab-menu form { margin: 0; width: 100%; }
@@ -878,7 +477,7 @@ body.dark-theme .act-share.shared { color: #d9ffe4; background: rgba(0, 255, 68,
 }
 .kebab-item svg { width: 14px; height: 14px; flex-shrink: 0; }
 .kebab-item:hover { background: var(--surface-2); }
-.kebab-item.kebab-danger { color: #8c2b2b; }
+.kebab-item.kebab-danger { color: var(--danger); }
 .kebab-item.kebab-danger:hover { background: var(--danger-soft); }
 
 /* ── PAGINATION BAR ──────────────────────────── */
@@ -893,14 +492,14 @@ body.dark-theme .act-share.shared { color: #d9ffe4; background: rgba(0, 255, 68,
 .page-controls { display: flex; align-items: center; gap: 3px; flex-wrap: wrap; }
 .pg-btn {
     background: var(--surface); border: 1px solid var(--border);
-    color: var(--text-muted); font-family: 'Source Sans 3', sans-serif;
+    color: var(--text-muted);
     font-size: 0.76rem; font-weight: 600; padding: 4px 9px;
     border-radius: 999px; cursor: pointer;
     transition: background .14s, color .14s, border-color .14s;
     min-width: 30px; text-align: center;
 }
 .pg-btn:hover:not(:disabled):not(.active) { background: var(--surface-2); color: var(--text); }
-.pg-btn.active { background: var(--surface-3); color: #1f4d3c; border-color: #c9b487; cursor: default; }
+.pg-btn.active { background: var(--surface-3); color: var(--accent); border-color: var(--border-md); cursor: default; }
 .pg-btn:disabled { opacity: .32; cursor: not-allowed; }
 .pg-btn.arrow { font-size: 0.88rem; padding: 4px 8px; }
 .pg-ellipsis { color: var(--text-dim); font-size: 0.76rem; padding: 0 2px; user-select: none; }
@@ -909,10 +508,10 @@ body.dark-theme .act-share.shared { color: #d9ffe4; background: rgba(0, 255, 68,
 .page-info { font-size: 0.73rem; color: var(--text-muted); white-space: nowrap; }
 .perpage-select {
     background: var(--surface); border: 1px solid var(--border);
-    color: var(--text-muted); font-family: 'Source Sans 3', sans-serif;
+    color: var(--text-muted);
     font-size: 0.73rem; padding: 3px 6px; border-radius: 5px; outline: none; cursor: pointer;
 }
-.perpage-select:focus { border-color: rgba(31,77,60,0.35); }
+.perpage-select:focus { border-color: var(--accent); }
 .perpage-select option { background: var(--surface-2); }
 
 /* ── EMPTY / NO-RESULTS ──────────────────────── */
@@ -920,13 +519,13 @@ body.dark-theme .act-share.shared { color: #d9ffe4; background: rgba(0, 255, 68,
     text-align: center; padding: 32px 20px; color: var(--text-dim);
     font-size: 0.82rem; border: 1px dashed var(--border);
     border-radius: var(--r); background: var(--surface); margin-top: 4px;
-    box-shadow: 0 8px 18px rgba(66,46,20,0.10);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.10);
 }
 .empty-state svg { display: block; margin: 0 auto 8px; opacity: .28; }
 .no-results-msg {
     display: none; text-align: center; padding: 28px; color: var(--text-muted);
     font-size: 0.82rem; border: 1px dashed var(--border); border-radius: var(--r); margin-top: 4px;
-    box-shadow: 0 8px 18px rgba(66,46,20,0.10);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.10);
 }
 
 /* ── SUBJECT GRID ───────────────────────────── */
@@ -936,7 +535,7 @@ body.dark-theme .act-share.shared { color: #d9ffe4; background: rgba(0, 255, 68,
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--r-lg);
-    box-shadow: 0 1px 2px rgba(66,46,20,0.05), 0 12px 24px var(--shadow-warm);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05), 0 12px 24px var(--shadow-warm);
     position: relative;
 }
 .subject-zone h3 {
@@ -944,7 +543,6 @@ body.dark-theme .act-share.shared { color: #d9ffe4; background: rgba(0, 255, 68,
     color: var(--text-muted);
     margin-bottom: 9px;
     font-weight: 700;
-    font-family: 'Source Serif 4', serif;
     letter-spacing: 0.01em;
     display: flex;
     align-items: center;
@@ -979,7 +577,7 @@ body.dark-theme .act-share.shared { color: #d9ffe4; background: rgba(0, 255, 68,
     align-items: center;
     justify-content: center;
     gap: 8px;
-    box-shadow: 0 1px 2px rgba(66,46,20,0.05);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     flex: 0 0 auto;
     width: max-content;
     min-width: 82px;
@@ -993,19 +591,44 @@ body.dark-theme .act-share.shared { color: #d9ffe4; background: rgba(0, 255, 68,
 .subject-card.active {
     border-color: var(--accent);
     background: var(--accent-soft);
-    color: #1f4d3c;
-    box-shadow: 0 4px 10px rgba(31,77,60,0.18);
+    color: var(--accent);
+    box-shadow: 0 4px 10px rgba(109,74,255,0.18);
 }
-.subject-card small {
-    font-size: 0.85rem;
-    color: var(--text-dim);
-    font-weight: 700;
+.subject-card .subject-check {
+    display: inline-flex;
+    align-items: center;
+    color: var(--accent);
+    flex-shrink: 0;
 }
-.subject-card.active small { color: var(--accent); }
+.subject-card .subject-check svg { width: 14px; height: 14px; }
+
+/* ── SUBJECT GATE ────────────────────────────────
+   Shown instead of the resource list until the
+   student picks a subject (or explicitly "All
+   Subjects") — avoids dumping every resource for
+   the program into one long, unfiltered list. ── */
+.subject-gate {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+    margin: 10px 0;
+    padding: 48px 24px;
+    background: var(--surface);
+    border: 1px dashed var(--border-md);
+    border-radius: var(--r-lg);
+    color: var(--text-muted);
+}
+.subject-gate svg { width: 30px; height: 30px; color: var(--text-dim); }
+.subject-gate h3 { font-size: 0.98rem; color: var(--text); }
+.subject-gate p { max-width: 44ch; font-size: 0.82rem; line-height: 1.55; }
+.tab-panel.awaiting-subject .subject-gate { display: flex; }
+.tab-panel.awaiting-subject .resource-results { display: none; }
 
 /* ── PREVIEW MODAL ───────────────────────────── */
 .preview-modal {
-    position: fixed; inset: 0; background: rgba(44,33,21,0.5);
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
     display: none; align-items: center; justify-content: center;
     z-index: 1000; padding: 14px; backdrop-filter: blur(5px);
 }
@@ -1014,7 +637,7 @@ body.dark-theme .act-share.shared { color: #d9ffe4; background: rgba(0, 255, 68,
     width: min(960px, 96vw); height: min(84vh, 750px);
     background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--r-lg); display: flex; flex-direction: column;
-    box-shadow: 0 20px 60px rgba(44,33,21,0.32); overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.32); overflow: hidden;
 }
 .preview-header {
     display: flex; align-items: center; justify-content: space-between;
@@ -1032,15 +655,15 @@ body.dark-theme .act-share.shared { color: #d9ffe4; background: rgba(0, 255, 68,
     display: flex; align-items: center; justify-content: center; flex-shrink: 0;
     transition: background .14s, color .14s;
 }
-.preview-close:hover { background: var(--danger-soft); color: #8c2b2b; }
-.preview-frame { flex: 1; border: none; width: 100%; background: #fffdf8; }
+.preview-close:hover { background: var(--danger-soft); color: var(--danger); }
+.preview-frame { flex: 1; border: none; width: 100%; background: var(--surface); }
 .preview-modal.feedback-only .preview-panel { height: auto; max-height: min(84vh, 750px); }
 .preview-modal.feedback-only .preview-frame { display: none; }
 .preview-modal.feedback-only .feedback-strip { border-top: 0; }
 .feedback-strip { padding: 8px 12px; border-top: 1px solid var(--border); background: var(--surface-2); display: flex; align-items: center; gap: 7px; flex-wrap: wrap; font-size: .76rem; }
 .feedback-strip button { border: 1px solid var(--border); background: var(--surface); color: var(--text-muted); border-radius: 6px; padding: 4px 7px; cursor: pointer; }
 .feedback-strip button.selected { color: var(--accent); border-color: var(--accent); }
-.feedback-submit { background: var(--accent) !important; color: #fffdf8 !important; border-color: var(--accent) !important; }
+.feedback-submit { background: var(--accent) !important; color: var(--on-accent) !important; border-color: var(--accent) !important; }
 .feedback-message { color: var(--text-muted); }
 .feedback-review { flex: 1 0 100%; min-height: 44px; max-height: 90px; resize: vertical; border: 1px solid var(--border); border-radius: 6px; padding: 7px; font: inherit; font-size: .76rem; color: var(--text); background: var(--surface); }
 .feedback-review::placeholder { color: var(--text-dim); }
@@ -1050,10 +673,10 @@ body.dark-theme .act-share.shared { color: #d9ffe4; background: rgba(0, 255, 68,
 .review-helpful.voted { color: var(--accent) !important; border-color: var(--accent) !important; }
 .feedback-tags { flex: 1 0 100%; display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
 .feedback-tags button { font-size: .7rem; padding: 4px 7px; }
-.feedback-tags button.positive { border-color: #bfd6bd; color: #1f4d3c; background: #eef5ec; }
-.feedback-tags button.negative { border-color: #e0bcb4; color: #7a2323; background: #faf0ee; }
-.feedback-tags button.selected.positive { color: #1f4d3c; border-color: #2f6b3a; background: #dcead9; }
-.feedback-tags button.selected.negative { color: #7a2323; border-color: #8c2b2b; background: #f3dbd8; }
+.feedback-tags button.positive { border-color: var(--success); color: var(--success); background: var(--success-soft); }
+.feedback-tags button.negative { border-color: var(--danger); color: var(--danger); background: var(--danger-soft); }
+.feedback-tags button.selected.positive { color: var(--success); border-color: var(--success); background: var(--success-soft); }
+.feedback-tags button.selected.negative { color: var(--danger); border-color: var(--danger); background: var(--danger-soft); }
 .report-zone { flex: 1 0 100%; border-top: 1px solid var(--border); padding-top: 6px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 .report-zone select, .report-zone input { border: 1px solid var(--border); border-radius: 6px; padding: 5px 7px; font: inherit; font-size: .72rem; color: var(--text); background: var(--surface); }
 .report-zone input { flex: 1 1 180px; }
@@ -1094,31 +717,10 @@ body.dark-theme .act-share.shared { color: #d9ffe4; background: rgba(0, 255, 68,
     }
 }
     </style>
-</head>
-<body>
-<div class="page">
+{% endblock %}
 
-<!-- TOP NAV -->
-<nav class="top-nav">
-    <a href="{{ url_for('course_view') }}">Dashboard</a>
-    <a href="{{ url_for('general_resources_page') }}">General Resources</a>
-    {% if admin_mode %}
-        <a href="{{ url_for('admin_resource_subjects') }}">+ Add Subject</a>
-    {% endif %}
-    {% if admin_mode %}
-        <a href="{{ url_for('admin_add_general_resource') }}">+ Add Resource</a>
-        <a href="{{ url_for('admin_pending_resource_submissions') }}">Pending Submissions</a>
-    {% endif %}
-    {% if current_user %}
-        <a href="{{ url_for('submit_general_resource') }}">Add Your Notes</a>
-        <a href="{{ url_for('my_resource_submissions') }}">Your Contributions</a>
-        <a href="{{ url_for('user_logout') }}">Logout</a>
-    {% else %}
-        <a class="cta-link" href="{{ url_for('google_login', next=request.path) }}">Login to Add Notes</a>
-    {% endif %}
-    <button class="contributors-link" id="topContributorsButton" type="button" aria-haspopup="dialog" aria-controls="contributorsModal" onclick="openContributors()">Top Contributors</button>
-    <button class="theme-toggle" id="resourceThemeToggle" type="button" aria-label="Toggle theme">🌙 Dark mode</button>
-</nav>
+{% block content %}
+<div class="page" data-reveal-page>
 
 <!-- PAGE HEADER -->
 <header class="page-header">
@@ -1129,6 +731,13 @@ body.dark-theme .act-share.shared { color: #d9ffe4; background: rgba(0, 255, 68,
             <span class="page-heading-status">Admin Active</span>
         {% endif %}
     </div>
+    <button class="contributors-link" id="topContributorsButton" type="button"
+            aria-haspopup="dialog" aria-controls="contributorsModal" onclick="openContributors()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;">
+            <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4a2 2 0 0 0 2 4M17 6h3a2 2 0 0 1-2 4"/>
+        </svg>
+        Top Contributors
+    </button>
     <div class="tab-strip" role="tablist">
         <button class="tab-btn" role="tab" aria-selected="false"
             aria-controls="panel-diploma" id="tab-diploma"
@@ -1167,7 +776,7 @@ body.dark-theme .act-share.shared { color: #d9ffe4; background: rgba(0, 255, 68,
                     <circle cx="11" cy="11" r="7"></circle>
                     <path d="M21 21l-3.5-3.5"></path>
                 </svg>
-                <input class="filter-input" id="resourceSearch" type="text"
+                <input class="filter-input" id="resourceSearch" type="text" aria-label="Search resources by title or tag"
                        placeholder="Search title or tag" autocomplete="off">
                 <span class="search-kbd">Ctrl K</span>
             </div>
@@ -1187,8 +796,6 @@ body.dark-theme .act-share.shared { color: #d9ffe4; background: rgba(0, 255, 68,
                 <option value="latest" {% if resource_sort == 'latest' %}selected{% endif %}>Latest</option>
                 <option value="most-viewed" {% if resource_sort == 'most-viewed' %}selected{% endif %}>Most Viewed</option>
             </select>
-            <span class="result-pill" id="resultCount">- items</span>
-            <span class="active-filter" id="activeFilters">All resources</span>
         </div>
     </div>
 </header>
@@ -1240,6 +847,14 @@ body.dark-theme .act-share.shared { color: #d9ffe4; background: rgba(0, 255, 68,
         <div class="subject-grid" id="subject-grid-diploma"></div>
     </div>
     {% if diploma_resources %}
+        <div class="subject-gate" id="gate-diploma">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
+            <h3>Choose a subject</h3>
+            <p>Pick a subject above to see its resources, or select <strong>All Subjects</strong> to browse everything in Diploma.</p>
+        </div>
+        <div class="resource-results" id="results-diploma">
         <ul class="resource-list" id="list-diploma">
             {% for resource in diploma_resources %}{% set lv = resource[2] or '' %}
             <li class="resource-item"
@@ -1352,6 +967,7 @@ body.dark-theme .act-share.shared { color: #d9ffe4; background: rgba(0, 255, 68,
         </ul>
         <p class="no-results-msg" id="no-diploma">No resources match your search.</p>
         <div class="pagination" id="pg-diploma" style="display:none"></div>
+        </div>
     {% else %}
         <div class="empty-state">
             <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -1370,6 +986,14 @@ body.dark-theme .act-share.shared { color: #d9ffe4; background: rgba(0, 255, 68,
         <div class="subject-grid" id="subject-grid-degree"></div>
     </div>
     {% if degree_resources %}
+        <div class="subject-gate" id="gate-degree">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
+            <h3>Choose a subject</h3>
+            <p>Pick a subject above to see its resources, or select <strong>All Subjects</strong> to browse everything in Degree.</p>
+        </div>
+        <div class="resource-results" id="results-degree">
         <ul class="resource-list" id="list-degree">
             {% for resource in degree_resources %}{% set lv = resource[2] or '' %}
             <li class="resource-item"
@@ -1482,6 +1106,7 @@ body.dark-theme .act-share.shared { color: #d9ffe4; background: rgba(0, 255, 68,
         </ul>
         <p class="no-results-msg" id="no-degree">No resources match your search.</p>
         <div class="pagination" id="pg-degree" style="display:none"></div>
+        </div>
     {% else %}
         <div class="empty-state">
             <svg width="26" height="26" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -1559,14 +1184,17 @@ body.dark-theme .act-share.shared { color: #d9ffe4; background: rgba(0, 255, 68,
                     <option value="incorrect">Incorrect information</option>
                     <option value="other">Other</option>
                 </select>
-                <input id="reportDetails" type="text" maxlength="300" placeholder="Optional details" style="display:none">
+                <input id="reportDetails" type="text" maxlength="300" aria-label="Report details"
+                       placeholder="Optional details" style="display:none">
                 <button id="reportSubmit" type="button" class="feedback-submit" onclick="submitResourceReport()" style="display:none">Send report</button>
                 <span id="reportMessage" class="feedback-message"></span>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block page_js %}
 <script>
 /* ════════════════════════════════════════════════
    PAGINATION ENGINE
@@ -1607,7 +1235,6 @@ function renderPage(id) {
         item.style.display = pageSet.has(item) ? '' : 'none';
     });
     renderPagination(id);
-    updateResultCount();
 }
 
 function renderPagination(id) {
@@ -1670,8 +1297,6 @@ function changePerPage(id, val) {
 const searchInput = document.getElementById('resourceSearch');
 const subjectFilter = document.getElementById('subjectFilter');
 const tagFilter   = document.getElementById('tagFilter');
-const resultCount = document.getElementById('resultCount');
-const activeFilters = document.getElementById('activeFilters');
 const subjectsByProgram = {{ subjects_by_program | tojson }};
 const hasUnassigned = {{ has_unassigned | tojson }};
 
@@ -1692,7 +1317,6 @@ function applyFilters() {
         if (noMsg) noMsg.style.display = (allItems(id).length > 0 && state[id].filtered.length === 0) ? 'block' : 'none';
         renderPage(id);
     });
-    updateActiveFilters();
     const active = document.querySelector('.tab-panel.active');
     if (active) {
         const program = active.id.replace('panel-', '');
@@ -1700,39 +1324,54 @@ function applyFilters() {
     }
 }
 
-function updateResultCount() {
+function activeProgram() {
     const active = document.querySelector('.tab-panel.active');
-    if (!active) return;
-    const id = active.id.replace('panel-', '');
-    const n  = state[id].filtered.length;
-    resultCount.textContent = n + ' item' + (n === 1 ? '' : 's');
+    return active ? active.id.replace('panel-', '') : 'degree';
 }
 
-function updateActiveFilters() {
-    const q = (searchInput.value || '').trim();
-    const t = (tagFilter.value  || '').trim();
-    const s = (subjectFilter.value || '').trim();
-    const parts = [];
-    if (q) parts.push('Search: ' + q);
-    if (t) parts.push('Tag: ' + t);
-    if (s) {
-        const current = subjectFilter.options[subjectFilter.selectedIndex];
-        if (current) parts.push('Subject: ' + current.textContent);
-    }
-    activeFilters.textContent = parts.length ? parts.join(' | ') : 'All resources';
+// Typing a search or picking a tag is just as much an explicit "show me
+// results now" action as clicking a subject card, so it should lift the
+// gate too (scoped to whatever subject is currently selected, "All
+// Subjects" by default).
+function revealResultsAndFilter() {
+    const program = activeProgram();
+    subjectChosen[program] = true;
+    updateSubjectGate(program);
+    applyFilters();
 }
 
 let searchDebounceTimer = null;
 searchInput.addEventListener('input', () => {
     clearTimeout(searchDebounceTimer);
-    searchDebounceTimer = setTimeout(applyFilters, 150);
+    searchDebounceTimer = setTimeout(revealResultsAndFilter, 150);
 });
-subjectFilter.addEventListener('change', applyFilters);
-tagFilter.addEventListener('change', applyFilters);
+subjectFilter.addEventListener('change', () => {
+    chooseSubject(activeProgram(), subjectFilter.value);
+});
+tagFilter.addEventListener('change', revealResultsAndFilter);
 
 /* ════════════════════════════════════════════════
    TAB SWITCHING
 ════════════════════════════════════════════════ */
+// Tracks whether the student has made an explicit subject choice (including
+// "All Subjects") for each program tab. Until they have, the resource list
+// stays hidden behind a "choose a subject" prompt instead of dumping every
+// resource for the program onto the page at once.
+const subjectChosen = { diploma: false, degree: false };
+
+function updateSubjectGate(name) {
+    const panel = document.getElementById('panel-' + name);
+    if (panel) panel.classList.toggle('awaiting-subject', !subjectChosen[name]);
+}
+
+function chooseSubject(program, subjectId) {
+    subjectFilter.value = subjectId || '';
+    subjectChosen[program] = true;
+    updateSubjectGate(program);
+    applyFilters();
+    renderSubjectGrid(program);
+}
+
 function switchTab(name) {
     document.querySelectorAll('.tab-btn').forEach(b => {
         const on = b.id === 'tab-' + name;
@@ -1742,18 +1381,23 @@ function switchTab(name) {
     document.querySelectorAll('.tab-panel').forEach(p =>
         p.classList.toggle('active', p.id === 'panel-' + name));
     refreshSubjectOptions(name);
-    applyFilters();
     renderSubjectGrid(name);
+    updateSubjectGate(name);
+    if (subjectChosen[name]) {
+        applyFilters();
+    }
 }
 
 function saveResourceViewState() {
     try {
         const active = document.querySelector('.tab-panel.active');
+        const program = active ? active.id.replace('panel-', '') : 'degree';
         sessionStorage.setItem('mh_resource_view_state', JSON.stringify({
-            program: active ? active.id.replace('panel-', '') : 'degree',
+            program,
             subject: subjectFilter.value || '',
             tag: tagFilter.value || '',
-            search: searchInput.value || ''
+            search: searchInput.value || '',
+            chosen: !!subjectChosen[program]
         }));
     } catch (_) {}
 }
@@ -1772,10 +1416,21 @@ function restoreResourceViewState() {
         : (saved && (saved.program === 'diploma' || saved.program === 'degree') ? saved.program : 'degree');
     searchInput.value = saved && saved.search ? saved.search : '';
     tagFilter.value = saved && saved.tag ? saved.tag : '';
+
+    // A shared link (even "All Subjects", which omits subject_id) or a
+    // previously-made choice restored from this session both count as an
+    // explicit choice, so the gate should not reappear for them.
+    if (sharedProgram || (saved && saved.chosen)) {
+        subjectChosen[program] = true;
+    }
+
     switchTab(program);
-    if ((sharedSubject || (saved && saved.subject))) {
+
+    if (sharedSubject || (saved && saved.subject)) {
         refreshSubjectOptions(program);
         subjectFilter.value = sharedSubject || saved.subject;
+        subjectChosen[program] = true;
+        updateSubjectGate(program);
         applyFilters();
         renderSubjectGrid(program);
     }
@@ -2159,11 +1814,15 @@ function renderSubjectGrid(program) {
     }
     list.forEach(item => items.push(item));
     grid.innerHTML = items.map(item => {
-        const isActive = subjectFilter.value === String(item.id);
+        // Only mark a card active once a choice has actually been made. The
+        // select defaults to '' and the "All Subjects" card's id is also '',
+        // so without this guard that card renders highlighted on load while
+        // the gate is still up and no resources are shown.
+        const isActive = subjectChosen[program] && subjectFilter.value === String(item.id);
         return `
             <div class="subject-card${isActive ? ' active' : ''}" data-subject="${item.id}" data-subject-name="${escapeHtml(item.name)}">
                 <span>${item.name}</span>
-                <small>${isActive ? '●' : '▾'}</small>
+                ${isActive ? `<small class="subject-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></small>` : ''}
                 <button class="subject-share-button" type="button" title="Share ${escapeHtml(item.name)}" aria-label="Share ${escapeHtml(item.name)}">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="2.5"/><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="19" r="2.5"/><path d="m8.2 10.8 7.5-4.4M8.2 13.2l7.5 4.4"/></svg>
                 </button>
@@ -2172,9 +1831,7 @@ function renderSubjectGrid(program) {
     }).join('');
     grid.querySelectorAll('.subject-card').forEach(card => {
         card.addEventListener('click', () => {
-            subjectFilter.value = card.getAttribute('data-subject') || '';
-            applyFilters();
-            renderSubjectGrid(program);
+            chooseSubject(program, card.getAttribute('data-subject'));
         });
         card.querySelector('.subject-share-button').addEventListener('click', event => {
             event.stopPropagation();
@@ -2204,21 +1861,5 @@ async function shareSubject(subjectId, program, subjectName) {
     }
 }
 
-const resourceThemeToggle = document.getElementById('resourceThemeToggle');
-if (localStorage.getItem('general-resources-theme') === 'dark') {
-    document.body.classList.add('dark-theme');
-}
-function updateResourceThemeButton() {
-    const dark = document.body.classList.contains('dark-theme');
-    resourceThemeToggle.textContent = dark ? '☀️ Light mode' : '🌙 Dark mode';
-    resourceThemeToggle.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
-}
-updateResourceThemeButton();
-resourceThemeToggle.addEventListener('click', () => {
-    document.body.classList.toggle('dark-theme');
-    localStorage.setItem('general-resources-theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
-    updateResourceThemeButton();
-});
 </script>
-</body>
-</html>
+{% endblock %}
