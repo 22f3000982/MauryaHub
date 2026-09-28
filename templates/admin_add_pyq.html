@@ -1,79 +1,49 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Add {{ item_type|capitalize }}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #282323;
-        }
+{% extends "base.html" %}
 
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
+{% set type_labels = {'quiz1': 'Quiz-1', 'quiz2': 'Quiz-2', 'endterm': 'End Term', 'resources': 'Resource'} %}
+{% set type_label = type_labels.get(item_type, item_type|capitalize) %}
 
-        form {
-            max-width: 400px;
-            margin: 0 auto;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
+{% block title %}Add {{ type_label }} · MauryaHub{% endblock %}
 
-        input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
+{% block content %}
+<div class="page page-narrow" data-reveal-page>
 
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-        }
+    <nav class="breadcrumb">
+        <a href="{{ url_for('course_view') }}">Courses</a>
+        <span class="breadcrumb-sep">/</span>
+        <a href="{{ url_for('course_detail', course_id=course_id) }}">Course</a>
+        <span class="breadcrumb-sep">/</span>
+        <span>Add {{ type_label }}</span>
+    </nav>
 
-        button:hover {
-            background-color: #45a049;
-        }
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Add {{ type_label }}</h1>
+            <p class="page-subtitle">Add a new item to this course's {{ type_label }} section.</p>
+        </div>
+    </div>
 
-        /* Responsive adjustments */
-        @media (max-width: 500px) {
-            body {
-                padding: 10px;
-            }
+    <div class="card card-pad">
+        <form method="post">
+            <div class="form-group">
+                <label class="form-label" for="item_name">Title <span class="required">*</span></label>
+                <input class="form-control" type="text" id="item_name" name="item_name"
+                       placeholder="e.g. Week-3 Theory + PYQ" required autofocus>
+            </div>
 
-            form {
-                padding: 15px;
-            }
+            <div class="form-group">
+                <label class="form-label" for="yt_link">Link</label>
+                <input class="form-control" type="url" id="yt_link" name="yt_link"
+                       placeholder="https://youtu.be/…">
+                <p class="form-hint">Optional. A YouTube link here enables watch-count tracking.</p>
+            </div>
 
-            input[type="text"],
-            button {
-                padding: 10px;
-                font-size: 14px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <h1 style="color: aqua;">Add {{ item_type|capitalize }}</h1>
-    <form method="post">
-        <input type="text" name="item_name" placeholder="Enter Name" required>
-        <input type="text" name="yt_link" placeholder="Enter Link" >
-        <button type="submit">Add</button>
-    </form>
-</body>
-</html>
+            <div class="form-actions">
+                <button class="btn btn-primary" type="submit">Add {{ type_label }}</button>
+                <a class="btn btn-ghost" href="{{ url_for('course_detail', course_id=course_id) }}">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

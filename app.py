@@ -338,14 +338,16 @@ def get_db_connection():
             print(f"DNS resolution failed: {dns_error}, using original host")
             ipv4_host = host
         
-        # Connect with explicit parameters and SSL
+        # Connect with explicit parameters. SSL is required in production
+        # (Supabase/Render) but local dev databases usually don't speak TLS,
+        # so this is overridable via DB_SSLMODE (see .env.local.example).
         conn = psycopg2.connect(
             host=ipv4_host,
             port=port,
             dbname=dbname,
             user=username,
             password=password,
-            sslmode='require'  # Force SSL connection
+            sslmode=os.environ.get('DB_SSLMODE', 'require')
         )
         
         print("Database connection successful!")
@@ -397,6 +399,30 @@ def load_current_user():
 @app.context_processor
 def inject_current_user():
     return {'current_user': getattr(g, 'current_user', None)}
+
+
+@app.context_processor
+def inject_layout_globals():
+    """Values the base layout needs on every page (footer year, admin badge)."""
+    pending_count = 0
+    if session.get('admin_mode'):
+        conn = get_db_connection()
+        if conn:
+            try:
+                cur = conn.cursor()
+                cur.execute("SELECT COUNT(*) FROM general_resource_submissions WHERE status='pending'")
+                row = cur.fetchone()
+                pending_count = row[0] if row else 0
+                cur.close()
+            except Exception as exc:
+                print(f'Could not load pending submission count: {exc}')
+            finally:
+                conn.close()
+
+    return {
+        'current_year': datetime.now().year,
+        'pending_submission_count': pending_count,
+    }
 
 def login_required(next_endpoint='general_resources_page'):
     if not getattr(g, 'current_user', None):
@@ -1315,8 +1341,10 @@ def get_recent_content():
 # Landing page route
 @app.route('/')
 def landing_page():
-    recent_content = get_recent_content()
-    return render_template('landing.html', recent_content=recent_content)
+    # The "Recently added" section was removed from the landing page, so the
+    # three queries get_recent_content() runs are no longer needed here. The
+    # helper is kept for whenever that block comes back.
+    return render_template('landing.html')
 
 @app.route('/google3c05c71b252e3c7e.html')
 def google_verification():
@@ -3571,7 +3599,7 @@ def course_detail(course_id):
                                admin_mode=admin_mode,
                                extra_stuff=extra)
     else:
-        return "Course not found"
+        return render_template('404.html'), 404
 
 # API endpoint to add extra stuff (AJAX)
 @app.route('/course/<int:course_id>/add_extra', methods=['POST'])
@@ -3851,7 +3879,7 @@ def admin_edit_item(item_type, course_id, item_id):
         }
         return render_template('admin_edit_pyq.html', item=item_data, item_type=item_type, course_id=course_id, item_id=item_id)
     else:
-        return "Item not found"
+        return render_template('404.html'), 404
 
 # Admin delete item route
 @app.route('/admin/delete_item/<string:item_type>/<int:course_id>/<int:item_id>', methods=['POST', 'GET'])
@@ -4019,9 +4047,9 @@ def settings():
 @app.route('/favicon.ico')
 def favicon():
     try:
-        return send_from_directory(os.path.join(app.root_path, 'static'),
+        return send_from_directory(os.path.join(app.root_path, 'static', 'img'),
                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
-    except:
+    except Exception:
         # Return empty response if favicon doesn't exist
         return '', 204
 

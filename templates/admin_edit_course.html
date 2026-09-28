@@ -1,77 +1,39 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Edit Course</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-            margin: 0;
-            padding: 20px;
-        }
+{% extends "base.html" %}
 
-        h1 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
+{% block title %}Edit course · MauryaHub{% endblock %}
 
-        form {
-            max-width: 400px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
+{% block content %}
+<div class="page page-narrow" data-reveal-page>
 
-        input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
+    <nav class="breadcrumb">
+        <a href="{{ url_for('course_view') }}">Courses</a>
+        <span class="breadcrumb-sep">/</span>
+        <a href="{{ url_for('course_detail', course_id=course_id) }}">{{ course_name }}</a>
+        <span class="breadcrumb-sep">/</span>
+        <span>Edit</span>
+    </nav>
 
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: #2196F3;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            cursor: pointer;
-        }
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Edit course</h1>
+            <p class="page-subtitle">Rename this course. Its quizzes and resources stay as they are.</p>
+        </div>
+    </div>
 
-        button:hover {
-            background-color: #0b7dda;
-        }
+    <div class="card card-pad">
+        <form method="post">
+            <div class="form-group">
+                <label class="form-label" for="course_name">Course name <span class="required">*</span></label>
+                <input class="form-control" type="text" id="course_name" name="course_name"
+                       value="{{ course_name }}" required autofocus>
+            </div>
 
-        @media (max-width: 500px) {
-            body {
-                padding: 10px;
-            }
+            <div class="form-actions">
+                <button class="btn btn-primary" type="submit">Save changes</button>
+                <a class="btn btn-ghost" href="{{ url_for('course_detail', course_id=course_id) }}">Cancel</a>
+            </div>
+        </form>
+    </div>
 
-            form {
-                padding: 15px;
-            }
-
-            input[type="text"],
-            button {
-                padding: 10px;
-                font-size: 14px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <h1>Edit Course</h1>
-    <form method="post">
-        <input type="text" name="course_name" value="{{ course_name }}" required>
-        <button type="submit">Save Changes</button>
-    </form>
-</body>
-</html>
+</div>
+{% endblock %}
