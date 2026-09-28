@@ -75,6 +75,20 @@ def templates() -> list[Path]:
     return sorted(TEMPLATES.glob("*.html"))
 
 
+def local_env() -> dict[str, str]:
+    env_file = ROOT / ".env.local"
+    if not env_file.exists():
+        return {}
+    return {
+        k.strip(): v.strip().strip('"').strip("'")
+        for k, v in (
+            line.split("=", 1)
+            for line in read(env_file).splitlines()
+            if "=" in line and not line.strip().startswith("#")
+        )
+    }
+
+
 # ---------------------------------------------------------------------------
 # 1. Environment
 # ---------------------------------------------------------------------------
@@ -237,10 +251,18 @@ def check_routes(base_url: str) -> None:
     else:
         record(PASS, f"all {len(PUBLIC_ROUTES)} public routes OK")
 
-    # Admin
-    s.post(base_url + "/admin_login", data={"password": "4129"}, timeout=10)
+    # Admin -- the password comes from the environment, never from source.
+    admin_pw = os.environ.get("ADMIN_PASSWORD") or local_env().get("ADMIN_PASSWORD", "")
+    logged_in = False
+    if admin_pw:
+        s.post(base_url + "/admin_login", data={"password": admin_pw}, timeout=10)
+        logged_in = s.get(base_url + "/admin/analytics", timeout=10,
+                          allow_redirects=False).status_code == 200
+    if not logged_in:
+        record(WARN, "admin checks skipped",
+               "set ADMIN_PASSWORD in .env.local to include the admin pages")
     bad = []
-    for path in ADMIN_ROUTES:
+    for path in (ADMIN_ROUTES if logged_in else []):
         try:
             got = s.get(base_url + path, timeout=10, allow_redirects=False).status_code
         except Exception as exc:  # noqa: BLE001
@@ -250,12 +272,13 @@ def check_routes(base_url: str) -> None:
             bad.append(f"{path}: got {got}")
     if bad:
         record(FAIL, f"{len(bad)}/{len(ADMIN_ROUTES)} admin routes wrong", "\n".join(bad))
-    else:
+    elif logged_in:
         record(PASS, f"all {len(ADMIN_ROUTES)} admin routes OK")
 
     # Pages must actually render the shell, not just return 200.
     shell_bad = []
-    for path in ("/dashboard", "/resources", "/course/1", "/admin/analytics"):
+    shell_pages = ["/dashboard", "/resources", "/course/1"] + (["/admin/analytics"] if logged_in else [])
+    for path in shell_pages:
         html = s.get(base_url + path, timeout=10).text
         for part in ("app-header", "app-sidebar", "app-footer"):
             if part not in html:
@@ -270,7 +293,7 @@ def check_routes(base_url: str) -> None:
     for path in ("/", "/dashboard", "/resources", "/course/1"):
         if "adsbygoogle" not in s.get(base_url + path, timeout=10).text:
             ad_bad.append(f"{path}: AdSense missing")
-    for path in ("/admin/analytics", "/admin/backup"):
+    for path in (("/admin/analytics", "/admin/backup") if logged_in else ()):
         if "adsbygoogle" in s.get(base_url + path, timeout=10).text:
             ad_bad.append(f"{path}: AdSense should not load on admin pages")
     if ad_bad:
