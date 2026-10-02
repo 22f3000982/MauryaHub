@@ -47,6 +47,14 @@ if not os.environ.get('RENDER'):
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'local-development-secret-key')
 
+@app.route('/ads.txt')
+def serve_ads_txt():
+    return send_from_directory(
+        directory=app.root_path,
+        path='ads.txt',
+        mimetype='text/plain'
+    )
+
 # Upload configuration
 UPLOAD_FOLDER = 'static/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
