@@ -1096,6 +1096,7 @@ body.dark-theme .act-share.shared { color: #d9ffe4; background: rgba(0, 255, 68,
     }
 }
     </style>
+<link rel="stylesheet" href="{{ url_for('static', filename='responsive.css') }}">
 </head>
 <body>
 <div class="page">
@@ -1131,7 +1132,8 @@ body.dark-theme .act-share.shared { color: #d9ffe4; background: rgba(0, 255, 68,
             <span class="page-heading-status">Admin Active</span>
         {% endif %}
     </div>
-    <div class="tab-strip" role="tablist">
+    <div class="program-navigation">
+    <div class="tab-strip" role="tablist" aria-label="Resource program">
         <button class="tab-btn" role="tab" aria-selected="false"
             aria-controls="panel-diploma" id="tab-diploma"
             onclick="switchTab('diploma')">
@@ -1144,6 +1146,8 @@ body.dark-theme .act-share.shared { color: #d9ffe4; background: rgba(0, 255, 68,
             Degree
             <span class="tab-badge" id="badge-degree">{{ degree_resources | length if degree_resources else 0 }}</span>
         </button>
+    </div>
+    <a class="practice-link" href="https://mauryahub.in" target="_blank" rel="noopener noreferrer">✍️ PYQ Practice <span>mauryahub.in ↗</span></a>
     </div>
     {% if admin_mode %}
         <a class="btn-add" href="{{ url_for('admin_add_general_resource') }}">
