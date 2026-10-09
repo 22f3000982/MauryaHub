@@ -88,3 +88,28 @@ a, p, h1, h2, h3, .item-name, .resource-title { overflow-wrap: anywhere; }
  .admin-report-dismiss { min-height: 30px; min-width: 30px; }
  .resource-flash-close { min-height: 24px; min-width: 24px; }
 }
+
+/* Lightweight shared promotion: no trackers or additional network requests. */
+.practice-promo { box-sizing:border-box; display:flex; align-items:center; justify-content:space-between; gap:20px; width:100%; margin:0 0 24px; padding:22px 24px; border:1px solid #7477ff; border-radius:18px; background:linear-gradient(115deg,#172554,#312e81 65%,#075985); color:#fff; box-shadow:0 8px 24px #312e8126; text-align:left; }
+.practice-promo-copy { display:grid; gap:7px; min-width:0; }
+.practice-promo .practice-promo-label { font-size:11px; letter-spacing:.12em; color:#a5f3fc; font-weight:700; }
+.practice-promo strong { font-size:clamp(17px,2vw,23px); line-height:1.35; color:#fff; }
+.practice-promo-copy > span:last-child { font-size:14px; color:#e0e7ff; line-height:1.5; }
+.practice-promo > a { flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; gap:12px; min-height:44px; padding:11px 18px; border-radius:12px; background:#a5f3fc; color:#172554; text-decoration:none; font-weight:700; font-size:14px; }
+.practice-promo > a:hover { background:#fff; }
+.practice-promo > a:focus-visible { outline:3px solid #fff; outline-offset:4px; }
+@media(max-width:600px) { .practice-promo { flex-direction:column; align-items:stretch; padding:18px; gap:16px; } .practice-promo > a { align-self:flex-start; } }
+
+/* Keep the resource promotion alongside program choices when space permits. */
+.page-header .program-navigation { flex:1 1 420px; display:grid; grid-template-columns:minmax(240px,360px) minmax(150px,1fr); gap:12px; }
+.page-header .program-navigation .tab-strip { min-width:0; width:100%; }
+.page-header .practice-link { min-height:54px; align-items:center; flex-direction:row; flex-wrap:wrap; gap:8px; text-align:center; }
+.settings-container, .settings-section, .setting-info, .practice-promo { min-width:0; max-width:100%; }
+@media(max-width:600px) {
+ .page-header .program-navigation { flex-basis:100%; grid-template-columns:1fr; }
+ .setting-item { gap:12px; }
+ .setting-info { flex:1; }
+ .toggle-switch { flex-shrink:0; }
+ .practice-promo > a { max-width:100%; }
+ .settings-container { padding:20px 16px; }
+}
