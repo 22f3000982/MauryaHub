@@ -905,6 +905,7 @@
             }
         }
     </style>
+<link rel="stylesheet" href="{{ url_for('static', filename='responsive.css') }}">
 </head>
 <body>
     <canvas id="network-bg"></canvas>
@@ -935,6 +936,11 @@
                     <a href="{{ url_for('course_view') }}" class="cta-btn">Let's Get Started</a>
                     <a href="{{ url_for('general_resources_page') }}" class="hero-resources-btn">Community Resources</a>
                 </div>
+                <a class="practice-banner" href="https://mauryahub.in" target="_blank" rel="noopener noreferrer">
+                    <span class="practice-banner-icon" aria-hidden="true">✍️</span>
+                    <span><strong>Practice PYQs. Build exam confidence.</strong><small>Explore interactive practice at mauryahub.in</small></span>
+                    <span class="practice-banner-arrow" aria-hidden="true">↗</span>
+                </a>
                 <div class="external-links-group" aria-label="External study tools">
                     <a href="https://docs.google.com/spreadsheets/d/1ndm0pg3620crYW1yyUigW6NPE5cvHLk65IvHErEv7f4/edit?gid=1789044591#gid=1789044591" class="external-link-btn" target="_blank" rel="noopener noreferrer">Degree Level PYQ</a>
                     <a href="https://docs.google.com/spreadsheets/d/1aRiLp4dnZGGOnMoqj23KpPU_S2dvO5guj_L6L-JayiA/edit?gid=1015061363#gid=1015061363" class="external-link-btn" target="_blank" rel="noopener noreferrer">Diploma Level PYQ</a>
@@ -1069,7 +1075,8 @@
     resize();
 
     const nodes = [];
-    const NODE_COUNT = Math.floor((w * h) / 9000 + 28);
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const NODE_COUNT = reducedMotion ? 0 : Math.min(window.innerWidth < 768 ? 28 : 70, Math.floor((w * h) / 18000 + 16));
     for (let i = 0; i < NODE_COUNT; i++) {
         nodes.push({
             x: Math.random() * w,
@@ -1089,7 +1096,13 @@
         mouse.y = h/2;
     });
 
-    function draw() {
+    let lastFrame = 0;
+    function draw(timestamp = 0) {
+        if (document.hidden || timestamp - lastFrame < 33) {
+            requestAnimationFrame(draw);
+            return;
+        }
+        lastFrame = timestamp;
         ctx.clearRect(0,0,w,h);
         for (let node of nodes) {
             node.x += node.vx;
@@ -1140,7 +1153,7 @@
         }
         requestAnimationFrame(draw);
     }
-    draw();
+    if (!reducedMotion) requestAnimationFrame(draw);
     </script>
     <script>
         // Admin mode flag
