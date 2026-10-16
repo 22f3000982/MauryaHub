@@ -1,0 +1,65 @@
+<style>
+    .mh-promo {
+        width: min(94%, 1120px);
+        margin: 14px auto 18px;
+        position: relative;
+        z-index: 20;
+    }
+
+    .mh-promo-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        min-height: 54px;
+        padding: 13px 22px;
+        border-radius: 12px;
+        background: linear-gradient(100deg, #5b21b6 0%, #4338ca 48%, #0369a1 100%);
+        box-shadow: 0 10px 24px rgba(49, 46, 129, 0.2);
+        color: #fff;
+        font: 800 clamp(0.95rem, 2vw, 1.1rem)/1.2 system-ui, sans-serif;
+        text-decoration: none;
+        transition: transform 180ms ease, box-shadow 180ms ease;
+    }
+
+    .mh-promo-nav-page .mh-promo {
+        margin-top: 84px;
+    }
+
+    .mh-promo-link:hover {
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 14px 28px rgba(49, 46, 129, 0.3);
+    }
+
+    .mh-promo-brand {
+        opacity: 0.92;
+        font-size: 0.88em;
+    }
+
+    .mh-promo-arrow {
+        font-size: 1.05em;
+        opacity: 0.9;
+    }
+
+    @media (max-width: 520px) {
+        .mh-promo {
+            width: calc(100% - 24px);
+            margin-top: 10px;
+        }
+
+        .mh-promo-link {
+            padding: 12px 14px;
+            gap: 6px;
+        }
+    }
+</style>
+
+<aside class="mh-promo" aria-label="MauryaHub promotion">
+    <a class="mh-promo-link" href="https://mauryahub.in" target="_blank" rel="noopener noreferrer">
+        <span aria-hidden="true">🙏</span>
+        <span>PYQ Practice</span>
+        <span class="mh-promo-brand">mauryahub.in</span>
+        <span class="mh-promo-arrow" aria-hidden="true">↗</span>
+    </a>
+</aside>
