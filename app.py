@@ -20,6 +20,7 @@ from datetime import datetime, timedelta
 from urllib.parse import urlparse, urlencode, unquote
 from xml.sax.saxutils import escape
 import requests
+from read_cache import ReadCache
 
 def load_local_env():
     """Load simple KEY=VALUE pairs from .env.local or .env for local runs."""
@@ -45,7 +46,11 @@ if not os.environ.get('RENDER'):
     load_local_env()
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', 'local-development-secret-key')
+app.secret_key = os.environ.get('SECRET_KEY', '').strip()
+if not app.secret_key:
+    if os.environ.get('RENDER'):
+        raise RuntimeError('Set SECRET_KEY to a strong random value in Render.')
+    app.secret_key = secrets.token_hex(32)
 
 @app.route('/ads.txt')
 def serve_ads_txt():
@@ -74,10 +79,11 @@ ADMIN_EMAILS = {
     if email.strip()
 }
 
-# Resource ranking is intentionally cached for a short period. Feedback and
-# view updates invalidate the relevant course immediately.
-_resource_ranking_cache = {}
-RESOURCE_RANKING_CACHE_SECONDS = 300
+# Cache public data only, never rendered pages, sessions, or authorization.
+# PostgreSQL and Storage remain the source of truth. Workers refresh within
+# two minutes; local mutations invalidate immediately in the serving worker.
+_read_cache = ReadCache(max_entries=128)
+PUBLIC_READ_CACHE_SECONDS = 120
 RESOURCE_RATING_COOLDOWN_HOURS = 6
 
 # Supabase Storage configuration
@@ -132,15 +138,42 @@ def contributor_name_similarity(username, title):
     return max(SequenceMatcher(None, normalized_username, candidate).ratio() for candidate in candidates)
 
 def match_contributor_from_title(title, usernames):
-    matches = [
-        (contributor_name_similarity(username, title), username)
-        for username in usernames
-        if username
-    ]
-    if not matches:
+    """Preserve legacy attribution while avoiding unnecessary fuzzy comparisons."""
+    normalized_title = normalize_contributor_name(title)
+    if not normalized_title:
         return None
-    score, username = max(matches, key=lambda item: (item[0], len(normalize_contributor_name(item[1]))))
-    return username if score >= 0.5 else None
+    names = [(username, normalize_contributor_name(username))
+             for username in usernames if username]
+
+    # An exact substring already has the maximum possible score of 1.0.
+    # Preserve the old longest-name tie break and first equal-length winner.
+    exact = [(username, normalized) for username, normalized in names
+             if normalized and normalized in normalized_title]
+    if exact:
+        return max(exact, key=lambda item: len(item[1]))[0]
+
+    # Build title windows once per title, rather than once for every username.
+    words = re.findall(r'[a-z0-9]+', (title or '').lower())
+    candidates = [normalized_title]
+    for start in range(len(words)):
+        for end in range(start + 1, min(len(words), start + 4) + 1):
+            candidates.append(normalize_contributor_name(' '.join(words[start:end])))
+    candidates = list(dict.fromkeys(candidates))
+
+    best_score, best_length, best_username = 0.5, 0, None
+    for username, normalized in names:
+        if not normalized:
+            continue
+        for candidate in candidates:
+            matcher = SequenceMatcher(None, normalized, candidate)
+            # These are upper bounds on ratio(), so pruning cannot discard a
+            # score that would beat or tie the current winner.
+            if matcher.real_quick_ratio() < best_score or matcher.quick_ratio() < best_score:
+                continue
+            score = matcher.ratio()
+            if (score, len(normalized)) > (best_score, best_length):
+                best_score, best_length, best_username = score, len(normalized), username
+    return best_username
 
 def uploaded_file_size(file_storage):
     if not file_storage or not getattr(file_storage, 'stream', None):
@@ -285,18 +318,10 @@ def upload_file_path_to_supabase(file_path, object_name):
     public_base = get_supabase_public_base()
     return f"{public_base}/{object_name}"
 
-# Database configuration
-DATABASE_URL = os.environ.get('DATABASE_URL')
-if not DATABASE_URL or DATABASE_URL.strip() == '':
-    # Fallback for local development - you should set DATABASE_URL environment variable
-    print("ERROR: DATABASE_URL environment variable not set or empty!")
-    print("Please set DATABASE_URL in your Render environment variables.")
-    print("Using fallback connection string...")
-    DATABASE_URL = "postgresql://postgres:India117767724@db.ncssqvmglximthdbinhm.supabase.co:5432/postgres"
-else:
-    print("DATABASE_URL environment variable found")
-    print(f"DATABASE_URL length: {len(DATABASE_URL)}")
-    print(f"DATABASE_URL starts with: {DATABASE_URL[:20]}...")  # Show first 20 chars safely
+# Database credentials are provided only through the deployment environment.
+DATABASE_URL = os.environ.get('DATABASE_URL', '').strip()
+if not DATABASE_URL:
+    raise RuntimeError('DATABASE_URL must be set; no bundled database is restored.')
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -313,7 +338,6 @@ def get_db_connection():
         from urllib.parse import urlparse
         
         print(f"Attempting to connect to database...")
-        print(f"Raw DATABASE_URL: {DATABASE_URL[:50]}..." if len(DATABASE_URL) > 50 else f"Raw DATABASE_URL: {DATABASE_URL}")
         
         # Parse the DATABASE_URL
         if DATABASE_URL.startswith('postgres://'):
@@ -322,7 +346,6 @@ def get_db_connection():
         else:
             url = DATABASE_URL
         
-        print(f"Parsed URL: {url[:50]}..." if len(url) > 50 else f"Parsed URL: {url}")
         
         # Parse connection details
         parsed = urlparse(url)
@@ -398,6 +421,9 @@ def fetch_user_by_id(user_id):
 
 @app.before_request
 def load_current_user():
+    g.current_user = None
+    if request.endpoint in {'static', 'uploaded_file', 'favicon', 'serve_ads_txt', 'google_verification', 'robots_txt'}:
+        return
     g.current_user = fetch_user_by_id(session.get('user_id'))
     if g.current_user and g.current_user.get('role') == 'admin':
         session['admin_mode'] = True
@@ -412,11 +438,16 @@ def login_required(next_endpoint='general_resources_page'):
         return redirect(url_for('google_login', next=request.path or url_for(next_endpoint)))
     return None
 
+@app.after_request
+def invalidate_public_reads_after_write(response):
+    # No database/storage writes here: only disposable in-memory entries.
+    if request.method in {'POST', 'PUT', 'PATCH', 'DELETE'}:
+        _read_cache.clear()
+    return response
+
 def invalidate_resource_ranking(course_id=None):
-    if course_id is None:
-        _resource_ranking_cache.clear()
-    else:
-        _resource_ranking_cache.pop(course_id, None)
+    # Both programs share contributor totals, so invalidate the full catalog.
+    _read_cache.invalidate('general:catalog')
 
 def wilson_score(positive, total, z=1.96):
     if not total:
@@ -445,10 +476,9 @@ def resource_score(avg_rating, rating_count, helpful_yes, helpful_total, views, 
     helpful_pct = (helpful_yes / helpful_total * 100) if helpful_total else 0
     return score, bayesian, helpful, freshness, helpful_pct
 
-def general_resource_badge(resource, all_resources):
+def general_resource_badge(resource, max_recent_views):
     """Return exactly one lightweight, data-driven badge for a resource."""
     rating_count, helpful_total = resource[9], resource[11]
-    max_recent_views = max((item[18] for item in all_resources), default=0)
     if helpful_total >= 3 and resource[12] >= 80:
         return '🎯 Exam Favorite'
     if resource[18] >= 5 and resource[18] >= max_recent_views * 0.6:
@@ -471,7 +501,8 @@ def sort_general_resources(resources, sort_key='recommended'):
         items.sort(key=lambda item: (item[4] or 0, item[0]), reverse=True)
     else:
         items.sort(key=lambda item: (item[13], item[0]), reverse=True)
-    return [item + (general_resource_badge(item, items),) for item in items]
+    max_recent_views = max((item[18] for item in items), default=0)
+    return [item + (general_resource_badge(item, max_recent_views),) for item in items]
 
 def decorate_general_resources(rows):
     decorated = []
@@ -863,6 +894,7 @@ def sync_extra_to_local_sqlite(course_id, name, link):
     finally:
         local_conn.close()
 
+@_read_cache.cached('courses', PUBLIC_READ_CACHE_SECONDS, cache_if=bool)
 def get_courses_from_supabase():
     """Fallback: Get courses directly from Supabase"""
     conn = get_db_connection()
@@ -1217,6 +1249,7 @@ def init_db():
 
 # Backup the database to a SQL file
 def backup_db():
+    _read_cache.clear()
     try:
         conn = get_db_connection()
         if not conn:
@@ -1279,6 +1312,7 @@ def backup_db():
             conn.close()
 
 # Function to get recently added content
+@_read_cache.cached('recent', PUBLIC_READ_CACHE_SECONDS, cache_if=bool)
 def get_recent_content():
     # Supabase-only recent content.
     conn = get_db_connection()
@@ -1408,40 +1442,28 @@ def submit_feedback():
         print(f"Error submitting feedback: {e}")
         return {'error': 'Internal server error'}, 500
 
-# Get feedback route
+@_read_cache.cached('testimonials', PUBLIC_READ_CACHE_SECONDS)
+def load_testimonials():
+    conn = get_db_connection()
+    if not conn:
+        raise RuntimeError('Database unavailable')
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("""
+                SELECT username, feedback, created_at
+                FROM feedback ORDER BY created_at DESC LIMIT 20
+            """)
+            return [dict(row, created_at=row['created_at'].isoformat() if row['created_at'] else None)
+                    for row in cur.fetchall()]
+    finally:
+        conn.close()
+
 @app.route('/get-feedback')
 def get_feedback():
     try:
-        conn = get_db_connection()
-        if not conn:
-            from flask import jsonify
-            return jsonify([])
-            
-        cur = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        cur.execute('''
-            SELECT username, feedback, created_at
-            FROM feedback
-            ORDER BY created_at DESC
-            LIMIT 20
-        ''')
-        
-        feedback_list = []
-        for row in cur.fetchall():
-            feedback_list.append({
-                'username': row['username'],
-                'feedback': row['feedback'],
-                'created_at': row['created_at'].isoformat() if row['created_at'] else None
-            })
-        
-        cur.close()
-        conn.close()
-        
-        from flask import jsonify
-        return jsonify(feedback_list)
-        
-    except Exception as e:
-        print(f"Error getting feedback: {e}")
-        from flask import jsonify
+        return jsonify(load_testimonials())
+    except Exception as exc:
+        print(f'Error getting feedback: {exc}')
         return jsonify([])
 
 # Delete feedback route
@@ -1683,31 +1705,12 @@ def course_view():
     admin_mode = session.get('admin_mode', False)
     return render_template('course_view.html', courses=courses, admin_mode=admin_mode)
 
-@app.route('/resources')
-def general_resources_page():
-    if getattr(g, 'current_user', None) and not g.current_user.get('username'):
-        return redirect(url_for('set_username', next=request.full_path))
-
-    sort_key = request.args.get('sort', 'recommended')
-    if sort_key not in {'recommended', 'top-rated', 'most-helpful', 'latest', 'most-viewed'}:
-        sort_key = 'recommended'
+@_read_cache.cached('general:catalog', PUBLIC_READ_CACHE_SECONDS)
+def load_general_resources_catalog():
+    """Cache the complete public catalog; never cache admin reports or HTML."""
     conn = get_db_connection()
-    reports = []
     if not conn:
-        flash('Database connection failed', 'error')
-        return render_template(
-            'resources.html',
-            diploma_resources=[],
-            degree_resources=[],
-            admin_mode=session.get('admin_mode', False),
-            all_tags=[],
-            resource_sort=sort_key,
-            subjects_by_program={'diploma': [], 'degree': []},
-            has_unassigned={'diploma': False, 'degree': False},
-            reports=[],
-            top_contributors=[]
-        )
-
+        raise RuntimeError('Database unavailable')
     try:
         cur = conn.cursor()
         cur.execute('''
@@ -1742,12 +1745,7 @@ def general_resources_page():
             contributor_scores.items(),
             key=lambda item: (-item[1], item[0].lower())
         )[:10]
-        cache_key = 'general:diploma'
-        diploma_cache = _resource_ranking_cache.get(cache_key)
-        if diploma_cache and time.time() - diploma_cache['created'] < RESOURCE_RANKING_CACHE_SECONDS:
-            diploma_resources = diploma_cache['resources']
-        else:
-            cur.execute('''
+        cur.execute('''
             SELECT gr.id,
                    gr.title,
                    gr.resource_link,
@@ -1778,84 +1776,56 @@ def general_resources_page():
                   AND viewed_at >= CURRENT_TIMESTAMP - INTERVAL '7 days'
                 GROUP BY content_id
             ) rv ON rv.content_id = gr.id
-            WHERE gr.program_type = %s
+            WHERE gr.program_type IN ('diploma', 'degree')
               AND COALESCE(gr.is_published, TRUE) = TRUE
             ORDER BY COALESCE(s.sort_order, 9999), COALESCE(s.name, ''), gr.sort_order, gr.id
-        ''', ('diploma',))
-            diploma_resources = decorate_general_resources(cur.fetchall())
-            _resource_ranking_cache[cache_key] = {'created': time.time(), 'resources': diploma_resources}
-
-        cache_key = 'general:degree'
-        degree_cache = _resource_ranking_cache.get(cache_key)
-        if degree_cache and time.time() - degree_cache['created'] < RESOURCE_RANKING_CACHE_SECONDS:
-            degree_resources = degree_cache['resources']
-        else:
-            cur.execute('''
-            SELECT gr.id,
-                   gr.title,
-                   gr.resource_link,
-                   gr.program_type,
-                   gr.watch_count,
-                   gr.tags,
-                   gr.subject_id,
-                   s.name,
-                   COALESCE(rf.avg_rating, 0), COALESCE(rf.rating_count, 0),
-                   COALESCE(rf.helpful_yes, 0), COALESCE(rf.helpful_total, 0),
-                     COALESCE(rf.helpful_avg, 0), gr.updated_at, COALESCE(rv.recent_views, 0),
-                     u.username
-            FROM general_resources gr
-            LEFT JOIN general_resource_subjects s ON s.id = gr.subject_id
-                 LEFT JOIN users u ON u.id = gr.submitted_by
-            LEFT JOIN (
-                SELECT resource_id, AVG(rating) FILTER (WHERE rating IS NOT NULL) AS avg_rating,
-                       COUNT(rating) AS rating_count,
-                       COUNT(*) FILTER (WHERE helpfulness >= 3) AS helpful_yes,
-                       COUNT(helpfulness) AS helpful_total,
-                       COALESCE(AVG(helpfulness), 0) AS helpful_avg
-                FROM general_resource_feedback GROUP BY resource_id
-            ) rf ON rf.resource_id = gr.id
-            LEFT JOIN (
-                SELECT content_id, COUNT(*) AS recent_views
-                FROM view_events
-                WHERE content_table='general_resources'
-                  AND viewed_at >= CURRENT_TIMESTAMP - INTERVAL '7 days'
-                GROUP BY content_id
-            ) rv ON rv.content_id = gr.id
-            WHERE gr.program_type = %s
-              AND COALESCE(gr.is_published, TRUE) = TRUE
-            ORDER BY COALESCE(s.sort_order, 9999), COALESCE(s.name, ''), gr.sort_order, gr.id
-        ''', ('degree',))
-            degree_resources = decorate_general_resources(cur.fetchall())
-            _resource_ranking_cache[cache_key] = {'created': time.time(), 'resources': degree_resources}
-
-        diploma_resources = sort_general_resources(diploma_resources, sort_key)
-        degree_resources = sort_general_resources(degree_resources, sort_key)
-
+        ''')
+        rows = decorate_general_resources(cur.fetchall())
+        diploma_resources = [row for row in rows if row[3] == 'diploma']
+        degree_resources = [row for row in rows if row[3] == 'degree']
         subjects_by_program = fetch_general_resource_subjects(conn)
-        if session.get('admin_mode', False):
-            try:
-                cur.execute('''
-                    SELECT rr.id, rr.resource_id, COALESCE(gr.title, 'Deleted resource'),
-                           rr.issue_type, rr.details, rr.anonymous_id, rr.created_at
-                    FROM general_resource_reports rr
-                    LEFT JOIN general_resources gr ON gr.id = rr.resource_id
-                    ORDER BY rr.created_at DESC
-                    LIMIT 100
-                ''')
-                reports = cur.fetchall()
-            except Exception as report_error:
-                print(f"Error fetching resource reports: {report_error}")
-                reports = []
         cur.close()
-    except Exception as e:
-        print(f"Error fetching general resources: {e}")
-        diploma_resources = []
-        degree_resources = []
-        subjects_by_program = {'diploma': [], 'degree': []}
-        reports = []
-        top_contributors = []
+        return diploma_resources, degree_resources, subjects_by_program, top_contributors
     finally:
         conn.close()
+
+@app.route('/resources')
+def general_resources_page():
+    if getattr(g, 'current_user', None) and not g.current_user.get('username'):
+        return redirect(url_for('set_username', next=request.full_path))
+
+    sort_key = request.args.get('sort', 'recommended')
+    if sort_key not in {'recommended', 'top-rated', 'most-helpful', 'latest', 'most-viewed'}:
+        sort_key = 'recommended'
+    reports = []
+    try:
+        diploma_resources, degree_resources, subjects_by_program, top_contributors = load_general_resources_catalog()
+        diploma_resources = sort_general_resources(diploma_resources, sort_key)
+        degree_resources = sort_general_resources(degree_resources, sort_key)
+    except Exception as exc:
+        print(f'Error fetching general resources: {exc}')
+        diploma_resources, degree_resources, top_contributors = [], [], []
+        subjects_by_program = {'diploma': [], 'degree': []}
+        flash('Could not load resources. Please try again.', 'error')
+
+    # Reports are private and are always fetched outside the public cache.
+    if session.get('admin_mode', False):
+        conn = get_db_connection()
+        if conn:
+            try:
+                with conn.cursor() as cur:
+                    cur.execute("""
+                        SELECT rr.id, rr.resource_id, COALESCE(gr.title, 'Deleted resource'),
+                               rr.issue_type, rr.details, rr.anonymous_id, rr.created_at
+                        FROM general_resource_reports rr
+                        LEFT JOIN general_resources gr ON gr.id = rr.resource_id
+                        ORDER BY rr.created_at DESC LIMIT 100
+                    """)
+                    reports = cur.fetchall()
+            except Exception as exc:
+                print(f'Error fetching resource reports: {exc}')
+            finally:
+                conn.close()
 
     tag_set = set()
     has_unassigned = {'diploma': False, 'degree': False}
@@ -2814,7 +2784,7 @@ def open_general_resource(resource_id):
             return "Resource link not found"
 
         link = row[0].strip()
-        invalidate_resource_ranking(f'general:{row[1]}')
+        # A view does not invalidate the full catalog; counts refresh on TTL.
         log_view_event('general_resources', resource_id, None)
 
         return render_html_resource_preview(link)
@@ -3161,11 +3131,12 @@ def admin_backup():
 
 from flask import flash  # Make sure this is imported
 
-# Admin login (password 4129)
+# Optional legacy admin login; Google admin login remains available.
 @app.route('/admin_login', methods=['POST'])
 def admin_login():
     password = request.form['password']
-    if password == '4129':
+    admin_password = os.environ.get('ADMIN_PASSWORD', '')
+    if admin_password and secrets.compare_digest(password, admin_password):
         session['admin_mode'] = True
         session['legacy_admin_mode'] = True
     else:
@@ -4045,7 +4016,8 @@ def internal_server_error(error):
 # Main
 if __name__ == '__main__':
     # Initialize database
-    init_db()
+    if not os.environ.get('RENDER') or os.environ.get('INIT_DB_ON_STARTUP', '').strip().lower() in ('1', 'true', 'yes'):
+        init_db()
 
     if os.environ.get('AUTO_MIGRATE_GENERAL_RESOURCES', '').strip().lower() in ('1', 'true', 'yes'):
         migrate_local_general_resources_to_supabase()
@@ -4057,7 +4029,8 @@ if __name__ == '__main__':
     app.run(host='0.0.0.0', port=port, debug=debug)
 else:
     # For production (gunicorn)
-    init_db()
+    if not os.environ.get('RENDER') or os.environ.get('INIT_DB_ON_STARTUP', '').strip().lower() in ('1', 'true', 'yes'):
+        init_db()
 
     if os.environ.get('AUTO_MIGRATE_GENERAL_RESOURCES', '').strip().lower() in ('1', 'true', 'yes'):
         migrate_local_general_resources_to_supabase()

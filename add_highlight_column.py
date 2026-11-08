@@ -10,7 +10,7 @@ from urllib.parse import urlparse
 # Database configuration
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if not DATABASE_URL or DATABASE_URL.strip() == '':
-    DATABASE_URL = "postgresql://postgres:India117767724@db.ncssqvmglximthdbinhm.supabase.co:5432/postgres"
+    raise RuntimeError("Set DATABASE_URL in the environment before running this script")
 
 def get_db_connection():
     """Get database connection"""

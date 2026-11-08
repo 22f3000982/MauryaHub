@@ -7,7 +7,7 @@ import psycopg2
 import os
 
 # Set DATABASE_URL
-os.environ['DATABASE_URL'] = 'postgresql://postgres:India117767724@db.ncssqvmglximthdbinhm.supabase.co:5432/postgres'
+# DATABASE_URL must be supplied through the environment.
 
 def cleanup_old_tables():
     try:

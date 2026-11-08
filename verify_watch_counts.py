@@ -10,7 +10,7 @@ from urllib.parse import urlparse
 # Database configuration
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if not DATABASE_URL or DATABASE_URL.strip() == '':
-    DATABASE_URL = "postgresql://postgres:India117767724@db.ncssqvmglximthdbinhm.supabase.co:5432/postgres"
+    raise RuntimeError("Set DATABASE_URL in the environment before running this script")
 
 def get_supabase_watch_counts():
     """Fetch current watch counts from Supabase to verify they're not lost"""

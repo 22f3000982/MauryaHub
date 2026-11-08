@@ -1,3 +1,15 @@
+# MauryaHub performance demo
+
+Start with [DEPLOY_DEMO.md](DEPLOY_DEMO.md) for Render commands and required
+environment variables. This demo uses the existing database/storage when given
+the same environment settings. It is not an isolated copy of live data.
+
+**Do not run the historical migration/setup instructions below against the live
+database.** SQL/SQLite snapshots and hardcoded database credentials are excluded.
+Render startup does not initialize/migrate the database by default.
+
+---
+
 # MauryaHub
 
 MauryaHub is a Flask-based academic resource portal for browsing and managing course material such as Quiz-1, Quiz-2, end-term content, videos, notes, PYQs, assignments, and other learning resources.
